@@ -22,8 +22,11 @@ from .features.user_signup.views import receive as user_signup_receive
 from .features.user_login.views import index as user_login
 
 
-
 urlpatterns = [
+    path('', views.index, name='index'),
+    path('user_signup/', user_signup, name='user_signup'),
+    path('user_signup/receive/', user_signup_receive, name='user_signup_receive'),
+    path('user_login/', user_login, name='user_login'),
     path('admin/', admin.site.urls),
     path('', views.index, name='index'),
     path('user_signup/', user_signup, name='user_signup'),

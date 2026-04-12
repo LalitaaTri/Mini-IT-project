@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -58,8 +59,7 @@ TEMPLATES = [
         'DIRS': [
             os.path.join(BASE_DIR, 'teamup_mmu/templates'),
             os.path.join(BASE_DIR, 'teamup_mmu/features'),
-            ],
-
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

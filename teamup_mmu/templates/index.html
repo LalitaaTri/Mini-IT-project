@@ -1,4 +1,7 @@
 <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+{% extends "nav.html" %}
+
+{% block content %}
 <h1>teamup mmu creators: shaun lalitaa alim</h1>
 <div hx-get="user_signup/" hx-trigger="load">
   <p>loading signup</p> <!-- this is where the signup form will be loaded when the page loads -->
@@ -6,4 +9,5 @@
 <div hx-get="user_login/" hx-trigger="load">
   <p>loading login</p> <!-- this is where the login form will be loaded when the page loads -->
 </div>
+{% endblock %}
 

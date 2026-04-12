@@ -1,0 +1,41 @@
+<!-- wanted the nav bar to be showing in all pages so im making a file here -->
+<style>
+    nav {
+        background-color: #333;
+        display: flex;
+        justify-content: space-between; /* Puts logo on left, links on right */
+        align-items: center;
+        padding: 1rem 2rem;
+        color: white;
+    }
+
+    nav ul {
+        list-style: none;
+        display: flex;
+        gap: 20px; /* Space between links */
+        margin: 0;
+    }
+
+    nav a {
+        color: white;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    nav a:hover {
+        color: #ffcc00; /* Changes color when you hover */
+    }
+</style>
+
+<nav>
+    <div class="logo">TeamUp MMU</div>
+    <ul>
+        <li><a href="/">Matching</a></li>
+        <li><a href="/login">Login</a></li>
+        <li><a href="/groups">Your Groups</a></li>
+        <li><a href="/settings">Settings</a></li>
+    </ul>
+</nav>
+
+{% block content %}
+{% endblock %}

@@ -1,41 +1,112 @@
-<!-- wanted the nav bar to be showing in all pages so im making a file here -->
-<style>
-    nav {
-        background-color: #333;
-        display: flex;
-        justify-content: space-between; /* Puts logo on left, links on right */
-        align-items: center;
-        padding: 1rem 2rem;
-        color: white;
-    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TeamUp MMU</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif; /* Changes the font to something sleek */
+            background-color: #f8f9fa;
+        }
 
-    nav ul {
-        list-style: none;
-        display: flex;
-        gap: 20px; /* Space between links */
-        margin: 0;
-    }
+        nav {
+            background-color: #1a1a1a;
+            display: flex;
+            justify-content: space-between; /* This is the secret sauce for Left-Middle-Right */
+            align-items: center;
+            padding: 0.8rem 4rem;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
 
-    nav a {
-        color: white;
-        text-decoration: none;
-        font-weight: bold;
-    }
+        .nav-right {
+            gap: 20px;
+        }
 
-    nav a:hover {
-        color: #ffcc00; /* Changes color when you hover */
-    }
-</style>
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -1px;
+        }
 
-<nav>
-    <div class="logo">TeamUp MMU</div>
-    <ul>
-        <li><a href="/">Matching</a></li>
-        <li><a href="/login">Login</a></li>
-        <li><a href="/groups">Your Groups</a></li>
-        <li><a href="/settings">Settings</a></li>
-    </ul>
-</nav>
+        .logo .MM {
+            color: #0011ff; /* Blue for MM */
+        }
 
-{% block content %}
-{% endblock %}
+        .logo .U {
+            color: #cb0000; /* Red for U */
+        }
+
+        .profile-circle {
+            width: 35px;
+            height: 35px;
+            background-color: #444;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8rem;
+            border: 1px solid #666;
+            cursor: pointer;
+        }
+
+        .profile-circle:hover {
+            background-color: #555;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav a {
+            color: #d1d1d1;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.3s ease; /* Smooth hover effect */
+        }
+
+        nav a:hover {
+            color: #ffffff; /* Highlights white on hover */
+        }
+
+        /* Styling for the content area below the nav */
+        .container {
+            padding-top: 2rem;
+        }
+
+    </style>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav>
+        <div class="logo">TeamUp <span class="MM">MM</span><span class="U">U</span></div>
+
+        <ul class="nav-middle">
+            <li><a href="#">Matching</a></li>
+            <li><a href="#">Your Groups</a></li>
+        </ul>
+
+        <ul class="nav-right">
+            <li><a href="#">Login</a></li>
+            <li><a href="#">Settings</a></li>
+            <li><div class="profile-circle">?</div></li> </ul>
+    </nav>
+
+    <!-- Content Area -->
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+</body>
+</html>

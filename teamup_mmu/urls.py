@@ -28,8 +28,9 @@ urlpatterns = [
     path('user_signup/receive/', user_signup_receive, name='user_signup_receive'),
     path('user_login/', user_login, name='user_login'),
     path('admin/', admin.site.urls),
-    path('', views.index, name='index'),
-    path('user_signup/', user_signup, name='user_signup'),
-    path('user_signup/receive/', user_signup_receive, name='user_signup_receive'),
-    path('user_login/', user_login, name='user_login'),
+
+    path('matching/', views.matching, name='matching'),
+    path('groups/', views.groups, name='groups'),
+    path('settings/', views.settings, name='settings'),
+    
 ]

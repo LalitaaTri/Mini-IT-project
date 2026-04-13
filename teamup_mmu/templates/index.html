@@ -8,25 +8,35 @@
     <style>
         :root {
             --primary: #4F46E5;
-            --secondary: #7C3AED;
+            --secondary: #7c3aed;
             --bg-gradient: linear-gradient(135deg, #1E1B4B, #4C1D95);
         }
         
         body {
             margin: 0;
             font-family: system-ui, -apple-system, sans-serif;
-            background: var(--bg-gradient);
+            background: #ffffff;
             color: white;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
 
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            box-sizing: border-box; /* Crucial: stops padding from making the header wider than the screen */
+            background: rgba(124, 58, 237, 1);
+            color: white;
+            z-index: 2;
+        }
+
         nav {
             display: flex;
-            justify-content: space-between;
+            justify-content: space-between; /* This pushes the logo and button to opposite sides */
             align-items: center;
-            padding: 1.5rem 5%;
+            padding: 20px 40px;
         }
 
         .logo {
@@ -69,6 +79,7 @@
         .hero h1 {
             font-size: clamp(2.5rem, 5vw, 4rem);
             margin-bottom: 1rem;
+            color: rgba(124, 58, 237, 0.9);
             line-height: 1.2;
         }
 
@@ -76,13 +87,13 @@
             font-size: 1.25rem;
             max-width: 600px;
             margin-bottom: 2.5rem;
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(124, 58, 237, 0.9);
             line-height: 1.6;
         }
 
         .btn-signup {
-            background: white;
-            color: var(--secondary);
+            background: rgba(124, 58, 237, 1);
+            color: white;
             font-size: 1.125rem;
             padding: 1rem 2rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -94,12 +105,16 @@
         }
     </style>
 </head>
-<body>
-    <nav>
-        <a href="{% url 'index' %}" class="logo">TeamUp MMU</a>
-        <a href="{% url 'user_login' %}" class="btn btn-login">Log In</a>
-    </nav>
 
+
+
+<body>
+  <header>
+  <nav>
+    <a href="{% url 'index' %}" class="logo">TeamUp MMU</a>
+    <a href="{% url 'user_login' %}" class="btn btn-login">Log In</a>
+    </nav>    
+</header>
     <main class="hero">
         <h1>Find Your Perfect Groupmates</h1>
         <p>Skip the hassle of forming groups. Connect with MMU students, combine your skills, and build the ultimate team for your assignments.</p>

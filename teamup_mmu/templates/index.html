@@ -1,8 +1,109 @@
-<script src="https://unpkg.com/htmx.org@2.0.0"></script>
-<h1>teamup mmu creators: shaun lalitaa alim</h1>
-<div hx-get="user_signup/" hx-trigger="load">
-  <p>loading signup</p>
-</div>
-<div hx-get="user_login/" hx-trigger="load">
-  <p>loading login</p>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeamUp MMU</title>
+    <script src="https://unpkg.com/htmx.org@1.9.11"></script>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --secondary: #7C3AED;
+            --bg-gradient: linear-gradient(135deg, #1E1B4B, #4C1D95);
+        }
+        
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--bg-gradient);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 5%;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-decoration: none;
+            color: white;
+            letter-spacing: 1px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-login {
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            color: white;
+        }
+
+        .btn-login:hover {
+            background: white;
+            color: var(--primary);
+        }
+
+        .hero {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            max-width: 600px;
+            margin-bottom: 2.5rem;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+        }
+
+        .btn-signup {
+            background: white;
+            color: var(--secondary);
+            font-size: 1.125rem;
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-signup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="{% url 'index' %}" class="logo">TeamUp MMU</a>
+        <a href="{% url 'user_login' %}" class="btn btn-login">Log In</a>
+    </nav>
+
+    <main class="hero">
+        <h1>Find Your Perfect Groupmates</h1>
+        <p>Skip the hassle of forming groups. Connect with MMU students, combine your skills, and build the ultimate team for your assignments.</p>
+        <a href="{% url 'user_signup' %}" class="btn btn-signup">Sign Up Now</a>
+    </main>
+</body>
+</html>

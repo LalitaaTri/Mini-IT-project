@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TeamUp MMU</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        nav {
+            background: #001561;
+            background: linear-gradient(180deg, rgba(0, 21, 97, 1) 30%, rgba(91, 115, 223, 1) 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 4rem;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative; /* Essential for absolute centering */
+        }
+
+        /* --- LOGO --- */
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -1px;
+        }
+        /* .logo .MM { color: #0011ff; }
+        .logo .U { color: #cb0000; } */
+
+        /* --- NAV MIDDLE (THE SWITCHES) --- */
+        .nav-middle {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            list-style: none;
+            display: flex;
+            gap: 10px;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ONLY target links inside .nav-middle */
+        .nav-middle a {
+            color: #c2e1ff;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 8px 18px;
+            border-radius: 25px; /* Pill shape */
+            transition: all 0.3s ease;
+            border: 2px solid transparent; 
+        }
+
+        /* Hover effect for .nav-middle links */
+        .nav-middle a:hover {
+            background-color: #ffffff;
+            color: rgb(8, 14, 120);
+        }
+
+        /* --- NAV RIGHT (PLAIN LINKS) --- */
+        .nav-right {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-right a {
+            color: #c2e1ff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .nav-right a:hover {
+            color: white;
+        }
+
+        .profile-circle {
+            width: 35px;
+            height: 35px;
+            background-color: #8a0000;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8rem;
+            border: 1px solid #ffffff;
+            cursor: pointer;
+        }
+
+        .container {
+            padding: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav>
+        <div class="logo">TeamUp <span class="MM">MM</span><span class="U">U</span></div>
+
+        <ul class="nav-middle">
+            <li><a href="/matching/">Matching</a></li>
+            <li><a href="/groups/">Your Groups</a></li>
+        </ul>
+
+        <ul class="nav-right">
+            <li><a href="/">Login</a></li>
+            <li><a href="/settings/">Settings</a></li>
+            <li><div class="profile-circle">?</div></li> 
+        </ul>
+    </nav>
+
+    <!-- Content Area -->
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+</body>
+</html>

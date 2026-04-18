@@ -20,6 +20,7 @@ from teamup_mmu import views
 from .features.user_signup.views import index as user_signup
 from .features.user_signup.views import receive as user_signup_receive
 from .features.user_login.views import index as user_login
+from .views import test_db_view
 
 
 urlpatterns = [
@@ -28,7 +29,7 @@ urlpatterns = [
     path('user_signup/receive/', user_signup_receive, name='user_signup_receive'),
     path('user_login/', user_login, name='user_login'),
     path('admin/', admin.site.urls),
-
+    path('test-db/', test_db_view),
     path('matching/', views.matching, name='matching'),
     path('groups/', views.groups, name='groups'),
     path('settings/', views.settings, name='settings'),

@@ -19,5 +19,5 @@ async def receive(request):
 async def index(request):
    pool = await Database.get_pool()
    async with pool.acquire() as conn:
-      value = await conn.fetchval("SELECT * FROM users")
+      value = await conn.fetch("SELECT * FROM users")
       return render(request, 'user_signup/templates/index.html', {'data':value})

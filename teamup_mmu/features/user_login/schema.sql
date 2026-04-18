@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS sessions CASCADE;
+CREATE TABLE IF NOT EXISTS sessions (
+    id SERIAL PRIMARY KEY,
+    token TEXT NOT NULL,
+    user_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT now()
+);

@@ -21,6 +21,7 @@ from .features.user_signup.views import index as user_signup
 from .features.user_signup.views import receive as user_signup_receive
 from .features.user_login.views import index as user_login
 from .features.user_login.views import receive as user_login_receive
+from .features.matching_view.views import index as matching_view
 from .views import test_db_view
 
 
@@ -32,7 +33,7 @@ urlpatterns = [
     path('user_login/receive/', user_login_receive, name='user_login_receive'),
     path('admin/', admin.site.urls),
     path('test-db/', test_db_view),
-    path('matching/', views.matching, name='matching'),
+    path('matching/', matching_view, name='matching'),
     path('groups/', views.groups, name='groups'),
     path('settings/', views.settings, name='settings'),
     

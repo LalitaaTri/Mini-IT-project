@@ -19,9 +19,10 @@ async def index(request):
    status = "Not logged in"
    if value:
        if value[0]['created_at'] + timedelta(hours=1) > datetime.now():
-           async with pool.acquire() as conn:
-                email = await conn.fetch("SELECT email FROM users WHERE id=$1", value[0]['user_id'])
-                status = "Logged in as {}".format(email[0]['email'])
+            response = HttpResponse(status=200)
+            print("Redirecting to matching")
+            response["HX-Redirect"] = "/matching/" # This tells HTMX to redirect the WHOLE page
+            return response
    return render(request, 'index.html',{'status':status})
 
 def matching(request):

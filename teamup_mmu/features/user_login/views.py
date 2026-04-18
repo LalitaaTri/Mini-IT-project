@@ -17,8 +17,9 @@ async def receive(request):
             'access_token',token,
             max_age=3600,httponly=True
          )
-         id = await conn.fetchval("SELECT id FROM users WHERE email=$1",email)
-         await conn.execute("INSERT INTO sessions(token,id) VALUES($1,$2)",token,id)
+         async with pool.acquire() as conn:
+            id = await conn.fetchval("SELECT id FROM users WHERE email=$1",email)
+            await conn.execute("INSERT INTO sessions(token,user_id) VALUES($1,$2)",token,id)
 
       return response
 

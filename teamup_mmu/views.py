@@ -11,6 +11,8 @@ async def test_db_view(request):
     return JsonResponse({"status": value})
 
 def index(request):
+   token = request.COOKIES.get('access_token')
+   # pass
    return render(request, 'index.html')
 
 def matching(request):

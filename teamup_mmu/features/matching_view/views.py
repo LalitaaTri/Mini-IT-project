@@ -21,4 +21,6 @@ async def index(request):
     if not passed_login_check:
         print("Redirecting to index")
         return redirect("/")
-    return render(request, 'matching_view/templates/index.html',{'status':status})
+    async with pool.acquire() as conn:
+        other_users = await conn.fetch("SELECT email FROM users WHERE id!=$1",value[0]['user_id'])
+    return render(request, 'matching_view/templates/index.html',{'status':status,'other_users':other_users})

@@ -1,0 +1,18 @@
+{% load static %}
+{% if context.user_obj %}
+    <div class="user-card">
+        <p>{{ context.user_obj.email }}</p>
+        <img src="{% static 'teamup_mmu/profile.png' %}">
+        <p>About: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur ut maximus ligula. Interdum et malesuada fames ac ante ipsum primis in faucibus.</p>
+        <p>Year: 0 (Foundation)</p>
+        <p>Program: Foundation in Computing</p>
+        <p>cGPA: 3.69</p>
+        <button>Like</button>
+        <button hx-get="
+        {% url 'matching_with_iter' context.next_iter %}"
+        hx-target="#user-list"
+        hx-swap="innerHTML">Next</button>
+    </div>
+{% else %}
+    <div class="user-card">No other users found.</div>
+{% endif %}

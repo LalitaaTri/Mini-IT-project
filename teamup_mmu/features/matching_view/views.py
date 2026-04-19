@@ -29,4 +29,6 @@ async def index(request, iter=0):
         'user_obj': other_users[iter],
         'next_iter': iter
     }
+    if request.headers.get('HX-Request'):
+        return render(request, 'matching_view/templates/card.html',{'status':status,'context': context})
     return render(request, 'matching_view/templates/index.html',{'status':status,'context': context})

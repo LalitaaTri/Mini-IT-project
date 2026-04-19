@@ -1,4 +1,4 @@
-from django.shortcuts import render 
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from .db import Database
 from datetime import timedelta, datetime
@@ -19,9 +19,8 @@ async def index(request):
    status = "Not logged in"
    if value:
        if value[0]['created_at'] + timedelta(hours=1) > datetime.now():
-           async with pool.acquire() as conn:
-                email = await conn.fetch("SELECT email FROM users WHERE id=$1", value[0]['user_id'])
-                status = "Logged in as {}".format(email[0]['email'])
+            print("Redirecting to matching")
+            return redirect("/matching/")
    return render(request, 'index.html',{'status':status})
 
 def matching(request):

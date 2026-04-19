@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from teamup_mmu.db import Database
 import secrets
+from django.contrib.auth.hashers import check_password
 
 async def receive(request):
     if request.method == 'POST':
@@ -9,9 +10,9 @@ async def receive(request):
       password = request.POST.get('password')
       pool = await Database.get_pool()
       async with pool.acquire() as conn:
-         value = await conn.fetch("SELECT * FROM users WHERE email=$1 AND password=$2",email,password)
+         value = await conn.fetch("SELECT * FROM users WHERE email=$1",email)
       response = JsonResponse({"response": [dict(r) for r in value]})
-      if value:
+      if value and check_password(password, value[0]['password']):
          token=secrets.token_urlsafe(32)
          response.set_cookie(
             'access_token',token,

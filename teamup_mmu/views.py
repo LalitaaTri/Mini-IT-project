@@ -17,7 +17,7 @@ async def index(request):
    async with pool.acquire() as conn:
        value = await conn.fetch("SELECT * FROM sessions WHERE token=$1", token)
    status = "Not logged in"
-   if value:
+   if value and value[0]['is_active']:
        if value[0]['created_at'] + timedelta(hours=1) > datetime.now():
             print("Redirecting to matching")
             return redirect("/matching/")

@@ -3,5 +3,6 @@ CREATE TABLE IF NOT EXISTS sessions (
     id SERIAL PRIMARY KEY,
     token TEXT NOT NULL,
     user_id INT NOT NULL,
-    created_at TIMESTAMP DEFAULT now()
+    created_at TIMESTAMP DEFAULT now(),
+    is_active BOOLEAN DEFAULT TRUE
 );

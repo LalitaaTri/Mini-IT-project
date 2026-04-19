@@ -19,8 +19,14 @@ async def index(request):
    status = "Not logged in"
    if value and value[0]['is_active']:
        if value[0]['created_at'] + timedelta(hours=1) > datetime.now():
-            print("Redirecting to matching")
-            return redirect("/matching/")
+            async with pool.acquire() as conn:
+                email_verified = await conn.fetchval("SELECT email_verified FROM users WHERE id=$1",value[0]['user_id'])
+                if email_verified:
+                    print("Redirecting to matching")
+                    return redirect("/matching/")
+                else:
+                    # Here will be form to verify code from email
+                    pass
    return render(request, 'index.html',{'status':status})
 
 def matching(request):

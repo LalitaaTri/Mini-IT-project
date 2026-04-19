@@ -9,10 +9,19 @@ from django.http import HttpResponse
 
 async def send(request):
    if request.method == 'POST':
+      code = secrets.token_urlsafe(6)
+      pool = await Database.get_pool()
+      async with pool.acquire() as conn:
+          value = await conn.fetch("SELECT * FROM users WHERE email=$1",request.POST.get('email'))
+          code_id = await conn.fetchval("SELECT id FROM codes WHERE user_id=$1",value[0]['user_id'])
+          if not code_id:
+             await conn.execute("INSERT INTO codes(code,user_id) VALUES($1,$2)",code,value[0]['user_id'])
+          else:
+             await conn.execute("UPDATE codes SET code=$1 WHERE user_id=$2",code,value[0]['user_id']) 
       def dispatch_email():
          return send_mail(
             'Verify your email for TeamUp MMU',
-            'Dear recipient,\nTo activate your account for TeamUp app, input this code on the website. 6X3G9S\nThanks,\nTeamUp team',
+            'Dear recipient,\nTo activate your account for TeamUp app, input this code on the website. ' + code + '\nThanks,\nTeamUp team',
             'noreply@teamupmmu.com',
             [request.POST.get('email')],
             fail_silently=False,
@@ -27,20 +36,15 @@ async def receive(request):
       pool = await Database.get_pool()
       async with pool.acquire() as conn:
          value = await conn.fetch("SELECT * FROM users WHERE email=$1",email)
-         #database_code = await conn.fetchval("SELECT ")
-      response = HttpResponse("You logged in successfully.",status=200)
+         database_code = await conn.fetchval("SELECT code FROM codes WHERE user_id=$1",value[0]['user_id'])
+      response = HttpResponse("You verified the account successfully.",status=200)
       if value and code == database_code:
-         token=secrets.token_urlsafe(32)
-         response.set_cookie(
-            'access_token',token,
-            max_age=3600,httponly=True
-         )
          async with pool.acquire() as conn:
             id = await conn.fetchval("SELECT id FROM users WHERE email=$1",email)
-            await conn.execute("INSERT INTO sessions(token,user_id) VALUES($1,$2)",token,id)
+            await conn.execute("UPDATE users SET email_verified=$1 WHERE id=$2",True,id)
          return response
 
-      return HttpResponse("Could not log in.",status=401)
+      return HttpResponse("Could not verify the account.",status=401)
 
 def index(request):
    return render(request, 'user_login/templates/index.html')

@@ -3,7 +3,7 @@ from django.http import HttpResponse, JsonResponse
 from teamup_mmu.db import Database
 from datetime import timedelta, datetime
 
-async def index(request):
+async def index(request, iter):
     token = request.COOKIES.get('access_token')
     pool = await Database.get_pool()
     async with pool.acquire() as conn:
@@ -23,4 +23,10 @@ async def index(request):
         return redirect("/")
     async with pool.acquire() as conn:
         other_users = await conn.fetch("SELECT email FROM users WHERE id!=$1",value[0]['user_id'])
-    return render(request, 'matching_view/templates/index.html',{'status':status,'other_users':other_users})
+    if len(other_users):
+        iter=(iter+1)%len(other_users)
+    context = {
+        'user_obj': other_users[iter],
+        'next_iter': iter
+    }
+    return render(request, 'matching_view/templates/index.html',{'status':status,'context': context})

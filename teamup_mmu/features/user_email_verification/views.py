@@ -13,11 +13,11 @@ async def send(request):
       pool = await Database.get_pool()
       async with pool.acquire() as conn:
           value = await conn.fetch("SELECT * FROM users WHERE email=$1",request.POST.get('email'))
-          code_id = await conn.fetchval("SELECT id FROM codes WHERE user_id=$1",value[0]['user_id'])
+          code_id = await conn.fetchval("SELECT id FROM codes WHERE user_id=$1",value[0]['id'])
           if not code_id:
-             await conn.execute("INSERT INTO codes(code,user_id) VALUES($1,$2)",code,value[0]['user_id'])
+             await conn.execute("INSERT INTO codes(code,user_id) VALUES($1,$2)",code,value[0]['id'])
           else:
-             await conn.execute("UPDATE codes SET code=$1 WHERE user_id=$2",code,value[0]['user_id']) 
+             await conn.execute("UPDATE codes SET code=$1 WHERE user_id=$2",code,value[0]['id']) 
       def dispatch_email():
          return send_mail(
             'Verify your email for TeamUp MMU',
@@ -36,11 +36,14 @@ async def receive(request):
       pool = await Database.get_pool()
       async with pool.acquire() as conn:
          value = await conn.fetch("SELECT * FROM users WHERE email=$1",email)
-         database_code = await conn.fetchval("SELECT code FROM codes WHERE user_id=$1",value[0]['user_id'])
+         database_code = await conn.fetchval("SELECT code FROM codes WHERE user_id=$1",value[0]['id'])
       response = HttpResponse("You verified the account successfully.",status=200)
+      print("value,code,db_code",value,code,database_code)
       if value and code == database_code:
+         print("Check passed")
          async with pool.acquire() as conn:
             id = await conn.fetchval("SELECT id FROM users WHERE email=$1",email)
+            print("Trying to modify user #" + str(id))
             await conn.execute("UPDATE users SET email_verified=$1 WHERE id=$2",True,id)
          return response
 

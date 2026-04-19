@@ -38,12 +38,9 @@ async def receive(request):
          value = await conn.fetch("SELECT * FROM users WHERE email=$1",email)
          database_code = await conn.fetchval("SELECT code FROM codes WHERE user_id=$1",value[0]['id'])
       response = HttpResponse("You verified the account successfully.",status=200)
-      print("value,code,db_code",value,code,database_code)
       if value and code == database_code:
-         print("Check passed")
          async with pool.acquire() as conn:
             id = await conn.fetchval("SELECT id FROM users WHERE email=$1",email)
-            print("Trying to modify user #" + str(id))
             await conn.execute("UPDATE users SET email_verified=$1 WHERE id=$2",True,id)
          return response
 

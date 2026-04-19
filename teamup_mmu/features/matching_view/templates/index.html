@@ -1,4 +1,5 @@
 {% extends "nav.html" %}
+{% load static %}
 
 {% block content %}
     <h2>Welcome to the Matching Page!</h2>
@@ -25,6 +26,7 @@
         {% for user in other_users %}
             <div class="user-card">
                 <p>{{ user.email }}</p>
+                <img src="{% static 'teamup_mmu/profile.png' %}">
                 <p>About: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur ut maximus ligula. Interdum et malesuada fames ac ante ipsum primis in faucibus.</p>
                 <p>Year: 0 (Foundation)</p>
                 <p>Program: Foundation in Computing</p>

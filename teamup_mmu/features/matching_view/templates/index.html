@@ -26,18 +26,19 @@
         }
     </style>
     <div class="user-list">
-        {% for user in other_users %}
+        {% if other_users %}
             <div class="user-card">
-                <p>{{ user.email }}</p>
+                <p>{{ other_users.0.email }}</p>
                 <img src="{% static 'teamup_mmu/profile.png' %}">
                 <p>About: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur ut maximus ligula. Interdum et malesuada fames ac ante ipsum primis in faucibus.</p>
                 <p>Year: 0 (Foundation)</p>
                 <p>Program: Foundation in Computing</p>
                 <p>cGPA: 3.69</p>
                 <button>Like</button>
+                <button>Next</button>
             </div>
-        {% empty %}
+        {% else %}
             <div class="user-card">No other users found.</div>
-        {% endfor %}
+        {% endif %}
     </div>
 {% endblock %}

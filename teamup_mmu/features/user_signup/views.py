@@ -7,15 +7,13 @@ async def receive(request):
     if request.method == 'POST':
       email = request.POST.get('email')
       password = make_password(request.POST.get('password'))
-      # After the user is created/logged in successfully:
-      # response = HttpResponse()
-      # response["HX-Redirect"] = "/matching/" # This tells HTMX to redirect the WHOLE page
-      # return response
       pool = await Database.get_pool()
       async with pool.acquire() as conn:
          value = await conn.execute("INSERT INTO users(email,password) VALUES($1,$2)",email,password)
       
-      return JsonResponse({"status": value})
+      if value == "INSERT 0 1":
+         return HttpResponse("You signed up successfully.",status=200)
+      return HttpResponse("Could not sign up.",status=401)
 
 async def index(request):
    pool = await Database.get_pool()

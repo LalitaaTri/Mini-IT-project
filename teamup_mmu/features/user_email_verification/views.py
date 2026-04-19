@@ -22,13 +22,14 @@ async def send(request):
 
 async def receive(request):
     if request.method == 'POST':
+      code = request.POST.get('code')
       email = request.POST.get('email')
-      password = request.POST.get('password')
       pool = await Database.get_pool()
       async with pool.acquire() as conn:
          value = await conn.fetch("SELECT * FROM users WHERE email=$1",email)
+         #database_code = await conn.fetchval("SELECT ")
       response = HttpResponse("You logged in successfully.",status=200)
-      if value and check_password(password, value[0]['password']):
+      if value and code == database_code:
          token=secrets.token_urlsafe(32)
          response.set_cookie(
             'access_token',token,

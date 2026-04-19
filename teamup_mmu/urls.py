@@ -37,6 +37,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('test-db/', test_db_view),
     path('matching/', matching_view, name='matching'),
+    path('matching/<int:iter>/', matching_view, name='matching_with_iter'),
     path('groups/', views.groups, name='groups'),
     path('settings/', views.settings, name='settings'),
     path('logout/', user_logout, name='user_logout'),

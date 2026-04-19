@@ -26,6 +26,8 @@
         }
     </style>
     <div id="user-list">
+        user obj: {{ user_obj }},
+        next iter: {{ next_iter }}
         {% if user_obj %}
             <div class="user-card">
                 <p>{{ user_obj.email }}</p>
@@ -36,7 +38,7 @@
                 <p>cGPA: 3.69</p>
                 <button>Like</button>
                 <button hx-get="
-                {% url 'matching_view:index' next_iter %}"
+                {% url 'matching_with_iter' next_iter %}"
                 hx-target="#user-list"
                 hx-swap="outerHTML">Next</button>
             </div>

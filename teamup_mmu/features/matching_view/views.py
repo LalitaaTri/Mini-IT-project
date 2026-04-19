@@ -3,7 +3,7 @@ from django.http import HttpResponse, JsonResponse
 from teamup_mmu.db import Database
 from datetime import timedelta, datetime
 
-async def index(request, iter):
+async def index(request, iter=0):
     token = request.COOKIES.get('access_token')
     pool = await Database.get_pool()
     async with pool.acquire() as conn:

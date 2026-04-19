@@ -4,5 +4,35 @@
     <h2>Welcome to the Matching Page!</h2>
     <h3>{{status}}</h3>
     <p>This content only shows up after you login.</p>
-    <p>Other users: {{other_users}}</p>
+    <style>
+        .user-list {
+
+        }
+        .user-card {
+            background-color: #ceaabb;
+            padding: 10px;
+            width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .user-card button {
+            width: 100px;
+        }
+    </style>
+    <div class="user-list">
+        {% for user in other_users %}
+            <div class="user-card">
+                <p>{{ user.email }}</p>
+                <p>About: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur ut maximus ligula. Interdum et malesuada fames ac ante ipsum primis in faucibus.</p>
+                <p>Year: 0 (Foundation)</p>
+                <p>Program: Foundation in Computing</p>
+                <p>cGPA: 3.69</p>
+                <button>Like</button>
+            </div>
+        {% empty %}
+            <div class="user-card">No other users found.</div>
+        {% endfor %}
+    </div>
 {% endblock %}

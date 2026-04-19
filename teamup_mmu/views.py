@@ -18,6 +18,7 @@ async def index(request):
        value = await conn.fetch("SELECT * FROM sessions WHERE token=$1", token)
    status = "Not logged in"
    show_form = False
+   email = None
    if value and value[0]['is_active']:
        if value[0]['created_at'] + timedelta(hours=1) > datetime.now():
             async with pool.acquire() as conn:
@@ -26,8 +27,10 @@ async def index(request):
                     print("Redirecting to matching")
                     return redirect("/matching/")
                 else:
+                    status = "Logged in but email not verified"
                     show_form = True
-   return render(request, 'index.html',{'status':status,'show_form':show_form})
+                    email = await conn.fetchval("SELECT email FROM users WHERE id=$1", value[0]['user_id'])
+   return render(request, 'index.html',{'status':status,'show_form':show_form,'email':email})
 
 def matching(request):
     return render(request, 'matching.html')

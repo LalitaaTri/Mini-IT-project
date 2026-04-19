@@ -26,6 +26,7 @@ async def index(request):
                     print("Redirecting to matching")
                     return redirect("/matching/")
                 else:
+                    status = "Logged in but email not verified"
                     show_form = True
    return render(request, 'index.html',{'status':status,'show_form':show_form})
 

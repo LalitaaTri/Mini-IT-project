@@ -1,6 +1,6 @@
 <div id="email-verification-container">
     <h2>Verify email</h2>
-    <button type="submit">Send code again</button>
+    <button hx-post="email_verification/send/" type="submit">Send code again</button>
     <br><form id="email-verification-form" hx-post="email_verification/receive/"
     hx-target="#email-verification-container"
     hx-swap="innerHTML">

@@ -3,6 +3,22 @@ from django.http import HttpResponse, JsonResponse
 from teamup_mmu.db import Database
 import secrets
 from django.contrib.auth.hashers import check_password
+from django.core.mail import send_mail
+from asgiref.sync import sync_to_async
+from django.http import HttpResponse
+
+async def send(request):
+   if request.method == 'POST':
+      def dispatch_email():
+         return send_mail(
+            'Verify your email for TeamUp MMU',
+            'Dear recipient,\nTo activate your account for TeamUp app, input this code on the website. 6X3G9S\nThanks,\nTeamUp team',
+            'noreply@teamupmmu.com',
+            [request.POST.get('email')],
+            fail_silently=False,
+         )
+      await sync_to_async(dispatch_email,thread_sensitive=False)()
+      return HttpResponse("Email sent successfully.",status=200)
 
 async def receive(request):
     if request.method == 'POST':

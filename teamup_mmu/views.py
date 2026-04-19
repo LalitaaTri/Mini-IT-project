@@ -1,4 +1,4 @@
-from django.shortcuts import render 
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from .db import Database
 from datetime import timedelta, datetime
@@ -19,10 +19,8 @@ async def index(request):
    status = "Not logged in"
    if value:
        if value[0]['created_at'] + timedelta(hours=1) > datetime.now():
-            response = HttpResponse(status=200)
             print("Redirecting to matching")
-            response["HX-Redirect"] = "/matching/" # This tells HTMX to redirect the WHOLE page
-            return response
+            return redirect("/matching/")
    return render(request, 'index.html',{'status':status})
 
 def matching(request):

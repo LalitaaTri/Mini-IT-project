@@ -43,3 +43,7 @@ urlpatterns = [
     path('email_verification/send/', user_email_verification_send, name='user_email_verification_send'),
     path('email_verification/receive/', user_email_verification_receive, name='user_email_verification_receive')
 ]
+
+
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+urlpatterns += staticfiles_urlpatterns()

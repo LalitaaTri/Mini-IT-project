@@ -2,8 +2,7 @@
 {% load static %}
 
 {% block content %}
-    <h2>Welcome to the Your Matches Page!</h2>
-    <h3>{{status}}</h3>
+    <h2>Welcome to the Your Inbox Page!</h2>
     <p>This content only shows up after you login.</p>
     <style>
         /* Centers the entire list on the page */
@@ -95,21 +94,14 @@
         }
     </style>
     <div id="user-list">
-        {% for user in context.matches %}
+        {% for chat in context.chats_l %}
             <div class="user-card">
-                <p>{{ user.email }}</p>
-                <img src="{% static 'teamup_mmu/profile.png' %}">
-                <p>About: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur ut maximus ligula. Interdum et malesuada fames ac ante ipsum primis in faucibus.</p>
-                <p>Year: 0 (Foundation)</p>
-                <p>Program: Foundation in Computing</p>
-                <p>cGPA: 3.69</p>
-                <button hx-get="
-                {% url 'user_message_index_view' user.id %}"
-                hx-target="#user-list"
-                hx-swap="innerHTML">Message</button>
+                <p>Chat with: {{ chat.another_user_email }}</p>
+                <p>{{ chat.last_message.sender_id }}: {{ chat.last_message.content }} ({{ chat.last_message.created_at }})</p>
+                <button hx-get="{% url 'user_message_index_view' chat.another_user_id %}" hx-target="#user-list" hx-swap="innerHTML">Open Chat</button>
             </div>
         {% empty %}
-            <div class="user-card">No matches yet.</div>
+            <p>No chats yet.</p>
         {% endfor %}
     </div>
 {% endblock %}

@@ -28,6 +28,9 @@ from .features.user_email_verification.views import receive as user_email_verifi
 from .views import test_db_view
 from .features.matching_view.views import like as matching_like_view
 from .features.matching_matches.views import index as matching_matches_view
+from .features.user_message.views import message as user_message_view
+from .features.user_message.views import index as user_message_index_view
+from .features.user_inbox.views import index as user_inbox_index_view
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -45,7 +48,10 @@ urlpatterns = [
     path('logout/', user_logout, name='user_logout'),
     path('email_verification/send/', user_email_verification_send, name='user_email_verification_send'),
     path('email_verification/receive/', user_email_verification_receive, name='user_email_verification_receive'),
-    path('matches/', matching_matches_view, name='matching_matches')
+    path('matches/', matching_matches_view, name='matching_matches'),
+    path('message/', user_message_view, name='user_message'),
+    path('chat/<int:another_user_id>/', user_message_index_view, name='user_message_index_view'),
+    path('inbox/', user_inbox_index_view, name='user_inbox_index_view')
 ]
 
 

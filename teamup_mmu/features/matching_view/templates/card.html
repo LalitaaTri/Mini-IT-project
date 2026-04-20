@@ -7,7 +7,11 @@
         <p>Year: 0 (Foundation)</p>
         <p>Program: Foundation in Computing</p>
         <p>cGPA: 3.69</p>
-        <button>Like</button>
+        <p id="like-status">Not liked yet</p>
+        <button hx-post="
+        /matching/like"
+        hx-target="#like-status"
+        hx-swap="innerHTML">Like</button>
         <button hx-get="
         {% url 'matching_with_iter' context.next_iter %}"
         hx-target="#user-list"

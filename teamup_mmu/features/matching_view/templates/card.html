@@ -8,10 +8,13 @@
         <p>Program: Foundation in Computing</p>
         <p>cGPA: 3.69</p>
         <p id="like-status">Not liked yet</p>
-        <button hx-post="
-        /matching/like"
-        hx-target="#like-status"
-        hx-swap="innerHTML">Like</button>
+        <form id="like-form" hx-post="/matching/like/"
+   hx-target="#like-status"
+   hx-swap="innerHTML">
+            <input type="hidden" name="logged_in_user_id" value=" {{  }}">
+            <input type="hidden" name="liked_user_id" value="{{ context.user_obj.id }}">
+            <button type="submit">Like</button>
+        </form>
         <button hx-get="
         {% url 'matching_with_iter' context.next_iter %}"
         hx-target="#user-list"

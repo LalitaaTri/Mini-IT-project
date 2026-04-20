@@ -23,12 +23,15 @@ async def index(request, iter=0):
         return redirect("/")
     async with pool.acquire() as conn:
         other_users = await conn.fetch("SELECT email FROM users WHERE id!=$1",value[0]['user_id'])
+    like_status = 'Not liked yet'
     if len(other_users):
         iter=(iter+1)%len(other_users)
+        async with pool.acquire() as conn:
+            pass
     context = {
         'user_obj': other_users[iter],
         'next_iter': iter,
-        'like_status': 'Not liked yet',
+        'like_status': like_status,
     }
     if request.headers.get('HX-Request'):
         return render(request, 'matching_view/templates/card.html',{'status':status,'context': context})

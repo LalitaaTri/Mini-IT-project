@@ -1,0 +1,31 @@
+{% extends "nav.html" %}
+{% load static %}
+
+{% block content %}
+    <h2>Welcome to the Matching Page!</h2>
+    <h3>{{status}}</h3>
+    <p>This content only shows up after you login.</p>
+    <style>
+        #user-list {
+
+        }
+        .user-card {
+            background-color: #ceaabb;
+            padding: 10px;
+            width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .user-card button {
+            width: 100px;
+        }
+        .user-card img {
+            width: 300px;
+        }
+    </style>
+    <div id="user-list">
+        {% include 'matching_view/templates/card.html' %}
+    </div>
+{% endblock %}

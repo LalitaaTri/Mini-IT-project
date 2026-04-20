@@ -20,17 +20,32 @@ from teamup_mmu import views
 from .features.user_signup.views import index as user_signup
 from .features.user_signup.views import receive as user_signup_receive
 from .features.user_login.views import index as user_login
-
+from .features.user_login.views import receive as user_login_receive
+from .features.matching_view.views import index as matching_view
+from .features.user_logout.views import index as user_logout
+from .features.user_email_verification.views import send as user_email_verification_send
+from .features.user_email_verification.views import receive as user_email_verification_receive
+from .views import test_db_view
+from .features.matching_view.views import like as matching_like_view
 
 urlpatterns = [
     path('', views.index, name='index'),
     path('user_signup/', user_signup, name='user_signup'),
     path('user_signup/receive/', user_signup_receive, name='user_signup_receive'),
     path('user_login/', user_login, name='user_login'),
+    path('user_login/receive/', user_login_receive, name='user_login_receive'),
     path('admin/', admin.site.urls),
-
-    path('matching/', views.matching, name='matching'),
+    path('test-db/', test_db_view),
+    path('matching/', matching_view, name='matching'),
+    path('matching/<int:iter>/', matching_view, name='matching_with_iter'),
+    path('matching/like/', matching_like_view, name='matching_like_view'),
     path('groups/', views.groups, name='groups'),
     path('settings/', views.settings, name='settings'),
-    
+    path('logout/', user_logout, name='user_logout'),
+    path('email_verification/send/', user_email_verification_send, name='user_email_verification_send'),
+    path('email_verification/receive/', user_email_verification_receive, name='user_email_verification_receive')
 ]
+
+
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+urlpatterns += staticfiles_urlpatterns()

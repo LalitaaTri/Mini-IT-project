@@ -26,7 +26,7 @@ from .features.user_logout.views import index as user_logout
 from .features.user_email_verification.views import send as user_email_verification_send
 from .features.user_email_verification.views import receive as user_email_verification_receive
 from .views import test_db_view
-
+from .features.matching_view.views import like as matching_like_view
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -38,6 +38,7 @@ urlpatterns = [
     path('test-db/', test_db_view),
     path('matching/', matching_view, name='matching'),
     path('matching/<int:iter>/', matching_view, name='matching_with_iter'),
+    path('matching/like/', matching_like_view, name='matching_like_view'),
     path('groups/', views.groups, name='groups'),
     path('settings/', views.settings, name='settings'),
     path('logout/', user_logout, name='user_logout'),

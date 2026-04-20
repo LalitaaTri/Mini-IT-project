@@ -27,6 +27,7 @@ from .features.user_email_verification.views import send as user_email_verificat
 from .features.user_email_verification.views import receive as user_email_verification_receive
 from .views import test_db_view
 from .features.matching_view.views import like as matching_like_view
+from .features.matching_matches.views import index as matching_matches_view
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -43,7 +44,8 @@ urlpatterns = [
     path('settings/', views.settings, name='settings'),
     path('logout/', user_logout, name='user_logout'),
     path('email_verification/send/', user_email_verification_send, name='user_email_verification_send'),
-    path('email_verification/receive/', user_email_verification_receive, name='user_email_verification_receive')
+    path('email_verification/receive/', user_email_verification_receive, name='user_email_verification_receive'),
+    path('matches/', matching_matches_view, name='matching_matches')
 ]
 
 

@@ -13,8 +13,7 @@
    hx-swap="innerHTML">{% csrf_token %}
             <input type="hidden" name="liked_user_id" value="{{ context.user_obj.id }}">
             <button type="submit">Like</button>
-        </form>
-        <button hx-get="
+        </form><button hx-get="
         {% url 'matching_with_iter' context.next_iter %}"
         hx-target="#user-list"
         hx-swap="innerHTML">Next</button>

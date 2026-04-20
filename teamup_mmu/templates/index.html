@@ -13,6 +13,9 @@
             margin: 0;
             font-family: 'Inter', sans-serif;
             background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         nav {
@@ -24,7 +27,9 @@
             padding: 0.8rem 4rem;
             color: white;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: relative; /* Essential for absolute centering */
+            position: relative;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         /* --- LOGO --- */
@@ -101,38 +106,103 @@
         }
 
         .container {
-            padding: 2rem;
+            padding: 4rem;
+            max-width: 800px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 auto;
         }
-    </style>
-</head>
 
-<body>
-    <!-- Navigation Bar -->
-    <nav>
-        <div class="logo">TeamUp <span class="MM">MM</span><span class="U">U</span></div>
+        h1, h2 {
+            color: #001561; /* Matches the dark blue of your nav */
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
 
-        <ul class="nav-middle">
-            Creators: Shaun, Lalitaa, Alim
-        </ul>
-    </nav>
+        /* Target the divs where forms load */
+        [hx-get] {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Adds a modern 3D feel */
+            margin: 0 auto 2rem auto;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
 
-    <!-- Content Area -->
-    <div class="container">
-        {% block content %}
-        <h1>{{status}}</h1>
-        {% if not show_form %}
-          <div hx-get="user_signup/" hx-trigger="load">
-            <p>loading signup</p> <!-- this is where the signup form will be loaded when the page loads -->
-          </div>
-          <div hx-get="user_login/" hx-trigger="load">
-            <p>loading login</p> <!-- this is where the login form will be loaded when the page loads -->
-          </div>
-        {% endif %}
-        {% if show_form %}
-          {% include 'email_verification.html' %}
-        {% endif %}
-        {% endblock %}
-    </div>
+        /* --- FORM ELEMENT STYLING --- */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        input[type="email"], 
+        input[type="password"],
+        input[type="text"] {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #5b73df; /* Light blue highlight from your gradient */
+        }
+
+        /* Submit Button - Pill style to match your nav switches */
+        input[type="submit"], button {
+            background-color: #001561;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 25px; 
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        input[type="submit"]:hover, button:hover {
+            background-color: #5b73df;
+            transform: translateY(-2px); /* Makes it feel like a modern tech tool */
+        }
+            </style>
+        </head>
+
+        <body>
+            <!-- Navigation Bar -->
+            <nav>
+                <div class="logo">TeamUp <span class="MM">MM</span><span class="U">U</span></div>
+
+                <ul class="nav-middle">
+                    Creators: Shaun, Lalitaa, Alim
+                </ul>
+            </nav>
+
+            <!-- Content Area -->
+            <div class="container">
+                {% block content %}
+                <h1>{{status}}</h1>
+                {% if not show_form %}
+                <div hx-get="user_signup/" hx-trigger="load">
+                    <p>loading signup</p> <!-- this is where the signup form will be loaded when the page loads -->
+                </div>
+                <div hx-get="user_login/" hx-trigger="load">
+                    <p>loading login</p> <!-- this is where the login form will be loaded when the page loads -->
+                </div>
+                {% endif %}
+                {% if show_form %}
+                {% include 'email_verification.html' %}
+                {% endif %}
+                {% endblock %}
+            </div>
 
 </body>
 </html>

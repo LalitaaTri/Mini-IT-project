@@ -31,7 +31,7 @@ async def index(request, iter=0):
     context = {
         'user_obj': other_users[iter],
         'next_iter': iter,
-        'like_status': like_status,
+        'like_status': like_status
     }
     if request.headers.get('HX-Request'):
         return render(request, 'matching_view/templates/card.html',{'status':status,'context': context})
@@ -39,7 +39,7 @@ async def index(request, iter=0):
 
 async def like(request):
     if request.method == "POST":
-        liked_user_id = request.POST.get('liked_user')
+        liked_user_id = request.POST.get('liked_user_id')
         token = request.COOKIES.get('access_token')
         pool = await Database.get_pool()
         async with pool.acquire() as conn:

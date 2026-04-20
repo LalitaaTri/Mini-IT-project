@@ -22,13 +22,20 @@ async def index(request, iter=0):
         print("Redirecting to index")
         return redirect("/")
     async with pool.acquire() as conn:
-        other_users = await conn.fetch("SELECT email FROM users WHERE id!=$1",value[0]['user_id'])
+        other_users = await conn.fetch("SELECT * FROM users WHERE id!=$1",value[0]['user_id'])
+    like_status = 'Not liked yet'
     if len(other_users):
         iter=(iter+1)%len(other_users)
+        async with pool.acquire() as conn:
+            pass
+    async with pool.acquire() as conn:
+        likes = await conn.fetch("SELECT * FROM likes WHERE user_id=$1 AND liked_user_id=$2",value[0]['user_id'],other_users[iter]['id'])
+        if likes:
+            like_status = 'Liked'
     context = {
         'user_obj': other_users[iter],
         'next_iter': iter,
-        'like_status': 'Not liked yet',
+        'like_status': like_status
     }
     if request.headers.get('HX-Request'):
         return render(request, 'matching_view/templates/card.html',{'status':status,'context': context})
@@ -36,7 +43,7 @@ async def index(request, iter=0):
 
 async def like(request):
     if request.method == "POST":
-        liked_user_id = request.POST.get('liked_user')
+        liked_user_id = int(request.POST.get('liked_user_id'))
         token = request.COOKIES.get('access_token')
         pool = await Database.get_pool()
         async with pool.acquire() as conn:

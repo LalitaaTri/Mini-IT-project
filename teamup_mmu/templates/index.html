@@ -1,30 +1,42 @@
-<script src="https://unpkg.com/htmx.org@2.0.0"></script>
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TeamUp MMU</title>
+    <script src="https://unpkg.com/htmx.org@2.0.0"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    
     <style>
+        :root {
+            --primary: #4F46E5;
+            --secondary: #7c3aed;
+        }
+        
         body {
             margin: 0;
             font-family: 'Inter', sans-serif;
-            background-color: #f8f9fa;
+            background: linear-gradient(to bottom, #ffffff 0%, rgb(0, 21, 97) 100%);
+            color: white;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
         }
 
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            box-sizing: border-box;
+            z-index: 2;
+        }
+
+        /* Updated Nav to match second file */
         nav {
-            background: #001561;
-            background: linear-gradient(180deg, rgba(0, 21, 97, 1) 30%, rgba(91, 115, 223, 1) 100%);
+            background: linear-gradient(180deg, rgb(0, 21, 97) 30%, rgba(91, 115, 223, 1) 100%);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.8rem 4rem;
+            padding: 1.76rem 4rem;
             color: white;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             position: relative;
@@ -32,177 +44,194 @@
             box-sizing: border-box;
         }
 
-        /* --- LOGO --- */
         .logo {
             font-size: 1.5rem;
             font-weight: 600;
+            text-decoration: none;
+            color: white;
             letter-spacing: -1px;
         }
-        /* .logo .MM { color: #0011ff; }
-        .logo .U { color: #cb0000; } */
 
-        /* --- NAV MIDDLE (THE SWITCHES) --- */
-        .nav-middle {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            list-style: none;
-            display: flex;
-            gap: 10px;
-            margin: 0;
-            padding: 0;
-        }
-
-        /* ONLY target links inside .nav-middle */
-        .nav-middle a {
-            color: #c2e1ff;
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
             text-decoration: none;
-            font-size: 0.95rem;
-            font-weight: 500;
-            padding: 8px 18px;
-            border-radius: 25px; /* Pill shape */
+            font-weight: 600;
             transition: all 0.3s ease;
-            border: 2px solid transparent; 
         }
 
-        /* Hover effect for .nav-middle links */
-        .nav-middle a:hover {
-            background-color: #ffffff;
-            color: rgb(8, 14, 120);
-        }
-
-        /* --- NAV RIGHT (PLAIN LINKS) --- */
-        .nav-right {
-            list-style: none;
-            display: flex;
-            align-items: center;
-            gap: 25px;
-            margin: 0;
-            padding: 0;
-        }
-
-        .nav-right a {
-            color: #c2e1ff;
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.2s;
-        }
-
-        .nav-right a:hover {
+        .btn-login {
+            border: 2px solid rgba(255, 255, 255, 0.8);
             color: white;
+            font-size:0.9rem;
         }
 
-        .profile-circle {
-            width: 35px;
-            height: 35px;
-            background-color: #8a0000;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 0.8rem;
-            border: 1px solid #ffffff;
-            cursor: pointer;
+        .btn-login:hover {
+            background: white;
+            color: var(--primary);
         }
 
-        .container {
-            padding: 4rem;
-            max-width: 800px;
-            width: 100%;
+        .hero {
+            min-height: 100vh;
+            flex: 1;
             display: flex;
             flex-direction: column;
+            justify-content: center;
             align-items: center;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .hero h1,
+        .hero p {
+            background: linear-gradient(180deg, rgba(0, 21, 97, 1) 30%, rgba(91, 115, 223, 1) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            max-width: 600px;
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+        }
+
+        .btn-signup {
+            background: linear-gradient(180deg, rgba(0, 21, 97, 1) 30%, rgba(91, 115, 223, 1) 100%);
+            color: white;
+            font-size: 1.125rem;
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-signup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .features, .how-it-works {
+            padding: 5rem 5%;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
-        h1, h2 {
-            color: #001561; /* Matches the dark blue of your nav */
-            font-weight: 600;
-            margin-bottom: 1.5rem;
+        .features h2, .how-it-works h2 {
             text-align: center;
+            font-size: 2.2rem;
+            margin-bottom: 3rem;
         }
 
-        /* Target the divs where forms load */
-        [hx-get] {
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Adds a modern 3D feel */
-            margin: 0 auto 2rem auto;
-            max-width: 400px;
-            width: 100%;
-            text-align: center;
+/* Feature Grid */
+        .feature-grid {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+              gap: 2rem;
         }
 
-        /* --- FORM ELEMENT STYLING --- */
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+        .feature-card {
+              background: white;
+              padding: 2rem;
+              border-radius: 8px;
+              box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+              border: 1px solid #eaeaea;
+              text-align: center;
+              color: #0056b3;
         }
 
-        input[type="email"], 
-        input[type="password"],
-        input[type="text"] {
-            padding: 12px 15px;
-            border: 1px solid #ddd;
+        .feature-card h3 {
+              margin-bottom: 1rem;
+              color: #0056b3;
+        }
+
+/* Steps */
+        .steps {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #f8f9fa;
+            padding: 3rem;
             border-radius: 8px;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
-            transition: border-color 0.3s;
+            color: #0056b3;
         }
 
-        input:focus {
-            outline: none;
-            border-color: #5b73df; /* Light blue highlight from your gradient */
+        .steps ol {
+            padding-left: 2rem;
         }
 
-        /* Submit Button - Pill style to match your nav switches */
-        input[type="submit"], button {
-            background-color: #001561;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 25px; 
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .steps li {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
         }
 
-        input[type="submit"]:hover, button:hover {
-            background-color: #5b73df;
-            transform: translateY(-2px); /* Makes it feel like a modern tech tool */
+        .steps li strong {
+          color: #0056b3;
         }
-            </style>
-        </head>
 
-        <body>
-            <!-- Navigation Bar -->
-            <nav>
-                <div class="logo">TeamUp <span class="MM">MM</span><span class="U">U</span></div>
+/* Footer */
+        footer {
+          background: #333;
+          color: white;
+          text-align: center;
+          padding: 2rem;
+          margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="{% url 'index' %}" class="logo">TeamUp MMU</a>
+      <a href="{% url 'signup_page' %}" class="btn btn-login">Log In</a>
+    </nav>    
+  </header>
+  
+  <main>
+    <section class="hero">
+      <h1>Find Your Perfect Groupmates</h1>
+      <p>Skip the hassle of forming groups. Connect with MMU students, combine your skills, and build the ultimate team for your assignments.</p>
+      <a href="{% url 'signup_page' %}" class="btn btn-signup">Sign Up Now</a>
+    </section>
 
-                <ul class="nav-middle">
-                    Creators: Shaun, Lalitaa, Alim
-                </ul>
-            </nav>
+    <section class="features">
+      <h2>Why Choose TeamUp?</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h3>Swiping Mechanism</h3>
+          <p>Easily swipe left or right to choose whichever groupmates you want.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Skill-Based Search</h3>
+          <p>Need a Python coder, a UI/UX designer, or a report writer? Filter by the exact skills you are missing.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Instant Connections</h3>
+          <p>Reach out securely to potential groupmates right here on campus before finalizing your roster.</p>
+        </div>
+      </div>
+    </section>
 
-            <!-- Content Area -->
-            <div class="container">
-                {% block content %}
-                <h1>{{status}}</h1>
-                {% if not show_form %}
-                <div hx-get="user_signup/" hx-trigger="load">
-                    <p>loading signup</p> <!-- this is where the signup form will be loaded when the page loads -->
-                </div>
-                <div hx-get="user_login/" hx-trigger="load">
-                    <p>loading login</p> <!-- this is where the login form will be loaded when the page loads -->
-                </div>
-                {% endif %}
-                {% if show_form %}
-                {% include 'email_verification.html' %}
-                {% endif %}
-                {% endblock %}
-            </div>
+    <section class="how-it-works">
+      <h2>How It Works</h2>
+      <div class="steps">
+        <ol>
+          <li><strong>Create Your Profile:</strong> List your course, major, and strengths.</li>
+          <li><strong>Browse or Post:</strong> Look for available students or post a vacancy for your existing group.</li>
+          <li><strong>Team Up:</strong> Connect, collaborate, and ace your assignments.</li>
+        </ol>
+      </div>
+    </section>
+  </main>
 
+  <footer>
+    <p>&copy; 2026 TeamUp MMU Cyberjaya</p>
+  </footer>
 </body>
 </html>

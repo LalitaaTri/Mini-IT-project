@@ -1,7 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from teamup_mmu.db import Database
 from django.contrib.auth.hashers import make_password
+from datetime import timedelta, datetime
 
 async def receive(request):
     if request.method == 'POST':
@@ -22,3 +23,24 @@ async def index(request):
    async with pool.acquire() as conn:
       value = await conn.fetch("SELECT * FROM users")
       return render(request, 'user_signup/templates/index.html')
+   
+async def signup_page(request):
+   token = request.COOKIES.get('access_token')
+   pool = await Database.get_pool()
+   async with pool.acquire() as conn:
+       value = await conn.fetch("SELECT * FROM sessions WHERE token=$1", token)
+   status = "Not logged in"
+   show_form = False
+   email = None
+   if value and value[0]['is_active']:
+       if value[0]['created_at'] + timedelta(hours=1) > datetime.now():
+            async with pool.acquire() as conn:
+                email_verified = await conn.fetchval("SELECT email_verified FROM users WHERE id=$1",value[0]['user_id'])
+                if email_verified:
+                    print("Redirecting to matching")
+                    return redirect("/matching/")
+                else:
+                    status = "Logged in but email not verified"
+                    show_form = True
+                    email = await conn.fetchval("SELECT email FROM users WHERE id=$1", value[0]['user_id'])
+   return render(request, 'signup.html',{'status':status,'show_form':show_form,'email':email})

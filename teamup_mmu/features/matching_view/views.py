@@ -27,13 +27,11 @@ async def index(request, iter=0):
     if len(other_users):
         iter=(iter+1)%len(other_users)
         async with pool.acquire() as conn:
-            pass
-    async with pool.acquire() as conn:
-        likes = await conn.fetch("SELECT * FROM likes WHERE user_id=$1 AND liked_user_id=$2",value[0]['user_id'],other_users[iter]['id'])
-        if likes:
-            like_status = 'Liked'
+            likes = await conn.fetch("SELECT * FROM likes WHERE user_id=$1 AND liked_user_id=$2",value[0]['user_id'],other_users[iter]['id'])
+            if likes:
+                like_status = 'Liked'
     context = {
-        'user_obj': other_users[iter],
+        'user_obj': [] if not other_users else other_users[iter],
         'next_iter': iter,
         'like_status': like_status
     }

@@ -31,11 +31,13 @@ from .features.matching_matches.views import index as matching_matches_view
 from .features.user_message.views import message as user_message_view
 from .features.user_message.views import index as user_message_index_view
 from .features.user_inbox.views import index as user_inbox_index_view
+from .features.user_signup.views import signup_page as signup_page
 
 urlpatterns = [
     path('', views.index, name='index'),
     path('user_signup/', user_signup, name='user_signup'),
     path('user_signup/receive/', user_signup_receive, name='user_signup_receive'),
+    path('signup_page/', signup_page, name='signup_page'),
     path('user_login/', user_login, name='user_login'),
     path('user_login/receive/', user_login_receive, name='user_login_receive'),
     path('admin/', admin.site.urls),

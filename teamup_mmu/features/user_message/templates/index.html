@@ -1,0 +1,14 @@
+<div class="user-card">
+    <p>Chat with {{ context.another_user_email }}:</p>
+    {% for message in context.messages %}
+        <p>{{ message.sender_id }}: {{ message.content }} ({{ message.created_at }})</p>
+    {% endfor %}
+    <br>
+    <form id="message-form" hx-post="{% url 'user_message' %}" hx-target="#message-status" hx-swap="innerHTML">
+        {% csrf_token %}
+        <input type="hidden" name="another_user_id" value="{{ context.another_user_id }}">
+        <textarea name="content" placeholder="Type your message here..." required></textarea>
+        <button type="submit">Send Message</button>
+    </form>
+    <div id="message-status"></div>
+</div>

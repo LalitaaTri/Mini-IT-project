@@ -2,13 +2,13 @@
 {% load static %}
 
 {% block content %}
-    <h2>Welcome to the Matching Page!</h2>
-    <h3>{{status}}</h3>
+    <h2>Welcome to the Your Inbox Page!</h2>
     <p>This content only shows up after you login.</p>
     <style>
         /* Centers the entire list on the page */
         #user-list {
             display: flex;
+            flex-direction: column;
             justify-content: center;
             padding-top: 20px;
         }
@@ -94,6 +94,14 @@
         }
     </style>
     <div id="user-list">
-        {% include 'matching_view/templates/card.html' %}
+        {% for chat in context.chats_l %}
+            <div class="user-card">
+                <p>Chat with: {{ chat.another_user_email }}</p>
+                <p>{{ chat.last_message.sender_id }}: {{ chat.last_message.content }} ({{ chat.last_message.created_at }})</p>
+                <button hx-get="{% url 'user_message_index_view' chat.another_user_id %}" hx-target="#user-list" hx-swap="innerHTML">Open Chat</button>
+            </div>
+        {% empty %}
+            <p>No chats yet.</p>
+        {% endfor %}
     </div>
 {% endblock %}

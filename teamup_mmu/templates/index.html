@@ -15,7 +15,7 @@
         body {
             margin: 0;
             font-family: 'Inter', sans-serif;
-            background: #ffffff;
+            background: linear-gradient(to bottom, #ffffff 0%, rgb(0, 21, 97) 100%);
             color: white;
             min-height: 100vh;
             display: flex;
@@ -32,7 +32,7 @@
 
         /* Updated Nav to match second file */
         nav {
-            background: linear-gradient(180deg, rgba(0, 21, 97, 1) 30%, rgba(91, 115, 223, 1) 100%);
+            background: linear-gradient(180deg, rgb(0, 21, 97) 30%, rgba(91, 115, 223, 1) 100%);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -71,6 +71,7 @@
         }
 
         .hero {
+            min-height: 100vh;
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -114,19 +115,121 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
+
+        .features, .how-it-works {
+            padding: 5rem 5%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .features h2, .how-it-works h2 {
+            text-align: center;
+            font-size: 2.2rem;
+            margin-bottom: 3rem;
+        }
+
+/* Feature Grid */
+        .feature-grid {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+              gap: 2rem;
+        }
+
+        .feature-card {
+              background: white;
+              padding: 2rem;
+              border-radius: 8px;
+              box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+              border: 1px solid #eaeaea;
+              text-align: center;
+              color: #0056b3;
+        }
+
+        .feature-card h3 {
+              margin-bottom: 1rem;
+              color: #0056b3;
+        }
+
+/* Steps */
+        .steps {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #f8f9fa;
+            padding: 3rem;
+            border-radius: 8px;
+            color: #0056b3;
+        }
+
+        .steps ol {
+            padding-left: 2rem;
+        }
+
+        .steps li {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .steps li strong {
+          color: #0056b3;
+        }
+
+/* Footer */
+        footer {
+          background: #333;
+          color: white;
+          text-align: center;
+          padding: 2rem;
+          margin-top: 2rem;
+        }
     </style>
 </head>
 <body>
   <header>
-  <nav>
-    <a href="{% url 'index' %}" class="logo">TeamUp MMU</a>
-    <a href="{% url 'user_login' %}" class="btn btn-login">Log In</a>
+    <nav>
+      <a href="{% url 'index' %}" class="logo">TeamUp MMU</a>
+      <a href="{% url 'user_login' %}" class="btn btn-login">Log In</a>
     </nav>    
-</header>
-    <main class="hero">
-            <h1>Find Your Perfect Groupmates</h1>
-            <p>Skip the hassle of forming groups. Connect with MMU students, combine your skills, and build the ultimate team for your assignments.</p>
-            <a href="{% url 'user_signup' %}" class="btn btn-signup">Sign Up Now</a>
-    </main>
+  </header>
+  
+  <main>
+    <section class="hero">
+      <h1>Find Your Perfect Groupmates</h1>
+      <p>Skip the hassle of forming groups. Connect with MMU students, combine your skills, and build the ultimate team for your assignments.</p>
+      <a href="{% url 'user_signup' %}" class="btn btn-signup">Sign Up Now</a>
+    </section>
+
+    <section class="features">
+      <h2>Why Choose TeamUp?</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h3>Swiping Mechanism</h3>
+          <p>Easily swipe left or right to choose whichever groupmates you want.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Skill-Based Search</h3>
+          <p>Need a Python coder, a UI/UX designer, or a report writer? Filter by the exact skills you are missing.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Instant Connections</h3>
+          <p>Reach out securely to potential groupmates right here on campus before finalizing your roster.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="how-it-works">
+      <h2>How It Works</h2>
+      <div class="steps">
+        <ol>
+          <li><strong>Create Your Profile:</strong> List your course, major, and strengths.</li>
+          <li><strong>Browse or Post:</strong> Look for available students or post a vacancy for your existing group.</li>
+          <li><strong>Team Up:</strong> Connect, collaborate, and ace your assignments.</li>
+        </ol>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 TeamUp MMU Cyberjaya</p>
+  </footer>
 </body>
 </html>

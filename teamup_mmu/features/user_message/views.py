@@ -13,7 +13,8 @@ async def index(request, another_user_id):
             if value[0]['created_at'] + timedelta(hours=1) > datetime.now():
                 async with pool.acquire() as conn:
                     email_verified = await conn.fetchval("SELECT email_verified FROM users WHERE id=$1",value[0]['user_id'])
-                    if email_verified:
+                    account_inactive = await conn.fetchval("SELECT inactive FROM users WHERE id=$1",value[0]['user_id'])
+                    if email_verified and not account_inactive:
                         user_x = min(value[0]['user_id'], another_user_id)
                         user_y = max(value[0]['user_id'], another_user_id)
                         chats = await conn.fetch("SELECT * FROM chats WHERE user_x_id=$1 AND user_y_id=$2",user_x,user_y)
@@ -47,7 +48,8 @@ async def message(request):
             if value[0]['created_at'] + timedelta(hours=1) > datetime.now():
                 async with pool.acquire() as conn:
                     email_verified = await conn.fetchval("SELECT email_verified FROM users WHERE id=$1",value[0]['user_id'])
-                    if email_verified:
+                    account_inactive = await conn.fetchval("SELECT inactive FROM users WHERE id=$1",value[0]['user_id'])
+                    if email_verified and not account_inactive:
                         user_x = min(value[0]['user_id'], another_user_id)
                         user_y = max(value[0]['user_id'], another_user_id)
                         chats = await conn.fetch("SELECT * FROM chats WHERE user_x_id=$1 AND user_y_id=$2",user_x,user_y)

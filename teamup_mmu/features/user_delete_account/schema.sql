@@ -1,0 +1,6 @@
+DROP TABLE IF EXISTS delete_codes CASCADE;
+CREATE TABLE IF NOT EXISTS delete_codes (
+    id SERIAL PRIMARY KEY,
+    code TEXT NOT NULL,
+    user_id INT NOT NULL
+);

@@ -14,7 +14,8 @@ async def index(request, iter=0):
         if value[0]['created_at'] + timedelta(hours=1) > datetime.now():
             async with pool.acquire() as conn:
                 email_verified = await conn.fetchval("SELECT email_verified FROM users WHERE id=$1",value[0]['user_id'])
-                if email_verified:
+                account_inactive = await conn.fetchval("SELECT inactive FROM users WHERE id=$1",value[0]['user_id'])
+                if email_verified and not account_inactive:
                     email = await conn.fetch("SELECT email FROM users WHERE id=$1", value[0]['user_id'])
                     status = "Logged in as {}".format(email[0]['email'])
                     passed_login_check = True
@@ -22,7 +23,7 @@ async def index(request, iter=0):
         print("Redirecting to index")
         return redirect("/")
     async with pool.acquire() as conn:
-        other_users = await conn.fetch("SELECT * FROM users WHERE id!=$1",value[0]['user_id'])
+        other_users = await conn.fetch("SELECT * FROM users WHERE id!=$1 AND email_verified=$2 AND inactive=$3",value[0]['user_id'], True, False)
     like_status = 'Not liked yet'
     if len(other_users):
         iter=(iter+1)%len(other_users)
@@ -50,7 +51,8 @@ async def like(request):
             if value[0]['created_at'] + timedelta(hours=1) > datetime.now():
                 async with pool.acquire() as conn:
                     email_verified = await conn.fetchval("SELECT email_verified FROM users WHERE id=$1",value[0]['user_id'])
-                    if email_verified:
+                    account_inactive = await conn.fetchval("SELECT inactive FROM users WHERE id=$1",value[0]['user_id'])
+                    if email_verified and not account_inactive:
                         likes = await conn.fetch("SELECT * FROM likes WHERE user_id=$1 AND liked_user_id=$2",value[0]['user_id'],liked_user_id)
                         if not likes:
                             await conn.execute("INSERT INTO likes(id,user_id,liked_user_id) VALUES(DEFAULT,$1,$2)",value[0]['user_id'],liked_user_id)

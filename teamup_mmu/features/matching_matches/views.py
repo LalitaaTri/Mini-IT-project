@@ -14,7 +14,8 @@ async def index(request):
         if value[0]['created_at'] + timedelta(hours=1) > datetime.now():
             async with pool.acquire() as conn:
                 email_verified = await conn.fetchval("SELECT email_verified FROM users WHERE id=$1",value[0]['user_id'])
-                if email_verified:
+                account_inactive = await conn.fetchval("SELECT inactive FROM users WHERE id=$1",value[0]['user_id'])
+                if email_verified and not account_inactive:
                     email = await conn.fetch("SELECT email FROM users WHERE id=$1", value[0]['user_id'])
                     status = "Logged in as {}".format(email[0]['email'])
                     passed_login_check = True
@@ -22,7 +23,7 @@ async def index(request):
         print("Redirecting to index")
         return redirect("/")
     async with pool.acquire() as conn:
-        other_users = await conn.fetch("SELECT * FROM users WHERE id!=$1",value[0]['user_id'])
+        other_users = await conn.fetch("SELECT * FROM users WHERE id!=$1 AND email_verified=$2 AND inactive=$3",value[0]['user_id'], True, False)
     matches = []
     for iter in range(len(other_users)):
         async with pool.acquire() as conn:

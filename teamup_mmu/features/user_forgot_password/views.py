@@ -44,9 +44,10 @@ async def receive(request):
          async with pool.acquire() as conn:
             id = await conn.fetchval("SELECT id FROM users WHERE email=$1",email)
             await conn.execute("UPDATE users SET password=$1 WHERE id=$2", password, id)
+         response['HX-Redirect'] = "/signup_page/"
          return response
 
-      return HttpResponse("Could not reset the password.",status=401)
+      return HttpResponse("Could not reset the password.")
 
 def index(request):
    return render(request, 'user_forgot_password/templates/index.html')

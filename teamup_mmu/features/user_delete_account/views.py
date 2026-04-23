@@ -3,7 +3,7 @@ from django.contrib.auth.hashers import check_password
 from django.core.mail import send_mail
 from asgiref.sync import sync_to_async
 from django.http import HttpResponse
-from ..access_check.views import *
+from ..user_access_check.views import *
 
 async def send(request):
    passed_login_check, status, email, id = await access_check(request)

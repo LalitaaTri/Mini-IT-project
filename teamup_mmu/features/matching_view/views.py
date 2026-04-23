@@ -1,4 +1,4 @@
-from ..access_check.views import *
+from ..user_access_check.views import *
 
 async def index(request, iter=0):
     pool = await Database.get_pool()

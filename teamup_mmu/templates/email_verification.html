@@ -4,7 +4,7 @@
     <form id="email-verification-send">
     {% csrf_token %}
     <input type="hidden" name="email" value="{{ email }}">
-    <button hx-post="/email_verification/send/" type="submit">Send code again</button>
+    <button hx-post="/email_verification/send/" type="submit">Send code</button>
     </form>
     <br><form id="email-verification-form" hx-post="/email_verification/receive/"
     hx-target="#email-verification-container"

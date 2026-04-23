@@ -1,0 +1,6 @@
+DROP TABLE IF EXISTS codes CASCADE;
+CREATE TABLE IF NOT EXISTS reset_codes (
+    id SERIAL PRIMARY KEY,
+    code TEXT NOT NULL,
+    user_id INT NOT NULL
+);

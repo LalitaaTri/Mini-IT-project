@@ -32,6 +32,9 @@ from .features.user_message.views import message as user_message_view
 from .features.user_message.views import index as user_message_index_view
 from .features.user_inbox.views import index as user_inbox_index_view
 from .features.user_signup.views import signup_page as signup_page
+from .features.user_forgot_password.views import index as user_forgot_password_index_view
+from .features.user_forgot_password.views import send as user_forgot_password_send
+from .features.user_forgot_password.views import receive as user_forgot_password_receive
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -53,7 +56,10 @@ urlpatterns = [
     path('matches/', matching_matches_view, name='matching_matches'),
     path('message/', user_message_view, name='user_message'),
     path('chat/<int:another_user_id>/', user_message_index_view, name='user_message_index_view'),
-    path('inbox/', user_inbox_index_view, name='user_inbox_index_view')
+    path('inbox/', user_inbox_index_view, name='user_inbox_index_view'),
+    path('user_forgot_password/', user_forgot_password_index_view, name='user_forgot_password_index_view'),
+    path('user_forgot_password/send/', user_forgot_password_send, name='user_forgot_password_send'),
+    path('user_forgot_password/receive/', user_forgot_password_receive, name='user_forgot_password_receive')
 ]
 
 

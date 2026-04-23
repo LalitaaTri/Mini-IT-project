@@ -47,6 +47,3 @@ async def receive(request):
          return response
 
       return HttpResponse("Could not verify the account.",status=401)
-
-def index(request):
-   return render(request, 'user_login/templates/index.html')

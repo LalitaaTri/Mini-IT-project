@@ -19,10 +19,7 @@ async def receive(request):
       return HttpResponse("Email must be a valid MMU email address.",status=400)
 
 async def index(request):
-   pool = await Database.get_pool()
-   async with pool.acquire() as conn:
-      value = await conn.fetch("SELECT * FROM users")
-      return render(request, 'user_signup/templates/index.html')
+   return render(request, 'user_signup/templates/index.html')
    
 async def signup_page(request):
    token = request.COOKIES.get('access_token')

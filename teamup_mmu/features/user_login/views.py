@@ -11,8 +11,9 @@ async def receive(request):
       pool = await Database.get_pool()
       async with pool.acquire() as conn:
          value = await conn.fetch("SELECT * FROM users WHERE email=$1",email)
+         account_inactive = await conn.fetchval("SELECT inactive FROM users WHERE id=$1",value[0]['id'])
       response = HttpResponse("You logged in successfully.",status=200)
-      if value and check_password(password, value[0]['password']):
+      if value and check_password(password, value[0]['password']) and not account_inactive:
          token=secrets.token_urlsafe(32)
          response.set_cookie(
             'access_token',token,

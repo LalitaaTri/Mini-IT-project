@@ -36,11 +36,14 @@ async def signup_page(request):
        if value[0]['created_at'] + timedelta(hours=1) > datetime.now():
             async with pool.acquire() as conn:
                 email_verified = await conn.fetchval("SELECT email_verified FROM users WHERE id=$1",value[0]['user_id'])
-                if email_verified:
+                account_inactive = await conn.fetchval("SELECT inactive FROM users WHERE id=$1",value[0]['user_id'])
+                if email_verified and not account_inactive:
                     print("Redirecting to matching")
                     return redirect("/matching/")
-                else:
+                elif not account_inactive:
                     status = "Logged in but email not verified"
                     show_form = True
                     email = await conn.fetchval("SELECT email FROM users WHERE id=$1", value[0]['user_id'])
+                else:
+                    status = "Not logged in"
    return render(request, 'signup.html',{'status':status,'show_form':show_form,'email':email})

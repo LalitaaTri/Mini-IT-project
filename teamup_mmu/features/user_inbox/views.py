@@ -13,7 +13,8 @@ async def index(request):
             if value[0]['created_at'] + timedelta(hours=1) > datetime.now():
                 async with pool.acquire() as conn:
                     email_verified = await conn.fetchval("SELECT email_verified FROM users WHERE id=$1",value[0]['user_id'])
-                    if email_verified:
+                    account_inactive = await conn.fetchval("SELECT inactive FROM users WHERE id=$1",value[0]['user_id'])
+                    if email_verified and not account_inactive:
                         l = await conn.fetch("SELECT * FROM users WHERE id!=$1",value[0]['user_id'])
                         chats_l = []
                         for another_user in l:

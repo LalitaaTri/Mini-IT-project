@@ -1,0 +1,15 @@
+<div id="delete-container">
+    <h2>Delete account</h2>
+    <form id="delete-send">
+    {% csrf_token %}
+    <input type="hidden" name="email" value="{{ email }}">
+    <button hx-post="/user_delete_account/send/" type="submit">Send code</button>
+    </form>
+    <br><form id="delete-form" hx-post="/user_delete_account/receive/"
+    hx-target="#delete-container"
+    hx-swap="innerHTML">
+    {% csrf_token %} <input type="text" name="code" placeholder="Verification code" required>
+    <input type="hidden" name="email" value="{{ email }}">
+    <br><button type="submit">Submit</button>
+    </form>
+</div>

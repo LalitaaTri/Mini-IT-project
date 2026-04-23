@@ -35,6 +35,8 @@ from .features.user_signup.views import signup_page as signup_page
 from .features.user_forgot_password.views import index as user_forgot_password_index_view
 from .features.user_forgot_password.views import send as user_forgot_password_send
 from .features.user_forgot_password.views import receive as user_forgot_password_receive
+from .features.user_delete_account.views import send as user_delete_account_send
+from .features.user_delete_account.views import receive as user_delete_account_receive
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -59,7 +61,9 @@ urlpatterns = [
     path('inbox/', user_inbox_index_view, name='user_inbox_index_view'),
     path('user_forgot_password/', user_forgot_password_index_view, name='user_forgot_password_index_view'),
     path('user_forgot_password/send/', user_forgot_password_send, name='user_forgot_password_send'),
-    path('user_forgot_password/receive/', user_forgot_password_receive, name='user_forgot_password_receive')
+    path('user_forgot_password/receive/', user_forgot_password_receive, name='user_forgot_password_receive'),
+    path('user_delete_account/send/', user_delete_account_send, name='user_delete_account_send'),
+    path('user_delete_account/receive/', user_delete_account_receive, name='user_delete_account_receive')
 ]
 
 

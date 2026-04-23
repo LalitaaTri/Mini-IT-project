@@ -1,4 +1,4 @@
-from .features.access_check.views import *
+from .features.user_access_check.views import *
 
 async def index(request):
    return render(request, 'index.html')

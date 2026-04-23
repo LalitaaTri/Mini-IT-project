@@ -1,224 +1,52 @@
+{% load static %}
 <script src="https://unpkg.com/htmx.org@2.0.0"></script>
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>TeamUp MMU</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            background-color: #f8f9fa;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        nav {
-            background: #001561;
-            background: linear-gradient(180deg, rgba(0, 21, 97, 1) 30%, rgba(91, 115, 223, 1) 100%);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.8rem 4rem;
-            color: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: relative;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        /* --- LOGO --- */
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 600;
-            letter-spacing: -1px;
-        }
-        /* .logo .MM { color: #0011ff; }
-        .logo .U { color: #cb0000; } */
-
-        /* --- NAV MIDDLE (THE SWITCHES) --- */
-        .nav-middle {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            list-style: none;
-            display: flex;
-            gap: 10px;
-            margin: 0;
-            padding: 0;
-        }
-
-        /* ONLY target links inside .nav-middle */
-        .nav-middle a {
-            color: #c2e1ff;
-            text-decoration: none;
-            font-size: 0.95rem;
-            font-weight: 500;
-            padding: 8px 18px;
-            border-radius: 25px; /* Pill shape */
-            transition: all 0.3s ease;
-            border: 2px solid transparent; 
-        }
-
-        /* Hover effect for .nav-middle links */
-        .nav-middle a:hover {
-            background-color: #ffffff;
-            color: rgb(8, 14, 120);
-        }
-
-        /* --- NAV RIGHT (PLAIN LINKS) --- */
-        .nav-right {
-            list-style: none;
-            display: flex;
-            align-items: center;
-            gap: 25px;
-            margin: 0;
-            padding: 0;
-        }
-
-        .nav-right a {
-            color: #c2e1ff;
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.2s;
-        }
-
-        .nav-right a:hover {
-            color: white;
-        }
-
-        .profile-circle {
-            width: 35px;
-            height: 35px;
-            background-color: #8a0000;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 0.8rem;
-            border: 1px solid #ffffff;
-            cursor: pointer;
-        }
-
-        .container {
-            padding: 4rem;
-            max-width: 800px;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0 auto;
-        }
-
-        h1, h2 {
-            color: #001561; /* Matches the dark blue of your nav */
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-
-        /* Target the divs where forms load */
-        [hx-get] {
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Adds a modern 3D feel */
-            margin: 0 auto 2rem auto;
-            max-width: 400px;
-            width: 100%;
-            text-align: center;
-        }
-
-        /* --- FORM ELEMENT STYLING --- */
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        input[type="email"], 
-        input[type="password"],
-        input[type="text"] {
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
-            transition: border-color 0.3s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #5b73df; /* Light blue highlight from your gradient */
-        }
-
-        /* Submit Button - Pill style to match your nav switches */
-        input[type="submit"], button {
-            background-color: #001561;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 25px; 
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        input[type="submit"]:hover, button:hover {
-            background-color: #5b73df;
-            transform: translateY(-2px); /* Makes it feel like a modern tech tool */
-        }
-            </style>
-        </head>
-
-        <body>
-            <!-- Navigation Bar -->
-            <nav>
-                <a style="all:unset; cursor: pointer; display: contents;" href="/">
-                    <div class="logo">TeamUp <span class="MM">MM</span><span class="U">U</span></div>
-                </a>
-                <ul class="nav-middle">
-                    Creators: Shaun, Lalitaa, Alim
-                </ul>
-            </nav>
-
-            <!-- Content Area -->
-            <div class="container">
-                {% block content %}
-                <h1>{{status}}</h1>
-                {% if not show_form %}
-                <div hx-get="/user_signup/" hx-trigger="load">
-                    <p>loading signup</p> <!-- this is where the signup form will be loaded when the page loads -->
-                </div>
-                <div hx-get="/user_login/" hx-trigger="load">
-                    <p>loading login</p> <!-- this is where the login form will be loaded when the page loads -->
-                </div>
-                <a href="/user_forgot_password/">Forgot password?</a>
-                {% endif %}
-                {% if show_form %}
-                    <div id="email-verification-container">
-                        <h2>Verify email</h2>
-                        <form id="email-verification-send">
-                        {% csrf_token %}
-                        <input type="hidden" name="email" value="{{ email }}">
-                        <button hx-post="/email_verification/send/" type="submit">Send code</button>
-                        </form>
-                        <br><form id="email-verification-form" hx-post="/email_verification/receive/"
-                        hx-target="#email-verification-container"
-                        hx-swap="innerHTML">
-                        {% csrf_token %} <input type="text" name="code" placeholder="Verification code" required>
-                        <input type="hidden" name="email" value="{{ email }}">
-                        <br><button type="submit">Submit</button>
-                        </form>
-                    </div>
-                {% endif %}
-                {% endblock %}
+    <link rel="stylesheet" href="{% static 'teamup_mmu/css/signup.css' %}">
+</head>
+<body>
+    <nav>
+        <a style="all:unset; cursor: pointer; display: contents;" href="/">
+            <div class="logo">TeamUp <span class="MM">MM</span><span class="U">U</span></div>
+        </a>
+        <ul class="nav-middle">
+            Creators: Shaun, Lalitaa, Alim
+        </ul>
+    </nav>
+    <div class="container">
+        {% block content %}
+        <h1>{{status}}</h1>
+        {% if not show_form %}
+        <div hx-get="/user_signup/" hx-trigger="load">
+            <p>Loading the Sign Up page...</p>
+        </div>
+        <div hx-get="/user_login/" hx-trigger="load">
+            <p>Loading the Log In page...</p>
+        </div>
+        <a href="/user_forgot_password/">Forgot password?</a>
+        {% endif %}
+        {% if show_form %}
+            <div id="email-verification-container">
+                <h2>Verify email</h2>
+                <form id="email-verification-send">
+                {% csrf_token %}
+                <input type="hidden" name="email" value="{{ email }}">
+                <button hx-post="/email_verification/send/" type="submit">Send code</button>
+                </form>
+                <br><form id="email-verification-form" hx-post="/email_verification/receive/"
+                hx-target="#email-verification-container"
+                hx-swap="innerHTML">
+                {% csrf_token %} <input type="text" name="code" placeholder="Verification code" required>
+                <input type="hidden" name="email" value="{{ email }}">
+                <br><button type="submit">Submit</button>
+                </form>
             </div>
-
+        {% endif %}
+        {% endblock %}
+    </div>
 </body>
 </html>

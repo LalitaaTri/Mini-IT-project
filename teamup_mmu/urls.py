@@ -1,19 +1,3 @@
-"""
-URL configuration for teamup_mmu project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path
 from teamup_mmu import views
@@ -25,7 +9,6 @@ from .features.matching_view.views import index as matching_view
 from .features.user_logout.views import index as user_logout
 from .features.user_email_verification.views import send as user_email_verification_send
 from .features.user_email_verification.views import receive as user_email_verification_receive
-from .views import test_db_view
 from .features.matching_view.views import like as matching_like_view
 from .features.matching_matches.views import index as matching_matches_view
 from .features.user_message.views import message as user_message_view
@@ -45,8 +28,6 @@ urlpatterns = [
     path('signup_page/', signup_page, name='signup_page'),
     path('user_login/', user_login, name='user_login'),
     path('user_login/receive/', user_login_receive, name='user_login_receive'),
-    path('admin/', admin.site.urls),
-    path('test-db/', test_db_view),
     path('matching/', matching_view, name='matching'),
     path('matching/<int:iter>/', matching_view, name='matching_with_iter'),
     path('matching/like/', matching_like_view, name='matching_like_view'),
@@ -63,7 +44,8 @@ urlpatterns = [
     path('user_forgot_password/send/', user_forgot_password_send, name='user_forgot_password_send'),
     path('user_forgot_password/receive/', user_forgot_password_receive, name='user_forgot_password_receive'),
     path('user_delete_account/send/', user_delete_account_send, name='user_delete_account_send'),
-    path('user_delete_account/receive/', user_delete_account_receive, name='user_delete_account_receive')
+    path('user_delete_account/receive/', user_delete_account_receive, name='user_delete_account_receive'),
+    path('admin/', admin.site.urls)
 ]
 
 

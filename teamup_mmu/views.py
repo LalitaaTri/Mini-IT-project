@@ -1,23 +1,13 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse
-from .db import Database
-from datetime import timedelta, datetime
-
-async def test_db_view(request):
-    pool = await Database.get_pool()
-    async with pool.acquire() as conn:
-        # Fetching data directly via asyncpg
-        value = await conn.fetchval("SELECT 'Connection Successful!'")
-    
-    return JsonResponse({"status": value})
+from .features.user_access_check.views import *
 
 async def index(request):
    return render(request, 'index.html')
 
-def matching(request):
-    return render(request, 'matching.html')
-
-def groups(request):
+async def groups(request):
+    passed_login_check, status, email, id = await access_check(request)
+    if not passed_login_check:
+        print("Redirecting to index")
+        return redirect("/")
     return render(request, 'groups.html')
 
 def settings(request):
@@ -25,3 +15,10 @@ def settings(request):
 
 def profile_setup(request):
     return render(request, 'profile_setup.html')
+
+async def settings(request):
+    passed_login_check, status, email, id = await access_check(request)
+    if not passed_login_check:
+        print("Redirecting to index")
+        return redirect("/")
+    return render(request, 'settings.html')

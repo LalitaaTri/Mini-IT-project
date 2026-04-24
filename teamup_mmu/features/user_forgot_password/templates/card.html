@@ -1,0 +1,16 @@
+<div id="reset-container">
+    <h2>Reset password</h2>
+    <form id="reset-send">
+    {% csrf_token %}
+    <input type="text" name="email" placeholder="Email">
+    <button hx-post="/user_forgot_password/send/" type="submit">Send code</button>
+    </form>
+    <br><form id="reset-form" hx-post="/user_forgot_password/receive/"
+    hx-target="#reset-container"
+    hx-swap="innerHTML">
+    {% csrf_token %} <input type="text" name="code" placeholder="Verification code" required>
+    <input type="password" name="password" placeholder="New password" required>
+    <input type="text" name="email" placeholder="Email">
+    <br><button type="submit">Submit</button>
+    </form>
+</div>

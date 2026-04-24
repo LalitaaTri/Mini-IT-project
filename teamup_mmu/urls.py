@@ -53,7 +53,8 @@ urlpatterns = [
     path('matches/', matching_matches_view, name='matching_matches'),
     path('message/', user_message_view, name='user_message'),
     path('chat/<int:another_user_id>/', user_message_index_view, name='user_message_index_view'),
-    path('inbox/', user_inbox_index_view, name='user_inbox_index_view')
+    path('inbox/', user_inbox_index_view, name='user_inbox_index_view'),
+    path('profile_setup/', views.profile_setup, name='profile_setup'),
 ]
 
 

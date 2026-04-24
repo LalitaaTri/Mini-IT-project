@@ -1,0 +1,5 @@
+DROP TABLE IF EXISTS profiles CASCADE;
+CREATE TABLE IF NOT EXISTS profiles (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+);

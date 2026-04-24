@@ -22,3 +22,6 @@ def groups(request):
 
 def settings(request):
     return render(request, 'settings.html')
+
+def profile_setup(request):
+    return render(request, 'profile_setup.html')

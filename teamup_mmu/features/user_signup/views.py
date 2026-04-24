@@ -37,8 +37,13 @@ async def signup_page(request):
             async with pool.acquire() as conn:
                 email_verified = await conn.fetchval("SELECT email_verified FROM users WHERE id=$1",value[0]['user_id'])
                 if email_verified:
-                    print("Redirecting to matching")
-                    return redirect("/matching/")
+                    is_profile_setup = await conn.fetchval("SELECT is_profile_setup FROM users WHERE id=$1",value[0]['user_id'])
+                    if is_profile_setup:
+                        print("Redirecting to matching")
+                        return redirect("/matching/")
+                    else:
+                        print("Redirecting to profile setup")
+                        return redirect("/profile_setup/")
                 else:
                     status = "Logged in but email not verified"
                     show_form = True

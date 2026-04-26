@@ -70,3 +70,50 @@ async def join_class(request, class_id):
         except Exception as e:
             return HttpResponse("Error joining class", status=400)
 
+# 9. Return the modal HTML when the user clicks "Join Class"
+async def join_modal(request):
+    return render(request, 'user_classes/templates/join_modal.html')
+
+# 10. Handle the submitted class code
+@csrf_exempt
+async def join_by_code(request):
+    if request.method != 'POST':
+        return HttpResponse("Invalid method", status=400)
+    
+    class_code = request.POST.get('class_code')
+    token = request.COOKIES.get('access_token')
+    
+    if not token or not class_code:
+        return render(request, 'user_classes/templates/join_modal.html', {'error_message': 'Missing code or unauthorized.'})
+        
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        # Check user session
+        session = await conn.fetchrow("SELECT * FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return render(request, 'user_classes/templates/join_modal.html', {'error_message': 'Unauthorized.'})
+            
+        user_id = session['user_id']
+        
+        # Check if the class exists by code
+        target_class = await conn.fetchrow("SELECT id FROM classes WHERE course_code=$1", class_code)
+        if not target_class:
+            return render(request, 'user_classes/templates/join_modal.html', {'error_message': 'Invalid class code.'})
+            
+        class_id = target_class['id']
+        
+        # Check if user already joined this class
+        already_joined = await conn.fetchrow("SELECT id FROM user_classes WHERE user_id=$1 AND class_id=$2", user_id, class_id)
+        if already_joined:
+            return render(request, 'user_classes/templates/join_modal.html', {'error_message': 'You are already in this class.'})
+        
+        try:
+            # Add user to the class!
+            await conn.execute("INSERT INTO user_classes(user_id, class_id) VALUES($1, $2)", user_id, class_id)
+            
+            # Since HTMX is handling this, we tell the browser to redirect and refresh the classes page
+            response = HttpResponse("Joined successfully!")
+            response['HX-Redirect'] = '/classes/'
+            return response
+        except Exception as e:
+            return render(request, 'user_classes/templates/join_modal.html', {'error_message': 'Error joining class.'})

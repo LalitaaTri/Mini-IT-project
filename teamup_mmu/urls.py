@@ -11,7 +11,6 @@ from .features.user_email_verification.views import send as user_email_verificat
 from .features.user_email_verification.views import receive as user_email_verification_receive
 from .features.matching_view.views import like as matching_like_view
 from .features.user_classes.views import index as user_classes_index
-from .features.user_classes.views import join_class
 from .features.user_classes.views import join_modal
 from .features.user_classes.views import join_by_code
 from .features.matching_matches.views import index as matching_matches_view
@@ -41,7 +40,6 @@ urlpatterns = [
     path('email_verification/send/', user_email_verification_send, name='user_email_verification_send'),
     path('email_verification/receive/', user_email_verification_receive, name='user_email_verification_receive'),
     path('classes/', user_classes_index, name='user_classes_index'),
-    path('classes/join/<int:class_id>/', join_class, name='join_class'),
     path('matches/', matching_matches_view, name='matching_matches'),
     path('message/', user_message_view, name='user_message'),
     path('chat/<int:another_user_id>/', user_message_index_view, name='user_message_index_view'),

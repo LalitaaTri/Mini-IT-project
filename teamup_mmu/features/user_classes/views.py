@@ -44,31 +44,6 @@ async def index(request):
         'explore_classes': explore_classes
     })
 
-# 8. Endpoint to handle the actual joining process
-@csrf_exempt
-async def join_class(request, class_id):
-    if request.method != 'POST':
-        return HttpResponse("Invalid request method", status=400)
-
-    token = request.COOKIES.get('access_token')
-    if not token:
-        return HttpResponse("Unauthorized", status=401)
-
-    pool = await Database.get_pool()
-    async with pool.acquire() as conn:
-        session = await conn.fetchrow("SELECT * FROM sessions WHERE token=$1 AND is_active=True", token)
-        if not session:
-            return HttpResponse("Unauthorized", status=401)
-
-        user_id = session['user_id']
-        try:
-            # Add the user to the junction table!
-            await conn.execute("INSERT INTO user_classes(user_id, class_id) VALUES($1, $2)", user_id, class_id)
-            
-            # Return a simple piece of HTML to update the button instantly via HTMX
-            return HttpResponse('<button disabled style="background-color: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold;">Joined ✓</button>')
-        except Exception as e:
-            return HttpResponse("Error joining class", status=400)
 
 # 9. Return the modal HTML when the user clicks "Join Class"
 async def join_modal(request):
@@ -96,7 +71,7 @@ async def join_by_code(request):
         user_id = session['user_id']
         
         # Check if the class exists by code
-        target_class = await conn.fetchrow("SELECT id FROM classes WHERE course_code=$1", class_code)
+        target_class = await conn.fetchrow("SELECT id FROM classes WHERE join_code=$1", class_code)
         if not target_class:
             return render(request, 'user_classes/templates/join_modal.html', {'error_message': 'Invalid class code.'})
             
@@ -111,7 +86,7 @@ async def join_by_code(request):
             # Add user to the class!
             await conn.execute("INSERT INTO user_classes(user_id, class_id) VALUES($1, $2)", user_id, class_id)
             
-            # Since HTMX is handling this, we tell the browser to redirect and refresh the classes page
+
             response = HttpResponse("Joined successfully!")
             response['HX-Redirect'] = '/classes/'
             return response

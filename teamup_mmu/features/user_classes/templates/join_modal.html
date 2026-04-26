@@ -1,0 +1,26 @@
+<div id="join-modal" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;">
+    
+    <!-- The white popup box -->
+    <div style="background: white; padding: 2rem; border-radius: 15px; width: 90%; max-width: 400px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); position: relative;">
+        
+        <!-- Close button to remove the modal from the screen -->
+        <button onclick="document.getElementById('join-modal').remove()" style="position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: #555;">&times;</button>
+        
+        <h2 style="margin-top: 0; color: #00186d;">Join a Class</h2>
+        <p style="color: #666; margin-bottom: 1.5rem; font-size: 0.9rem;">Enter the class code provided by your lecturer or friends.</p>
+        
+        <!-- Form that sends the code to the backend -->
+        <form hx-post="/classes/join_by_code/" hx-target="#join-modal" hx-swap="outerHTML" style="display: flex; flex-direction: column; gap: 15px;">
+            {% csrf_token %}
+            
+            <input type="text" name="class_code" placeholder="e.g. CS101" required style="padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 16px;">
+            
+            <!-- Optional spot to display error messages -->
+            {% if error_message %}
+                <p style="color: red; font-size: 0.85rem; margin: 0;">{{ error_message }}</p>
+            {% endif %}
+
+            <button type="submit" style="background-color: #001561; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 16px;">Join</button>
+        </form>
+    </div>
+</div>

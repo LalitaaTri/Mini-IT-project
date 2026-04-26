@@ -17,9 +17,11 @@ async def receive(request):
                   inactive = await conn.fetchval("SELECT inactive FROM users WHERE id=$1",id)
                   if inactive:
                      await conn.execute("UPDATE users SET password=$1, inactive=FALSE WHERE id=$2", password, id)
+                     
                      return HttpResponse("You signed up successfully.")
                   return HttpResponse("Email already exists.")
             value = await conn.execute("INSERT INTO users(email,password) VALUES($1,$2)",email,password)
+            await conn.execute("INSERT INTO profiles(username) VALUES($1)","John Doe")
          
          if value == "INSERT 0 1":
             return HttpResponse("You signed up successfully.")
@@ -41,23 +43,11 @@ async def signup_page(request):
        if value[0]['created_at'] + timedelta(hours=1) > datetime.now():
             async with pool.acquire() as conn:
                 email_verified = await conn.fetchval("SELECT email_verified FROM users WHERE id=$1",value[0]['user_id'])
-<<<<<<< HEAD
-                if email_verified:
-                    is_profile_setup = await conn.fetchval("SELECT is_profile_setup FROM users WHERE id=$1",value[0]['user_id'])
-                    if is_profile_setup:
-                        print("Redirecting to matching")
-                        return redirect("/matching/")
-                    else:
-                        print("Redirecting to profile setup")
-                        return redirect("/profile_setup/")
-                else:
-=======
                 account_inactive = await conn.fetchval("SELECT inactive FROM users WHERE id=$1",value[0]['user_id'])
                 if email_verified and not account_inactive:
                     print("Redirecting to matching")
                     return redirect("/matching/")
                 elif not account_inactive:
->>>>>>> 30a3027a56e1ec0eff4debe9c0fd2acbc9f6d340
                     status = "Logged in but email not verified"
                     show_form = True
                     email = await conn.fetchval("SELECT email FROM users WHERE id=$1", value[0]['user_id'])

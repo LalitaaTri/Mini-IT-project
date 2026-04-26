@@ -20,6 +20,8 @@ from .features.user_forgot_password.views import send as user_forgot_password_se
 from .features.user_forgot_password.views import receive as user_forgot_password_receive
 from .features.user_delete_account.views import send as user_delete_account_send
 from .features.user_delete_account.views import receive as user_delete_account_receive
+from .features.profile_setup_1.views import index as profile_setup_1
+from .features.profile_setup_1.views import receive as profile_setup_1_receive
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -40,18 +42,16 @@ urlpatterns = [
     path('message/', user_message_view, name='user_message'),
     path('chat/<int:another_user_id>/', user_message_index_view, name='user_message_index_view'),
     path('inbox/', user_inbox_index_view, name='user_inbox_index_view'),
-<<<<<<< HEAD
     path('profile_setup/', views.profile_setup, name='profile_setup'),
-=======
+    path('profile_setup_1/', profile_setup_1, name='profile_setup_1'),
+    path('profile_setup_1/receive/', profile_setup_1_receive, name='profile_setup_1'),
     path('user_forgot_password/', user_forgot_password_index_view, name='user_forgot_password_index_view'),
     path('user_forgot_password/send/', user_forgot_password_send, name='user_forgot_password_send'),
     path('user_forgot_password/receive/', user_forgot_password_receive, name='user_forgot_password_receive'),
     path('user_delete_account/send/', user_delete_account_send, name='user_delete_account_send'),
     path('user_delete_account/receive/', user_delete_account_receive, name='user_delete_account_receive'),
     path('admin/', admin.site.urls)
->>>>>>> 30a3027a56e1ec0eff4debe9c0fd2acbc9f6d340
 ]
-
 
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 urlpatterns += staticfiles_urlpatterns()

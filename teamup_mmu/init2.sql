@@ -1,0 +1,1 @@
+\i teamup_mmu/features/profile_setup_1/schema.sql

@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from teamup_mmu.db import Database
 from datetime import timedelta, datetime
+from ..user_access_check.views import *
 
 async def access_check(request):
     token = request.COOKIES.get('access_token')

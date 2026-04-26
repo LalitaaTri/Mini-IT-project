@@ -1,102 +1,73 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>My Classes</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <!-- imports the HTMX library to use dynamic buttons -->
-    <script src="https://unpkg.com/htmx.org@2.0.0"></script>
-    <style>
-        body { 
-            font-family: 'Inter', 
-            sans-serif; background-color: #f8f9fa; 
-            margin: 0; padding: 2rem; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-        }
-        .container { 
-            max-width: 800px; 
-            width: 100%; 
-            background: white; 
-            padding: 2rem; 
-            border-radius: 15px; 
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        }
-        h1, h2 { color: #001561; }
+{% extends 'nav.html' %}
 
-        /* Class css */
-        .class-list { list-style: none; padding: 0; }
-        .class-card { 
-            border: 1px solid #ddd; 
-            padding: 1rem; 
-            border-radius: 8px; 
-            margin-bottom: 1rem; 
-            display: flex; 
-            justify-content: 
-            space-between; 
-            align-items: center; 
-        }
-        .class-info h3 { margin: 0 0 0.5rem 0; color: #333; }
-        .class-info p { margin: 0; color: #666; font-size: 0.9rem; }
-        
-        /* Join button css */
-        .join-btn { 
-            background-color: #001561; 
-            color: white; 
-            border: none; 
-            padding: 8px 15px; 
-            border-radius: 20px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            transition: 0.3s; 
-        }
-        .join-btn:hover { background-color: #5b73df; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>My Classes</h1>
-        
-        <!-- Checking if the user has any classes joined -->
-        {% if my_classes %}
-            <ul class="class-list">
-                <!-- This loops through the 'my_classes' list we sent from views.py -->
-                {% for c in my_classes %}
-                <li class="class-card">
-                    <div class="class-info">
-                        <h3>{{ c.course_code }} - {{ c.course_name }}</h3>
-                        <p>{{ c.description }}</p>
-                    </div>
-                </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>You haven't joined any classes yet.</p>
-        {% endif %}
+{% block content %}
+<style>
+    /* Class css */
+    h1 , h2 {color: #00186d}
+    .class-list { list-style: none; padding: 0;}
+    .class-card { 
+        border: 1px solid #ddd; 
+        padding: 1rem; 
+        border-radius: 8px; 
+        margin-bottom: 1rem; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+    }
+    .class-info h3 { margin: 0 0 0.5rem 0; color: #333; }
+    .class-info p { margin: 0; color: #666; font-size: 0.9rem; }
+    
+    /* Join button css */
+    .join-btn { 
+        background-color: #001561; 
+        color: white; 
+        border: none; 
+        padding: 8px 15px; 
+        border-radius: 20px; 
+        font-weight: bold; 
+        cursor: pointer; 
+        transition: 0.3s; 
+    }
+    .join-btn:hover { background-color: #5b73df; }
+</style>
 
-        <h2>Explore Classes</h2>
+<div style="width: 100%; max-width: 800px; margin: 0 auto; background: white; padding: 2rem; border: 1px solid #00198357; border-radius: 15px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);">
+    <h1>My Classes</h1>
+    
+    <!-- Checking if the user has any classes joined -->
+    {% if my_classes %}
         <ul class="class-list">
-            <!-- This loops through the 'explore_classes' list -->
-            {% for c in explore_classes %}
+            {% for c in my_classes %}
             <li class="class-card">
                 <div class="class-info">
                     <h3>{{ c.course_code }} - {{ c.course_name }}</h3>
                     <p>{{ c.description }}</p>
                 </div>
-                
-                <!-- HTMX Magic Button -->
-                <button class="join-btn"
-                        hx-post="/classes/join/{{ c.id }}/"
-                        hx-swap="outerHTML">
-                    Join
-                </button>
-                
             </li>
             {% endfor %}
         </ul>
-        <br>
-        <a href="/" style="color: #001561; text-decoration: none; font-weight: bold;">&larr; Back to Home</a>
-    </div>
-</body>
-</html>
+    {% else %}
+        <p>You haven't joined any classes yet.</p>
+    {% endif %}
+
+    <h2>Explore Classes</h2>
+    <ul class="class-list">
+        {% for c in explore_classes %}
+        <li class="class-card">
+            <div class="class-info">
+                <h3>{{ c.course_code }} - {{ c.course_name }}</h3>
+                <p>{{ c.description }}</p>
+            </div>
+            
+            <!-- HTMX Magic Button -->
+            <button class="join-btn"
+                    hx-post="/classes/join/{{ c.id }}/"
+                    hx-swap="outerHTML">
+                Join
+            </button>
+            
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

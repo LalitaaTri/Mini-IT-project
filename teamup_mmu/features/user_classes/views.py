@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from teamup_mmu.db import Database
 from datetime import timedelta, datetime
+from django.views.decorators.csrf import csrf_exempt
+
 
 async def index(request):
     # 1. Check if the browser sent an access_token cookie
@@ -41,8 +43,9 @@ async def index(request):
         'my_classes': my_classes,
         'explore_classes': explore_classes
     })
-    
+
 # 8. Endpoint to handle the actual joining process
+@csrf_exempt
 async def join_class(request, class_id):
     if request.method != 'POST':
         return HttpResponse("Invalid request method", status=400)

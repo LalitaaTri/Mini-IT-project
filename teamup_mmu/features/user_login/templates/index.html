@@ -1,5 +1,5 @@
 <h2>Log in</h2>
-<form id="login-form" hx-post="user_login/receive/"
+<form id="login-form" hx-post="/user_login/receive/"
    hx-target="#login-form"
    hx-swap="innerHTML">
    {% csrf_token %} <input type="text" name="email" placeholder="MMU Email" required>

@@ -5,3 +5,4 @@
 \i teamup_mmu/features/user_login/schema.sql
 \i teamup_mmu/features/user_message/schema.sql
 \i teamup_mmu/features/user_signup/schema.sql
+\i teamup_mmu/features/user_classes/schema.sql

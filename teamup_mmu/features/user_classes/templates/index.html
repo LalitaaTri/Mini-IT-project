@@ -29,11 +29,40 @@
         transition: 0.3s; 
     }
     .join-btn:hover { background-color: #5b73df; }
+
+    /* Add Class section */
+    .h1_section { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center;
+    }
+    .create_class_btn { 
+        background-color: #008b20; 
+        color: white; 
+        border: none; 
+        width: 45px;
+        height: 45px;
+        border-radius: 50%; 
+        font-size: 24px;
+        font-weight: bold; 
+        cursor: pointer; 
+        transition: 0.3s; 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .create_class_btn:hover { background-color: #4cb262; }
+
 </style>
 
 <div style="width: 100%; max-width: 800px; margin: 0 auto; background: white; padding: 2rem; border: 1px solid #00198357; border-radius: 15px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);">
-    <h1>My Classes</h1>
-    
+    <div class="h1_section">
+        <h1>My Classes</h1>
+        <div style="display: flex; gap: 10px;">        
+            <button class="join-btn" hx-get="/classes/join_modal/" hx-target="#modal-container" hx-swap="innerHTML">Join Class By Code</button>
+            <button class="create_class_btn" title="Create Class">+</button>
+        </div>
+    </div>
     <!-- Checking if the user has any classes joined -->
     {% if my_classes %}
         <ul class="class-list">
@@ -58,16 +87,11 @@
                 <h3>{{ c.course_code }} - {{ c.course_name }}</h3>
                 <p>{{ c.description }}</p>
             </div>
-            
-            <!-- HTMX Magic Button -->
-            <button class="join-btn"
-                    hx-post="/classes/join/{{ c.id }}/"
-                    hx-swap="outerHTML">
-                Join
-            </button>
-            
         </li>
         {% endfor %}
     </ul>
 </div>
+<!-- This is where the popup will appear -->
+<div id="modal-container"></div>
+
 {% endblock %}

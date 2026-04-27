@@ -1,9 +1,0 @@
-<form id="profile_setup_1" hx-post="/profile_setup_1/receive/"
-   hx-target="this"
-   hx-swap="outerHTML">
-   {% csrf_token %} 
-   <h2>Enter Username</h2>
-   <input type="text" name="username" placeholder="username" required>
-   <br><br>
-   <button type="submit">Submit</button>
-</form>

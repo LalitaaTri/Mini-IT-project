@@ -72,7 +72,7 @@ async def receive(request):
       if code == database_code:
          async with pool.acquire() as conn:
             await conn.execute("UPDATE users SET email_verified=$1 WHERE id=$2",True,id)
-         response['HX-Redirect'] = "/matching/"
+         response['HX-Redirect'] = "/profile_setup/"
          return response
 
       return HttpResponse("Could not verify the account.")

@@ -1,6 +1,5 @@
 from urllib import response
 
-from asyncpg import pool
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from teamup_mmu.db import Database
@@ -19,18 +18,11 @@ async def receive(request):
       async with pool.acquire() as conn:
             existing_user = await conn.fetchval("SELECT id FROM profiles WHERE username=$1", username)
             if existing_user:
-                return HttpResponse("Username is already taken. Please try again.")
-                
+                # If taken, it replaces the form with an error message, or you can return the form again with an error flag
+               return HttpResponse("Username is already taken. Please try again.")
             await conn.execute("UPDATE profiles SET username=$1 WHERE id=$2", username, id)
-            
-        # Tell HTMX to redirect to the parent page URL
-        # (Replace '/profile_setup/' with whatever URL routes to your parent view)
-      response = HttpResponse("Success")
-      response['HX-Redirect'] = '/profile_setup/'
-      return response
+        # HTMX intercepts this and seamlessly loads the Step 2 HTML
+      return redirect("/profile_setup_2/")
 
-async def index(request):
-   passed_login_check, status, email, id = await access_check(request)
-   if not passed_login_check:
-      return redirect("/")
+def index(request):
    return render(request, 'profile_setup_1/templates/index.html')

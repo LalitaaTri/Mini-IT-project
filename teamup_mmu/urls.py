@@ -24,6 +24,9 @@ from .features.user_delete_account.views import send as user_delete_account_send
 from .features.user_delete_account.views import receive as user_delete_account_receive
 from .features.profile_setup_1.views import index as profile_setup_1
 from .features.profile_setup_1.views import receive as profile_setup_1_receive
+from .features.profile_setup_2.views import index as profile_setup_2
+from .features.profile_setup_2.views import receive as profile_setup_2_receive
+
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -48,7 +51,9 @@ urlpatterns = [
     path('inbox/', user_inbox_index_view, name='user_inbox_index_view'),
     path('profile_setup/', views.profile_setup, name='profile_setup'),
     path('profile_setup_1/', profile_setup_1, name='profile_setup_1'),
-    path('profile_setup_1/receive/', profile_setup_1_receive, name='profile_setup_1'),
+    path('profile_setup_1/receive/', profile_setup_1_receive, name='profile_setup_1_receive'),
+    path('profile_setup_2/', profile_setup_2, name='profile_setup_2'),
+    path('profile_setup_2/receive/', profile_setup_2_receive, name='profile_setup_2_receive'),
     path('user_forgot_password/', user_forgot_password_index_view, name='user_forgot_password_index_view'),
     path('user_forgot_password/send/', user_forgot_password_send, name='user_forgot_password_send'),
     path('user_forgot_password/receive/', user_forgot_password_receive, name='user_forgot_password_receive'),

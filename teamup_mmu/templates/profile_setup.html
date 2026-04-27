@@ -17,15 +17,23 @@
             Creators: Shaun, Lalitaa, Alim
         </ul>
     </nav>
-    <div class="container">
+    <div class="container" id="profile-setup-container">
         {% block content %}
-        <div hx-get="/profile_setup_1/" hx-trigger="load">
-            <p>Loading profile setup 1</p>
-        </div>
-        <div hx-get="/user_login/" hx-trigger="load">
-            <p>Loading the Log In page...</p>
-        </div>
+    
+        {% if setup_page == 1 %}
+            <div hx-get="/profile_setup_1/" hx-trigger="load">
+                <p>Loading Profile Setup 1...</p>
+            </div>
+        
+        {% elif setup_page == 2 %}
+            <div hx-get="/profile_setup_2/" hx-trigger="load">
+                <p>Loading Profile Setup 2...</p>
+            </div>
+        
+        {% endif %}
+    
         {% endblock %}
-    </div>
+</div>
+</div>
 </body>
 </html>

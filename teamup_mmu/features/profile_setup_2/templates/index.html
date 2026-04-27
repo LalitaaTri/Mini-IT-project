@@ -1,0 +1,16 @@
+<h2>Select Your Topics (Choose 2 to 5)</h2>
+<form id="profile_setup_2" hx-post="/profile_setup_2/receive/"
+   hx-target="#message"
+   hx-swap="innerHTML">
+   {% csrf_token %}
+   
+   <label><input type="checkbox" name="interests" value="Web Development"> Web Development</label><br>
+   <label><input type="checkbox" name="interests" value="Game Development"> Game Development</label><br>
+   <label><input type="checkbox" name="interests" value="Algorithms"> Algorithms / Competitive Programming</label><br>
+   <label><input type="checkbox" name="interests" value="UI/UX Design"> UI/UX Design</label><br>
+   <label><input type="checkbox" name="interests" value="Machine Learning"> Machine Learning</label><br>
+   <label><input type="checkbox" name="interests" value="Mobile Apps"> Mobile Apps</label><br>
+   
+   <br><button type="submit">Complete Profile</button>
+</form>
+<div id="message"></div>

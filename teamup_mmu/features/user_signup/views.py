@@ -21,7 +21,7 @@ async def receive(request):
                      return HttpResponse("You signed up successfully.")
                   return HttpResponse("Email already exists.")
             value = await conn.execute("INSERT INTO users(email,password) VALUES($1,$2)",email,password)
-            await conn.execute("INSERT INTO profiles(username) VALUES($1)","John Doe")
+            await conn.execute("INSERT INTO profiles(username) VALUES($1)","")
          
          if value == "INSERT 0 1":
             return HttpResponse("You signed up successfully.")

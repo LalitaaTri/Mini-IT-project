@@ -98,7 +98,7 @@
 0x6715dc86 di:95 mi:95 do:4916905 ds:8513 ddo:0 dds:0 cdo:0 cds:0 Xamarin.AndroidX.CardView.dll
 0x677cd287 di:64 mi:64 do:3017015 ds:9989 ddo:0 dds:0 cdo:0 cds:0 ro/Microsoft.Maui.Controls.resources.dll
 0x68139a0d di:14 mi:14 do:217371 ds:3514 ddo:0 dds:0 cdo:0 cds:0 System.IO.Pipelines.dll
-0x692b83c5 di:123 mi:123 do:5834041 ds:40324 ddo:0 dds:0 cdo:0 cds:0 teamup_mmu.dll
+0x692b83c5 di:123 mi:123 do:5834041 ds:40339 ddo:0 dds:0 cdo:0 cds:0 teamup_mmu.dll
 0x6947f945 di:115 mi:115 do:5459590 ds:16605 ddo:0 dds:0 cdo:0 cds:0 Xamarin.AndroidX.SwipeRefreshLayout
 0x6988f147 di:83 mi:83 do:3195354 ds:11242 ddo:0 dds:0 cdo:0 cds:0 Microsoft.Extensions.Logging.dll
 0x6a216153 di:39 mi:39 do:2210903 ds:13862 ddo:0 dds:0 cdo:0 cds:0 Mono.Android.Runtime.dll
@@ -245,4 +245,4 @@
 0xfc5f7d36 di:63 mi:63 do:3007026 ds:9989 ddo:0 dds:0 cdo:0 cds:0 pt/Microsoft.Maui.Controls.resources
 0xfea12dee di:87 mi:87 do:3234028 ds:880395 ddo:0 dds:0 cdo:0 cds:0 Microsoft.Maui.Controls.dll
 0xfecef6ea di:27 mi:27 do:733897 ds:39239 ddo:0 dds:0 cdo:0 cds:0 System.Runtime.Numerics
-0xff8077b1 di:123 mi:123 do:5834041 ds:40324 ddo:0 dds:0 cdo:0 cds:0 teamup_mmu
+0xff8077b1 di:123 mi:123 do:5834041 ds:40339 ddo:0 dds:0 cdo:0 cds:0 teamup_mmu

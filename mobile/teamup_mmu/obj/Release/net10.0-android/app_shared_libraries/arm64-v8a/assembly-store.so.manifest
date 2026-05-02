@@ -128,7 +128,7 @@
 0x8277f2be6b5ce05f di:93 mi:93 do:4839687 ds:150548 ddo:0 dds:0 cdo:0 cds:0 Xamarin.AndroidX.AppCompat
 0x82f6403342e12049 di:70 mi:70 do:3158403 ds:9991 ddo:0 dds:0 cdo:0 cds:0 uk/Microsoft.Maui.Controls.resources
 0x83c14ba66c8e2b8c di:73 mi:73 do:3188368 ds:9984 ddo:0 dds:0 cdo:0 cds:0 zh-Hans/Microsoft.Maui.Controls.resources
-0x83f106d1e778f3e6 di:123 mi:123 do:5915478 ds:40324 ddo:0 dds:0 cdo:0 cds:0 teamup_mmu.dll
+0x83f106d1e778f3e6 di:123 mi:123 do:5915478 ds:40339 ddo:0 dds:0 cdo:0 cds:0 teamup_mmu.dll
 0x86b3e00c36b84509 di:76 mi:76 do:3211714 ds:8901 ddo:0 dds:0 cdo:0 cds:0 Microsoft.Extensions.Configuration.dll
 0x87f6569b25707834 di:12 mi:12 do:188353 ds:12739 ddo:0 dds:0 cdo:0 cds:0 System.IO.Compression.Brotli.dll
 0x8842b3a5d2d3fb36 di:90 mi:90 do:4671928 ds:33821 ddo:0 dds:0 cdo:0 cds:0 Microsoft.Maui.Essentials
@@ -158,7 +158,7 @@
 0xa1440773ee9d341e di:118 mi:118 do:5594978 ds:169269 ddo:0 dds:0 cdo:0 cds:0 Xamarin.Google.Android.Material
 0xa1b9d7c27f47219f di:111 mi:111 do:5403928 ds:9632 ddo:0 dds:0 cdo:0 cds:0 Xamarin.AndroidX.Navigation.UI.dll
 0xa2572680829d2c7c di:14 mi:14 do:218431 ds:3514 ddo:0 dds:0 cdo:0 cds:0 System.IO.Pipelines.dll
-0xa402ba3ce9895537 di:123 mi:123 do:5915478 ds:40324 ddo:0 dds:0 cdo:0 cds:0 teamup_mmu
+0xa402ba3ce9895537 di:123 mi:123 do:5915478 ds:40339 ddo:0 dds:0 cdo:0 cds:0 teamup_mmu
 0xa46aa1eaa214539b di:57 mi:57 do:3028549 ds:9984 ddo:0 dds:0 cdo:0 cds:0 ko/Microsoft.Maui.Controls.resources
 0xa5e599d1e0524750 di:21 mi:21 do:529962 ds:2457 ddo:0 dds:0 cdo:0 cds:0 System.Numerics.Vectors.dll
 0xa5f1ba49b85dd355 di:29 mi:29 do:780473 ds:64271 ddo:0 dds:0 cdo:0 cds:0 System.Security.Cryptography.dll

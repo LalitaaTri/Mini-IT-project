@@ -23,6 +23,8 @@ from .features.user_forgot_password.views import send as user_forgot_password_se
 from .features.user_forgot_password.views import receive as user_forgot_password_receive
 from .features.user_delete_account.views import send as user_delete_account_send
 from .features.user_delete_account.views import receive as user_delete_account_receive
+from django.views.decorators.csrf import csrf_exempt
+from .features.user_access_check.views import access_check_endpoint as access_check_endpoint
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -30,7 +32,7 @@ urlpatterns = [
     path('user_signup/receive/', user_signup_receive, name='user_signup_receive'),
     path('signup_page/', signup_page, name='signup_page'),
     path('user_login/', user_login, name='user_login'),
-    path('user_login/receive/', user_login_receive, name='user_login_receive'),
+    path('user_login/receive/', csrf_exempt(user_login_receive), name='user_login_receive'),
     path('matching/', matching_view, name='matching'),
     path('matching/<int:iter>/', matching_view, name='matching_with_iter'),
     path('matching/like/', matching_like_view, name='matching_like_view'),
@@ -49,10 +51,9 @@ urlpatterns = [
     path('user_forgot_password/receive/', user_forgot_password_receive, name='user_forgot_password_receive'),
     path('user_delete_account/send/', user_delete_account_send, name='user_delete_account_send'),
     path('user_delete_account/receive/', user_delete_account_receive, name='user_delete_account_receive'),
-    
+    path('access_check/', access_check_endpoint, name='access_check_endpoint'),
     path('classes/join_modal/', join_modal, name='join_modal'),
     path('classes/join_by_code/', join_by_code, name='join_by_code'),
-
     path('admin/', admin.site.urls)
 ]
 

@@ -1,0 +1,15 @@
+<api>
+  <jcw-types>
+    <type name="MainActivity" package="crc64f45d91b14e554859" application_java_class="android.app.Application" mono_runtime_initialization="mono.MonoPackageManager.LoadApplication (context);" extends_type="crc6488302ad6e9e4df1a.MauiAppCompatActivity" partial_assembly_qualified_name="teamup_mmu.MainActivity, teamup_mmu">
+      <constructors>
+        <constructor name="MainActivity" method="n_.ctor:()V:" jni_signature="()V" managed_parameters="" retval="void" is_dynamically_registered="True" />
+        <constructor name="MainActivity" method="n_.ctor:(I)V:" jni_signature="(I)V" managed_parameters="System.Int32, System.Private.CoreLib" params="int p0" retval="void" is_dynamically_registered="True" super_call="p0" activate_call="p0" />
+      </constructors>
+    </type>
+    <type name="MainApplication" package="crc64f45d91b14e554859" application_java_class="android.app.Application" mono_runtime_initialization="mono.MonoPackageManager.LoadApplication (context);" extends_type="crc6488302ad6e9e4df1a.MauiApplication" is_application="True" partial_assembly_qualified_name="teamup_mmu.MainApplication, teamup_mmu" application_constructor="MainApplication" />
+  </jcw-types>
+  <acw-types partial-assembly-name="teamup_mmu" module-name="teamup_mmu.dll">
+    <type assembly-qualified-name="teamup_mmu.MainActivity, teamup_mmu, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" compat-jni-name="teamup_mmu.MainActivity" java-key="crc64f45d91b14e554859.MainActivity" managed-key="teamup_mmu.MainActivity" partial-assembly-qualified-name="teamup_mmu.MainActivity, teamup_mmu" />
+    <type assembly-qualified-name="teamup_mmu.MainApplication, teamup_mmu, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" compat-jni-name="teamup_mmu.MainApplication" java-key="crc64f45d91b14e554859.MainApplication" managed-key="teamup_mmu.MainApplication" partial-assembly-qualified-name="teamup_mmu.MainApplication, teamup_mmu" />
+  </acw-types>
+</api>

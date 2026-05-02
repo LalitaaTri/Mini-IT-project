@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("teamup_mmu")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("2.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("2+4acf0710355e73ea8d354a7b096a9a1e0c60413d")]
 [assembly: System.Reflection.AssemblyProductAttribute("teamup_mmu")]
 [assembly: System.Reflection.AssemblyTitleAttribute("teamup_mmu")]
 [assembly: System.Reflection.AssemblyVersionAttribute("2.0.0.0")]

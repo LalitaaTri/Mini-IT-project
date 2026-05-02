@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/alim/Desktop/Mini-IT/mobile/teamup_mmu/teamup_mmu.csproj": {}
+    "/Users/alim/Desktop/Mini-IT/Mini-IT-project/mobile/teamup_mmu/teamup_mmu.csproj": {}
   },
   "projects": {
-    "/Users/alim/Desktop/Mini-IT/mobile/teamup_mmu/teamup_mmu.csproj": {
+    "/Users/alim/Desktop/Mini-IT/Mini-IT-project/mobile/teamup_mmu/teamup_mmu.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/alim/Desktop/Mini-IT/mobile/teamup_mmu/teamup_mmu.csproj",
+        "projectUniqueName": "/Users/alim/Desktop/Mini-IT/Mini-IT-project/mobile/teamup_mmu/teamup_mmu.csproj",
         "projectName": "teamup_mmu",
-        "projectPath": "/Users/alim/Desktop/Mini-IT/mobile/teamup_mmu/teamup_mmu.csproj",
+        "projectPath": "/Users/alim/Desktop/Mini-IT/Mini-IT-project/mobile/teamup_mmu/teamup_mmu.csproj",
         "packagesPath": "/Users/alim/.nuget/packages/",
-        "outputPath": "/Users/alim/Desktop/Mini-IT/mobile/teamup_mmu/obj/",
+        "outputPath": "/Users/alim/Desktop/Mini-IT/Mini-IT-project/mobile/teamup_mmu/obj/",
         "projectStyle": "PackageReference",
         "crossTargeting": true,
         "configFilePaths": [
@@ -1004,19 +1004,16 @@
         }
       },
       "runtimes": {
-        "android-arm": {
-          "#import": []
-        },
         "android-arm64": {
           "#import": []
         },
-        "ios-arm64": {
+        "android-x64": {
+          "#import": []
+        },
+        "iossimulator-arm64": {
           "#import": []
         },
         "maccatalyst-arm64": {
-          "#import": []
-        },
-        "maccatalyst-x64": {
           "#import": []
         }
       }

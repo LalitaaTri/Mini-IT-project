@@ -60,7 +60,7 @@
         <h1>My Classes</h1>
         <div style="display: flex; gap: 10px;">        
             <button class="join-btn" hx-get="/classes/join_modal/" hx-target="#modal-container" hx-swap="innerHTML">Join Class By Code</button>
-            <button class="create_class_btn" title="Create Class">+</button>
+            <button class="create_class_btn" hx-get="/classes/create_modal/" hx-target="#modal-container" hx-swap="innerHTML" title="Create Class">+</button>
         </div>
     </div>
     <!-- Checking if the user has any classes joined -->
@@ -92,6 +92,7 @@
     </ul>
 </div>
 <!-- This is where the popup will appear -->
+<div id="modal-container"></div>
 <div id="modal-container"></div>
 
 {% endblock %}

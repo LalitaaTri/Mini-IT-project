@@ -3,6 +3,8 @@ from django.http import HttpResponse
 from teamup_mmu.db import Database
 from datetime import timedelta, datetime
 from django.views.decorators.csrf import csrf_exempt
+import random
+import string
 
 
 async def index(request):
@@ -92,3 +94,51 @@ async def join_by_code(request):
             return response
         except Exception as e:
             return render(request, 'user_classes/templates/join_modal.html', {'error_message': 'Error joining class.'})
+
+
+# 11. Return the create class modal HTML when user clicks the + button
+async def create_modal(request):
+    return render(request, 'user_classes/templates/create_class_modal.html')
+
+
+# 12. Handle the submitted create class form
+@csrf_exempt
+async def create_class(request):
+    if request.method != 'POST':
+        return HttpResponse("Invalid method", status=400)
+    
+    course_code = request.POST.get('course_code')
+    course_name = request.POST.get('course_name')
+    description = request.POST.get('description', '')
+    token = request.COOKIES.get('access_token')
+    
+    if not token or not course_code or not course_name:
+        return render(request, 'user_classes/templates/create_class_modal.html', {'error_message': 'Missing required fields.'})
+    
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        # Check user session
+        session = await conn.fetchrow("SELECT * FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return render(request, 'user_classes/templates/create_class_modal.html', {'error_message': 'Unauthorized.'})
+        
+        user_id = session['user_id']
+        
+        try:
+            # Generate a unique join code
+            join_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+            
+            # Create the class
+            class_id = await conn.fetchval(
+                "INSERT INTO classes(course_code, course_name, description, join_code) VALUES($1, $2, $3, $4) RETURNING id",
+                course_code, course_name, description, join_code
+            )
+            
+            # Add the creator to the class
+            await conn.execute("INSERT INTO user_classes(user_id, class_id) VALUES($1, $2)", user_id, class_id)
+            
+            response = HttpResponse("Class created successfully!")
+            response['HX-Redirect'] = '/classes/'
+            return response
+        except Exception as e:
+            return render(request, 'user_classes/templates/create_class_modal.html', {'error_message': 'Error creating class.'})

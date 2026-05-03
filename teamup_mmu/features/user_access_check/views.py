@@ -21,3 +21,19 @@ async def access_check(request):
                     status = "Logged in as {}".format(email[0]['email'])
                     passed_login_check = True
     return passed_login_check, status, email, value[0]['user_id'] if value else None
+
+async def access_check_endpoint(request):
+    passed_login_check, status, email, user_id = await access_check(request)
+    
+    dicti = {
+        "passed_login_check": passed_login_check,
+        "status": str(status), # Safety cast
+        "email": str(email) if email else None, # Cast Record to string
+        "user_id": str(user_id) if user_id else None # Safety cast
+    }
+    
+    if not passed_login_check:
+        dicti["action"] = "redirect"
+        dicti["target"] = "/signup_page/"
+        
+    return JsonResponse(dicti)

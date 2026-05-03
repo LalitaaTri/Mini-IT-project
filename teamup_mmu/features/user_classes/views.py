@@ -142,3 +142,7 @@ async def create_class(request):
             return response
         except Exception as e:
             return render(request, 'user_classes/templates/create_class_modal.html', {'error_message': 'Error creating class.'})
+
+# Return the class details modal HTML when a user clicks on a class
+async def class_details_modal(request, class_id):
+    return render(request, 'user_classes/templates/class_details_modal.html')

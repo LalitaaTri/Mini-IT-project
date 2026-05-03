@@ -142,3 +142,54 @@ async def create_class(request):
             return response
         except Exception as e:
             return render(request, 'user_classes/templates/create_class_modal.html', {'error_message': 'Error creating class.'})
+
+# Return the class details modal HTML when a user clicks on a class
+async def class_details_modal(request, class_id):
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        target_class = await conn.fetchrow("SELECT * FROM classes WHERE id=$1", class_id)
+        if not target_class:
+            return HttpResponse("Class not found", status = 404)
+        return render(request, 'user_classes/templates/class_details_modal.html', {
+            'class_details' : target_class
+        })
+
+
+async def leave_class(request, class_id):
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        class_to_leave = await conn.fetchrow("SELECT * FROM classes WHERE id=$1", class_id)
+        return render(request, 'user_classes/templates/leave_class.html', {
+            'class_id' : class_id,
+            'course_code' : class_to_leave['course_code'],
+            'course_name' : class_to_leave['course_name']
+        })
+
+@csrf_exempt
+async def leave_class_confirm(request):
+    if request.method != 'POST':
+        return HttpResponse("Invalid method", status=400)
+    
+    class_id = request.POST.get('class_id')
+    token = request.COOKIES.get('access_token')
+    
+    if not token or not class_id:
+        return HttpResponse("Missing info", status=400)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        # 1. Figure out who is logged in
+        session = await conn.fetchrow("SELECT * FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+            
+        user_id = session['user_id']
+        
+        try: 
+            await conn.execute("DELETE FROM user_classes WHERE user_id=$1 and class_id=$2", user_id, int(class_id))
+
+            response = HttpResponse("Left successfully!")
+            response['HX-Redirect'] = '/classes/'
+            return response
+        except Exception as e:
+            return HttpResponse("Error leaving class", status=500)

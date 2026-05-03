@@ -6,6 +6,7 @@
     h1 , h2 {color: #00186d}
     .class-list { list-style: none; padding: 0;}
     .class-card { 
+        cursor: pointer;
         border: 1px solid #ddd; 
         padding: 1rem; 
         border-radius: 8px; 
@@ -13,7 +14,10 @@
         display: flex; 
         justify-content: space-between; 
         align-items: center; 
+        flex-grow: 1; 
     }
+    .class-card:hover { background-color: #f2f3f8; }
+    
     .class-info h3 { margin: 0 0 0.5rem 0; color: #333; }
     .class-info p { margin: 0; color: #666; font-size: 0.9rem; }
     
@@ -53,6 +57,18 @@
     }
     .create_class_btn:hover { background-color: #4cb262; }
 
+    .leave_btn { 
+        background-color: #bc0000; 
+        color: white; 
+        border: none; 
+        padding: 8px 15px;
+        border-radius: 20px; 
+        font-weight: bold; 
+        cursor: pointer; 
+        transition: 0.3s; 
+    }
+    .leave_btn:hover { background-color: #e90000dd; }
+
 </style>
 
 <div style="width: 100%; max-width: 800px; margin: 0 auto; background: white; padding: 2rem; border: 1px solid #00198357; border-radius: 15px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);">
@@ -60,6 +76,7 @@
         <h1>My Classes</h1>
         <div style="display: flex; gap: 10px;">        
             <button class="join-btn" hx-get="/classes/join_modal/" hx-target="#modal-container" hx-swap="innerHTML">Join Class By Code</button>
+            <!-- This tells HTMX "when clicked, go fetch the modal HTML from this URL.-->
             <button class="create_class_btn" hx-get="/classes/create_modal/" hx-target="#modal-container" hx-swap="innerHTML" title="Create Class">+</button>
         </div>
     </div>
@@ -67,11 +84,17 @@
     {% if my_classes %}
         <ul class="class-list">
             {% for c in my_classes %}
-            <li class="class-card">
+            <li class="class-card" hx-get="/classes/class_details_modal/{{ c.id }}/" hx-target="#modal-container" hx-swap="innerHTML">
+                
+                <!-- Left side of the card -->
                 <div class="class-info">
                     <h3>{{ c.course_code }} - {{ c.course_name }}</h3>
                     <p>{{ c.description }}</p>
                 </div>
+
+                <!-- Right side of the card (stopPropagation! to prevent accident cliking to view details) -->
+                <button class="leave_btn" onclick="event.stopPropagation();" hx-get="/classes/leave_class/{{ c.id }}/" hx-target="#modal-container" hx-swap="innerHTML">Leave</button>
+                
             </li>
             {% endfor %}
         </ul>
@@ -92,7 +115,6 @@
     </ul>
 </div>
 <!-- This is where the popup will appear -->
-<div id="modal-container"></div>
 <div id="modal-container"></div>
 
 {% endblock %}

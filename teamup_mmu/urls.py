@@ -1,3 +1,4 @@
+from teamup_mmu.features.user_classes.views import leave_class
 from django.contrib import admin
 from django.urls import path
 from teamup_mmu import views
@@ -17,6 +18,8 @@ from .features.user_classes.views import join_by_code
 from .features.user_classes.views import create_modal
 from .features.user_classes.views import create_class
 from .features.user_classes.views import class_details_modal
+from .features.user_classes.views import leave_class
+from .features.user_classes.views import leave_class_confirm
 
 from .features.matching_matches.views import index as matching_matches_view
 from .features.user_message.views import message as user_message_view
@@ -63,6 +66,8 @@ urlpatterns = [
     path('classes/create_modal/', create_modal, name='create_modal'),
     path('classes/create_class/', create_class, name='create_class'),
     path('classes/class_details_modal/<int:class_id>/', class_details_modal, name='class_details_modal'),
+    path('classes/leave_class/<int:class_id>/', leave_class, name='leave_modal'),
+    path('classes/leave_class_confirm/', leave_class_confirm, name='leave_class_confirm'),
 
 
     path('admin/', admin.site.urls)

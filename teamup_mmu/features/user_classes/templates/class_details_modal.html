@@ -4,7 +4,20 @@
         <!-- Close button to remove the modal from the screen -->
         <button onclick="document.getElementById('details-modal').remove()" style="position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: #555;">&times;</button>
         
-        <h1 style="margin-top: 0; color: #00186d;">Class Details</h1>
-        <!-- Display class details here -->
+        <h1 style="margin-top: 0; color: #00186d;">{{ class_details.course_name }}</h1>
+        <h2 style="margin-top: 0; color: #333; font-size: 1.5rem; padding-bottom: 10px;">
+            {{class_details.course_code}}
+        </h2>
+        <p style="margin-top: 0;color: #333; font-size: 1.1rem; padding: 15px; border-radius: 8px; background-color: #e9efff99;">
+            {% if class_details.description %}
+                {{ class_details.description }}
+            {% else %}
+                <span style="font-style: italic; color: #999;">No description provided for this class.</span>
+            {% endif %}
+        </p>
+        <!-- Display class students here -->
+         <div>
+
+         </div>
     </div>
 </div>

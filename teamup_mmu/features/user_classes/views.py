@@ -145,4 +145,11 @@ async def create_class(request):
 
 # Return the class details modal HTML when a user clicks on a class
 async def class_details_modal(request, class_id):
-    return render(request, 'user_classes/templates/class_details_modal.html')
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        target_class = await conn.fetchrow("SELECT * FROM classes WHERE id=$1", class_id)
+        if not target_class:
+            return HttpResponse("Class not found", status = 404)
+        return render(request, 'user_classes/templates/class_details_modal.html', {
+            'class_details' : target_class
+        })

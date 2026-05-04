@@ -1,3 +1,4 @@
+from teamup_mmu.features.user_classes.views import leave_class
 from django.contrib import admin
 from django.urls import path
 from teamup_mmu import views
@@ -10,9 +11,16 @@ from .features.user_logout.views import index as user_logout
 from .features.user_email_verification.views import send as user_email_verification_send
 from .features.user_email_verification.views import receive as user_email_verification_receive
 from .features.matching_view.views import like as matching_like_view
+
 from .features.user_classes.views import index as user_classes_index
 from .features.user_classes.views import join_modal
 from .features.user_classes.views import join_by_code
+from .features.user_classes.views import create_modal
+from .features.user_classes.views import create_class
+from .features.user_classes.views import class_details_modal
+from .features.user_classes.views import leave_class
+from .features.user_classes.views import leave_class_confirm
+
 from .features.matching_matches.views import index as matching_matches_view
 from .features.user_message.views import message as user_message_view
 from .features.user_message.views import index as user_message_index_view
@@ -23,12 +31,17 @@ from .features.user_forgot_password.views import send as user_forgot_password_se
 from .features.user_forgot_password.views import receive as user_forgot_password_receive
 from .features.user_delete_account.views import send as user_delete_account_send
 from .features.user_delete_account.views import receive as user_delete_account_receive
+<<<<<<< HEAD
 from .features.profile_setup_1.views import index as profile_setup_1
 from .features.profile_setup_1.views import receive as profile_setup_1_receive
 from .features.profile_setup_2.views import index as profile_setup_2
 from .features.profile_setup_2.views import receive as profile_setup_2_receive
 from .features.profile_setup_2.views import validate as profile_setup_2_validate
 
+=======
+from django.views.decorators.csrf import csrf_exempt
+from .features.user_access_check.views import access_check_endpoint as access_check_endpoint
+>>>>>>> 79b84fe9406bde66d5ab179e9f908e8f758667e8
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -36,7 +49,7 @@ urlpatterns = [
     path('user_signup/receive/', user_signup_receive, name='user_signup_receive'),
     path('signup_page/', signup_page, name='signup_page'),
     path('user_login/', user_login, name='user_login'),
-    path('user_login/receive/', user_login_receive, name='user_login_receive'),
+    path('user_login/receive/', csrf_exempt(user_login_receive), name='user_login_receive'),
     path('matching/', matching_view, name='matching'),
     path('matching/<int:iter>/', matching_view, name='matching_with_iter'),
     path('matching/like/', matching_like_view, name='matching_like_view'),
@@ -61,9 +74,16 @@ urlpatterns = [
     path('user_forgot_password/receive/', user_forgot_password_receive, name='user_forgot_password_receive'),
     path('user_delete_account/send/', user_delete_account_send, name='user_delete_account_send'),
     path('user_delete_account/receive/', user_delete_account_receive, name='user_delete_account_receive'),
+    path('access_check/', access_check_endpoint, name='access_check_endpoint'),
     
     path('classes/join_modal/', join_modal, name='join_modal'),
     path('classes/join_by_code/', join_by_code, name='join_by_code'),
+    path('classes/create_modal/', create_modal, name='create_modal'),
+    path('classes/create_class/', create_class, name='create_class'),
+    path('classes/class_details_modal/<int:class_id>/', class_details_modal, name='class_details_modal'),
+    path('classes/leave_class/<int:class_id>/', leave_class, name='leave_modal'),
+    path('classes/leave_class_confirm/', leave_class_confirm, name='leave_class_confirm'),
+
 
     path('admin/', admin.site.urls)
 ]

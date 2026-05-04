@@ -26,9 +26,19 @@ SECRET_KEY = 'django-insecure-nmbhn!0t9bl6+1%@_pgm&s&7%(_o&*qbky%#_r0nh4oegap##%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '0.0.0.0']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '0.0.0.0', '192.168.100.149', '10.122.233.251', 'fidgeting-liver-expel.ngrok-free.dev']
 
+CSRF_TRUSTED_ORIGINS = [
+    'http://10.122.233.251:8000',
+    'https://10.122.233.251:8000',
+    'http://127.0.0.1:8000',
+    'http://192.168.100.149:8000',
+    'https://fidgeting-liver-expel.ngrok-free.dev'
+]
 
+# If the university proxy is stripping headers, you might need this:
+CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_HTTPONLY = False
 # Application definition
 
 INSTALLED_APPS = [
@@ -45,7 +55,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    #'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -123,3 +133,6 @@ STATIC_URL = '/static/'
 # STATIC_ROOT = BASE_DIR / "staticfiles"
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+SECURE_PROXY_SSL_HEADER = None
+CSRF_COOKIE_SECURE = False

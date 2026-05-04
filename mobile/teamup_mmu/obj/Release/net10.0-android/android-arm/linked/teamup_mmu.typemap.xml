@@ -1,0 +1,8 @@
+<api type="release" assembly-name="teamup_mmu" mvid="ecdc81697d754c97bc525a35d4950d4b">
+  <module assembly-name="teamup_mmu" mvid="ecdc81697d754c97bc525a35d4950d4b" mvid-bytes="aYHc7HV9l0y8Ulo11JUNSw==">
+    <types-scratch>
+      <entry key="crc64f45d91b14e554859/MainActivity" java-name="crc64f45d91b14e554859/MainActivity" managed-type-name="teamup_mmu.MainActivity" token="33554445" />
+      <entry key="crc64f45d91b14e554859/MainApplication" java-name="crc64f45d91b14e554859/MainApplication" managed-type-name="teamup_mmu.MainApplication" token="33554446" />
+    </types-scratch>
+  </module>
+</api>

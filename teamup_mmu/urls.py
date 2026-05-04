@@ -40,6 +40,9 @@ from .features.profile_setup_2.views import validate as profile_setup_2_validate
 from django.views.decorators.csrf import csrf_exempt
 from .features.user_access_check.views import access_check_endpoint as access_check_endpoint
 
+from .features.my_profile.views import index as my_profile_index
+from .features.my_profile.views import edit as my_profile_edit
+
 urlpatterns = [
     path('', views.index, name='index'),
     path('user_signup/', user_signup, name='user_signup'),
@@ -72,7 +75,8 @@ urlpatterns = [
     path('user_delete_account/send/', user_delete_account_send, name='user_delete_account_send'),
     path('user_delete_account/receive/', user_delete_account_receive, name='user_delete_account_receive'),
     path('access_check/', access_check_endpoint, name='access_check_endpoint'),
-    
+    path('my_profile/', my_profile_index, name='my_profile'),
+    path('my_profile/edit/', my_profile_edit, name='my_profile_edit'),
     path('classes/join_modal/', join_modal, name='join_modal'),
     path('classes/join_by_code/', join_by_code, name='join_by_code'),
     path('classes/create_modal/', create_modal, name='create_modal'),

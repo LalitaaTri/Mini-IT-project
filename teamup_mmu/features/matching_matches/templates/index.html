@@ -5,6 +5,7 @@
     <h2>Welcome to the Your Matches Page!</h2>
     <h3>{{status}}</h3>
     <p>This content only shows up after you login.</p>
+    
     <style>
         /* Centers the entire list on the page */
         #user-list {
@@ -54,62 +55,65 @@
             margin: 8px 0;
         }
 
-        /* Status text (e.g., "Not liked yet") */
-        #like-status {
-            font-weight: 600;
-            color: #001561;
-            margin: 1.5rem 0;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
         /* The Buttons */
         .user-card button {
             width: 120px;
             padding: 10px;
             margin: 5px;
-            border-radius: 25px; /* Pill-shaped to match your Nav Bar */
+            border-radius: 25px;
             border: none;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-        }
-
-        /* Like Button - Using your Navy Blue theme */
-        button[hx-post*="like"] {
-            background-color: #001561;
-            color: white;
-        }
-
-        /* Next Button - Lighter grey to distinguish it */
-        button[hx-get*="matching_with_iter"] {
             background-color: #e4e6eb;
             color: #050505;
         }
 
-        /* Hover effects */
         .user-card button:hover {
             transform: translateY(-2px);
             opacity: 0.9;
         }
     </style>
+    
     <div id="user-list">
         {% for user in context.matches %}
             <div class="user-card">
-                <p>{{ user.email }}</p>
-                <img src="{% static 'teamup_mmu/profile.png' %}">
-                <p>About: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur ut maximus ligula. Interdum et malesuada fames ac ante ipsum primis in faucibus.</p>
-                <p>Year: 0 (Foundation)</p>
-                <p>Program: Foundation in Computing</p>
-                <p>cGPA: 3.69</p>
-                <button hx-get="
-                {% url 'user_message_index_view' user.id %}"
+                <!-- Username -->
+                <h2>{{ user.username|default:user.email }}</h2>
+                
+                <!-- Explicitly show the email per your request -->
+                <p style="color: #001561; font-weight: 600; margin-top: -10px; font-size: 0.95rem;">
+                    ✉️ {{ user.email }}
+                </p>
+                
+                <img src="{% static 'teamup_mmu/profile.png' %}" alt="Profile Picture">
+                
+                <!-- Injected Profile Data -->
+                <p><strong>Headline:</strong> {{ user.introduction }}</p>
+                <p><strong>About:</strong> {{ user.descriptions }}</p>
+                <p><strong>Year:</strong> {{ user.year_of_study }}</p>
+                <p><strong>Program:</strong> {{ user.program }} ({{ user.faculty }})</p>
+                <p><strong>cGPA:</strong> {{ user.cgpa }}</p>
+                
+                <!-- Display Interests -->
+                <div class="interests-list" style="margin: 15px 0;">
+                    {% for interest in user.interests %}
+                        <span style="display:inline-block; padding:4px 10px; margin:3px; background:#e4e6eb; border-radius:12px; font-size: 0.85em; color: #333;">
+                            {{ interest }}
+                        </span>
+                    {% endfor %}
+                </div>
+                
+                <!-- Message Button -->
+                <button hx-get="{% url 'user_message_index_view' user.id %}"
                 hx-target="#user-list"
                 hx-swap="innerHTML">Message</button>
             </div>
         {% empty %}
-            <div class="user-card">No matches yet.</div>
+            <div class="user-card" style="padding: 3rem;">
+                <h3 style="color: #555;">No matches yet.</h3>
+                <p>Keep browsing the Matching page to find potential teammates!</p>
+            </div>
         {% endfor %}
     </div>
 {% endblock %}

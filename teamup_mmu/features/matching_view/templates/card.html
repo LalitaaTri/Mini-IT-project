@@ -1,22 +1,39 @@
 {% load static %}
 {% if context.user_obj %}
     <div class="user-card">
-        <p>{{ context.user_obj.email }}</p>
-        <img src="{% static 'teamup_mmu/profile.png' %}">
-        <p>About: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur ut maximus ligula. Interdum et malesuada fames ac ante ipsum primis in faucibus.</p>
-        <p>Year: 0 (Foundation)</p>
-        <p>Program: Foundation in Computing</p>
-        <p>cGPA: 3.69</p>
+        <!-- Show Username instead of just email if it exists -->
+        <h2>{{ context.user_obj.username|default:context.user_obj.email }}</h2>
+        
+        <img src="{% static 'teamup_mmu/profile.png' %}" alt="Profile Picture">
+        
+        <!-- Inject real data from the database -->
+        <p><strong>Headline:</strong> {{ context.user_obj.introduction }}</p>
+        <p><strong>About:</strong> {{ context.user_obj.descriptions }}</p>
+        <p><strong>Year:</strong> {{ context.user_obj.year_of_study }}</p>
+        <p><strong>Program:</strong> {{ context.user_obj.program }} ({{ context.user_obj.faculty }})</p>
+        
+        <!-- Display the array of interests -->
+        <div class="interests-list">
+            {% for interest in context.user_obj.interests %}
+                <span style="display:inline-block; padding:3px 8px; margin:2px; background:#e0e0e0; border-radius:10px; font-size: 0.9em;">
+                    {{ interest }}
+                </span>
+            {% endfor %}
+        </div>
+        
         <p id="like-status">{{ context.like_status }}</p>
+        
         <form id="like-form" hx-post="/matching/like/"
-   hx-target="#like-status"
-   hx-swap="innerHTML">{% csrf_token %}
+           hx-target="#like-status"
+           hx-swap="innerHTML">
+           {% csrf_token %}
             <input type="hidden" name="liked_user_id" value="{{ context.user_obj.id }}">
-            <button type="submit">Like</button>
-        </form><button hx-get="
-        {% url 'matching_with_iter' context.next_iter %}"
-        hx-target="#user-list"
-        hx-swap="innerHTML">Next</button>
+            <button type="submit" {% if context.like_status == 'Liked' %}disabled{% endif %}>Like</button>
+        </form>
+        
+        <button hx-get="{% url 'matching_with_iter' context.next_iter %}"
+           hx-target="#user-list"
+           hx-swap="innerHTML">Next</button>
     </div>
 {% else %}
     <div class="user-card">No other users found.</div>

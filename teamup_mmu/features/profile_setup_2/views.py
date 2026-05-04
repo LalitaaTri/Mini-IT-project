@@ -6,9 +6,9 @@ from ..user_access_check.views import *
 
 # Define your categories here so the template can loop through them easily
 INTEREST_CATEGORIES = {
-    "💻 Tech & Skills": ["Web Development", "Game Development", "Machine Learning", "Cybersecurity"],
-    "🎮 Gaming": ["FPS Games", "RPGs", "Tabletop & Board Games", "Valorant", "Roblox", "Minecraft"],
-    "🌱 Life & Hobbies": ["Music Production", "Sports & Fitness", "Anime & Manga"]
+    "💻 Tech & Skills": ["Web Development", "Game Development", "Machine Learning", "Cybersecurity", "Blockchain Technology", "Data Science"],
+    "🎮 Gaming": ["FPS Games", "RPGs", "Tabletop & Board Games", "Valorant", "Roblox", "Minecraft", ],
+    "🌱 Life & Hobbies": ["Music Production", "Sports & Fitness", "Anime & Manga", "Arts and Crafts", "Cooking", "Traveling"]
 }
 
 async def index(request):

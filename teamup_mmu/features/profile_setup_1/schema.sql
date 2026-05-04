@@ -1,8 +1,13 @@
 DROP TABLE IF EXISTS profiles CASCADE;
+
 CREATE TABLE IF NOT EXISTS profiles (
     id SERIAL PRIMARY KEY,
     username VARCHAR(255) UNIQUE,
-    
+    introduction TEXT,
+    descriptions TEXT,
+    year_of_study INTEGER CHECK (year_of_study >= 1 AND year_of_study <= 5),
+    faculty VARCHAR(255),
+    program VARCHAR(255),
     interests TEXT[] CHECK (
         array_length(interests, 1) >= 2 AND 
         array_length(interests, 1) <= 5

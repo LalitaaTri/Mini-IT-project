@@ -27,6 +27,7 @@ from .features.profile_setup_1.views import index as profile_setup_1
 from .features.profile_setup_1.views import receive as profile_setup_1_receive
 from .features.profile_setup_2.views import index as profile_setup_2
 from .features.profile_setup_2.views import receive as profile_setup_2_receive
+from .features.profile_setup_2.views import validate as profile_setup_2_validate
 
 
 urlpatterns = [
@@ -53,6 +54,7 @@ urlpatterns = [
     path('profile_setup_1/', profile_setup_1, name='profile_setup_1'),
     path('profile_setup_1/receive/', profile_setup_1_receive, name='profile_setup_1_receive'),
     path('profile_setup_2/', profile_setup_2, name='profile_setup_2'),
+    path('profile_setup_2/validate/', profile_setup_2_validate, name='profile_setup_2_validate'),
     path('profile_setup_2/receive/', profile_setup_2_receive, name='profile_setup_2_receive'),
     path('user_forgot_password/', user_forgot_password_index_view, name='user_forgot_password_index_view'),
     path('user_forgot_password/send/', user_forgot_password_send, name='user_forgot_password_send'),

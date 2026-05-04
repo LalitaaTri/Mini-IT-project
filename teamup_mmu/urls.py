@@ -31,17 +31,14 @@ from .features.user_forgot_password.views import send as user_forgot_password_se
 from .features.user_forgot_password.views import receive as user_forgot_password_receive
 from .features.user_delete_account.views import send as user_delete_account_send
 from .features.user_delete_account.views import receive as user_delete_account_receive
-<<<<<<< HEAD
 from .features.profile_setup_1.views import index as profile_setup_1
 from .features.profile_setup_1.views import receive as profile_setup_1_receive
 from .features.profile_setup_2.views import index as profile_setup_2
 from .features.profile_setup_2.views import receive as profile_setup_2_receive
 from .features.profile_setup_2.views import validate as profile_setup_2_validate
 
-=======
 from django.views.decorators.csrf import csrf_exempt
 from .features.user_access_check.views import access_check_endpoint as access_check_endpoint
->>>>>>> 79b84fe9406bde66d5ab179e9f908e8f758667e8
 
 urlpatterns = [
     path('', views.index, name='index'),

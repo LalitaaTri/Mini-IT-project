@@ -130,7 +130,7 @@ form {
     gap: 12px;
 }
 
-input[type="email"], 
+input[type="username"], 
 input[type="password"],
 input[type="text"] {
     padding: 12px 15px;

@@ -150,8 +150,19 @@ async def class_details_modal(request, class_id):
         target_class = await conn.fetchrow("SELECT * FROM classes WHERE id=$1", class_id)
         if not target_class:
             return HttpResponse("Class not found", status = 404)
+        class_students = await conn.fetch("""
+            SELECT u.email 
+            FROM users u
+            JOIN user_classes uc ON u.id = uc.user_id
+            WHERE uc.class_id = $1
+        """, class_id)
+        #do for number of groups here as well
+
         return render(request, 'user_classes/templates/class_details_modal.html', {
-            'class_details' : target_class
+            'class_details': target_class,
+            'class_students': class_students,
+            'num_students': len(class_students) # for ttl number of students
+
         })
 
 

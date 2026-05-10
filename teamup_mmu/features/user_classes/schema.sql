@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS user_classes (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     class_id INTEGER REFERENCES classes(id) ON DELETE CASCADE,
+    role VARCHAR(20) DEFAULT 'student',
     joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(user_id, class_id)
 );

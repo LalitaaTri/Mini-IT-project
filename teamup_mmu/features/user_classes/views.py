@@ -134,8 +134,8 @@ async def create_class(request):
                 course_code, course_name, description, join_code
             )
             
-            # Add the creator to the class
-            await conn.execute("INSERT INTO user_classes(user_id, class_id) VALUES($1, $2)", user_id, class_id)
+            # Add the creator to the class as the ADMIN
+            await conn.execute("INSERT INTO user_classes(user_id, class_id, role) VALUES($1, $2, 'admin')", user_id, class_id)
             
             response = HttpResponse("Class created successfully!")
             response['HX-Redirect'] = '/classes/'
@@ -150,6 +150,18 @@ async def class_details_modal(request, class_id):
         target_class = await conn.fetchrow("SELECT * FROM classes WHERE id=$1", class_id)
         if not target_class:
             return HttpResponse("Class not found", status = 404)
+            
+        # --- Check if the logged-in user is an admin ---
+        token = request.COOKIES.get('access_token')
+        is_admin = False
+        if token:
+            session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+            if session:
+                user_id = session['user_id']
+                user_role = await conn.fetchval("SELECT role FROM user_classes WHERE user_id=$1 AND class_id=$2", user_id, class_id)
+                if user_role == 'admin':
+                    is_admin = True
+                    
         class_students = await conn.fetch("""
             SELECT u.email, p.username 
             FROM users u
@@ -162,7 +174,8 @@ async def class_details_modal(request, class_id):
         return render(request, 'user_classes/templates/class_details_modal.html', {
             'class_details': target_class,
             'class_students': class_students,
-            'num_students': len(class_students) # for ttl number of students
+            'num_students': len(class_students), # for ttl number of students
+            'is_admin': is_admin
 
         })
 

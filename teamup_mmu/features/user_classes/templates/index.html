@@ -88,8 +88,8 @@
                 
                 <!-- Left side of the card -->
                 <div class="class-info">
-                    <h3>{{ c.course_code }} - {{ c.course_name }}</h3>
-                    <p>{{ c.description }}</p>
+                    <h3 id="title-{{ c.id }}">{{ c.course_code }} - {{ c.course_name }}</h3>
+                    <p id="desc-{{ c.id }}">{{ c.description }}</p>
                 </div>
 
                 <!-- Right side of the card (stopPropagation! to prevent accident cliking to view details) -->

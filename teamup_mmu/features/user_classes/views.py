@@ -151,9 +151,10 @@ async def class_details_modal(request, class_id):
         if not target_class:
             return HttpResponse("Class not found", status = 404)
         class_students = await conn.fetch("""
-            SELECT u.email 
+            SELECT u.email, p.username 
             FROM users u
             JOIN user_classes uc ON u.id = uc.user_id
+            JOIN profiles p ON u.id = p.id
             WHERE uc.class_id = $1
         """, class_id)
         #do for number of groups here as well
@@ -204,3 +205,25 @@ async def leave_class_confirm(request):
             return response
         except Exception as e:
             return HttpResponse("Error leaving class", status=500)
+
+@csrf_exempt
+async def edit_class(request,class_id):
+    if request.method != "POST":
+        return HttpResponse("Invalid method", status=400)
+
+    course_name = request.POST.get('course_name')
+    course_code = request.POST.get('course_code')
+    description = request.POST.get('description')
+
+    if not course_code or not course_name:
+        return HttpResponse("Missing Required Fields", status = 400)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        await conn.execute("""
+            UPDATE classes 
+            SET course_name = $1, course_code = $2, description = $3 
+            WHERE id = $4
+        """, course_name, course_code, description, class_id)
+        return HttpResponse("Class Updated Successfully")
+        

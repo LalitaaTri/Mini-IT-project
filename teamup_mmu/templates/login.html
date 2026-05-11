@@ -1,0 +1,49 @@
+{% load static %}
+<script src="https://unpkg.com/htmx.org@2.0.0"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TeamUp MMU</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'teamup_mmu/css/signup.css' %}">
+</head>
+<body>
+    <nav>
+        <a style="all:unset; cursor: pointer; display: contents;" href="/">
+            <div class="logo">TeamUp <span class="MM">MM</span><span class="U">U</span></div>
+        </a>
+        <ul class="nav-middle">
+            Creators: Shaun, Lalitaa, Alim
+        </ul>
+    </nav>
+    <div class="container">
+        {% block content %}
+        <h1>{{status}}</h1>
+        {% if not show_form %}
+        <div hx-get="/user_login/" hx-trigger="load">
+            <p>Loading the Log In page...</p>
+        </div>
+        <a href="/user_forgot_password/">Forgot password?</a>
+        {% endif %}
+        {% if show_form %}
+            <div id="email-verification-container">
+                <h2>Verify email</h2>
+                <form id="email-verification-send">
+                {% csrf_token %}
+                <input type="hidden" name="email" value="{{ email }}">
+                <button hx-post="/email_verification/send/" type="submit">Send code</button>
+                </form>
+                <br><form id="email-verification-form" hx-post="/email_verification/receive/"
+                hx-target="#email-verification-container"
+                hx-swap="innerHTML">
+                {% csrf_token %} <input type="text" name="code" placeholder="Verification code" required>
+                <input type="hidden" name="email" value="{{ email }}">
+                <br><button type="submit">Submit</button>
+                </form>
+            </div>
+        {% endif %}
+        {% endblock %}
+    </div>
+</body>
+</html>

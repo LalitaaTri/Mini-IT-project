@@ -1,5 +1,178 @@
 {% extends "nav.html" %}
+{% load static %}
 
 {% block content %}
-    <p>This page shows all the groups and classes the user has</p>
+<style>
+    .groups-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .header-action {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .create-btn {
+        background-color: #001561;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 20px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .create-btn:hover {
+        background-color: #002299;
+    }
+
+    .group-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    .group-card {
+        background-color: #f8f9fa;
+        border: 1px solid #e0e0e0;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .group-card h3 {
+        margin-top: 0;
+        color: #001561;
+        margin-bottom: 5px;
+    }
+
+    .tag {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .tag.general { background-color: #e5e8ff; color: #001561; }
+    .tag.class { background-color: #ffe5e5; color: #8b0000; }
+
+    .wa-link {
+        display: inline-block;
+        margin-top: 15px;
+        background-color: #25D366; /* WhatsApp Green */
+        color: white;
+        padding: 8px 15px;
+        border-radius: 15px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+    
+    .wa-link:hover {
+        background-color: #20b858;
+    }
+</style>
+
+<div class="groups-container">
+    
+    <!-- HEADER AREA -->
+    <div class="header-action">
+        <h2>Your Groups</h2>
+        
+        <!-- Right side of header: Join Form & Create Button -->
+        <div style="display: flex; flex-direction: column; align-items: flex-end;">
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <form hx-post="/groups/join_by_code/" hx-target="#join-error" hx-swap="innerHTML" style="display: flex; gap: 5px; margin: 0;">
+                    {% csrf_token %}
+                    <input type="text" name="join_code" placeholder="Group Code" maxlength="8" required style="padding: 8px; border-radius: 8px; border: 1px solid #ccc; text-transform: uppercase;">
+                    <button type="submit" style="background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold;">Join</button>
+                </form>
+                
+                <button class="create-btn" hx-get="/groups/create/" hx-target="#create-form-area" hx-swap="innerHTML">
+                    + Create New Group
+                </button>
+            </div>
+            <!-- Error message container for the join form -->
+            <div id="join-error" style="color: red; font-weight: bold; margin-top: 5px; font-size: 0.85rem;"></div>
+        </div>
+    </div>
+    
+    <!-- This empty div is where our HTMX "Create Group" form will appear -->
+    <div id="create-form-area" style="margin-bottom: 20px;"></div>
+
+    <!-- MAIN GROUPS GRID -->
+    <div class="group-grid">
+        {% for group in context.my_groups %}
+            <div class="group-card">
+                
+                <!-- Group Name and Join Code Header -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <h3>{{ group.name }}</h3>
+                    <span style="background: #eee; padding: 4px 8px; border-radius: 6px; font-family: monospace; font-weight: bold; letter-spacing: 1px; font-size: 0.8rem; color: #333;">
+                        Code: {{ group.join_code|default:"N/A" }}
+                    </span>
+                </div>
+    
+                <!-- Tags -->
+                {% if group.is_general %}
+                    <span class="tag general">General Group</span>
+                {% else %}
+                    <span class="tag class">Class: {{ group.class_name }}</span>
+                {% endif %}
+    
+                <!-- Description -->
+                <p style="font-size: 0.9rem; color: #555;">{{ group.description }}</p>
+    
+                <!-- WhatsApp Link -->
+                {% if group.whatsapp_link %}
+                    <a href="{{ group.whatsapp_link }}" target="_blank" class="wa-link">📱 Join WhatsApp</a>
+                {% else %}
+                    <p style="font-size: 0.85rem; color: gray; margin-top: 15px;">No WhatsApp link provided.</p>
+                {% endif %}
+    
+                <!-- Bottom Actions (Leave & Members) -->
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <!-- View Members Button -->
+                        <button hx-get="/groups/{{ group.id }}/members/" 
+                                hx-target="#members-area-{{ group.id }}" 
+                                hx-swap="innerHTML"
+                                style="background: #e5e8ff; color: #001561; border: none; padding: 6px 12px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.8rem;">
+                            👥 View Members
+                        </button>
+
+                        <!-- Leave Group Form -->
+                        <form hx-post="/groups/leave/{{ group.id }}/" 
+                              hx-confirm="Are you sure you want to leave {{ group.name }}?" 
+                              hx-target="#leave-msg-{{ group.id }}" 
+                              hx-swap="innerHTML"
+                              style="margin: 0;">
+                            {% csrf_token %}
+                            <button type="submit" style="background-color: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 0.8rem;">
+                                Leave Group
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Containers for HTMX messages -->
+                    <div id="leave-msg-{{ group.id }}" style="margin-top: 10px; font-weight: bold;"></div>
+                    <div id="members-area-{{ group.id }}"></div>
+                    
+                </div>
+            </div>
+            
+        {% empty %}
+            <p style="color: gray; grid-column: 1 / -1; text-align: center; padding: 40px;">You are not in any groups yet. Match with some people and create one!</p>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

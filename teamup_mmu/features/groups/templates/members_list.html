@@ -1,0 +1,31 @@
+<div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ccc; text-align: left;">
+    <h4 style="margin-top: 0; color: #001561;">Members ({{ context.members|length }})</h4>
+    
+    <ul style="list-style: none; padding: 0; margin: 0;">
+        {% for member in context.members %}
+            <li style="padding: 8px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <!-- Display Username, fallback to Email if no profile setup -->
+                    <strong style="color: #333;">{{ member.username|default:member.email }}</strong>
+                    
+                    {% if member.id == context.leader_id %}
+                        <span style="font-size: 0.8rem; margin-left: 5px;" title="Group Leader">👑</span>
+                    {% endif %}
+                    
+                    <div style="font-size: 0.8rem; color: #666;">
+                        {{ member.program|default:"No program set" }}
+                    </div>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+    
+<!-- Button to collapse the list -->
+    <button type="button" 
+            hx-get="/groups/clear/" 
+            hx-target="#members-area-{{ context.group_id }}" 
+            hx-swap="innerHTML" 
+            style="margin-top: 10px; background: none; border: none; color: gray; cursor: pointer; text-decoration: underline; font-size: 0.85rem; padding: 0;">
+        Hide Members
+    </button>
+</div>

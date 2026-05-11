@@ -20,6 +20,9 @@ from .features.user_classes.views import create_class
 from .features.user_classes.views import class_details_modal
 from .features.user_classes.views import leave_class
 from .features.user_classes.views import leave_class_confirm
+from .features.user_classes.views import edit_class
+from .features.user_classes.views import remove_student 
+
 
 from .features.matching_matches.views import index as matching_matches_view
 from .features.user_message.views import message as user_message_view
@@ -92,7 +95,8 @@ urlpatterns = [
     path('classes/class_details_modal/<int:class_id>/', class_details_modal, name='class_details_modal'),
     path('classes/leave_class/<int:class_id>/', leave_class, name='leave_modal'),
     path('classes/leave_class_confirm/', leave_class_confirm, name='leave_class_confirm'),
-
+    path('classes/edit_class/<int:class_id>/', edit_class, name='edit_class'),
+    path('classes/remove_student/<int:class_id>/<int:student_id>/', remove_student, name = 'remove_student'),
 
     path('admin/', admin.site.urls)
 ]

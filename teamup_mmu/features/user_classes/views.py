@@ -134,8 +134,8 @@ async def create_class(request):
                 course_code, course_name, description, join_code
             )
             
-            # Add the creator to the class
-            await conn.execute("INSERT INTO user_classes(user_id, class_id) VALUES($1, $2)", user_id, class_id)
+            # Add the creator to the class as the ADMIN
+            await conn.execute("INSERT INTO user_classes(user_id, class_id, role) VALUES($1, $2, 'admin')", user_id, class_id)
             
             response = HttpResponse("Class created successfully!")
             response['HX-Redirect'] = '/classes/'
@@ -150,8 +150,33 @@ async def class_details_modal(request, class_id):
         target_class = await conn.fetchrow("SELECT * FROM classes WHERE id=$1", class_id)
         if not target_class:
             return HttpResponse("Class not found", status = 404)
+            
+        # --- Check if the logged-in user is an admin ---
+        token = request.COOKIES.get('access_token')
+        is_admin = False
+        if token:
+            session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+            if session:
+                user_id = session['user_id']
+                user_role = await conn.fetchval("SELECT role FROM user_classes WHERE user_id=$1 AND class_id=$2", user_id, class_id)
+                if user_role == 'admin':
+                    is_admin = True
+                    
+        class_students = await conn.fetch("""
+            SELECT u.id as user_id, u.email, p.username 
+            FROM users u
+            JOIN user_classes uc ON u.id = uc.user_id
+            JOIN profiles p ON u.id = p.id
+            WHERE uc.class_id = $1
+        """, class_id)
+        #do for number of groups here as well
+
         return render(request, 'user_classes/templates/class_details_modal.html', {
-            'class_details' : target_class
+            'class_details': target_class,
+            'class_students': class_students,
+            'num_students': len(class_students), # for ttl number of students
+            'is_admin': is_admin
+
         })
 
 
@@ -193,3 +218,58 @@ async def leave_class_confirm(request):
             return response
         except Exception as e:
             return HttpResponse("Error leaving class", status=500)
+
+@csrf_exempt
+async def edit_class(request,class_id):
+    if request.method != "POST":
+        return HttpResponse("Invalid method", status=400)
+
+    course_name = request.POST.get('course_name')
+    course_code = request.POST.get('course_code')
+    description = request.POST.get('description')
+
+    if not course_code or not course_name:
+        return HttpResponse("Missing Required Fields", status = 400)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        await conn.execute("""
+            UPDATE classes 
+            SET course_name = $1, course_code = $2, description = $3 
+            WHERE id = $4
+        """, course_name, course_code, description, class_id)
+        return HttpResponse("Class Updated Successfully")
+        
+@csrf_exempt
+async def remove_student(request,class_id,student_id):
+    if request.method != "POST":
+        return HttpResponse("Invalid method", status=400)
+    
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized. Please login to proceed ", status=401)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized. Please login to proceed ", status=401)
+        
+        user_id = session['user_id']
+
+        user_role = await conn.fetchval("SELECT role FROM user_classes WHERE user_id=$1 AND class_id=$2", user_id, class_id)
+        # make sure the person removing the student is actually the class admin
+        if user_role != 'admin':
+            return HttpResponse("Forbidden", status=403)
+        # admin cant remove themselves
+        if str(user_id) == str(student_id):
+            return HttpResponse("Cannot remove yourself ", status=400)
+    
+        # Delete the student from the class
+        await conn.execute("DELETE FROM user_classes WHERE user_id=$1 and class_id=$2", student_id, class_id)
+        # Calculate the new number of students
+        new_count = await conn.fetchval("SELECT count(*) FROM user_classes WHERE class_id=$1", class_id)
+        # Send back the updated counter with hx-swap-oob="true"
+        response_html = f'<span id="num_students" hx-swap-oob="true">👤 {new_count} students</span>'
+
+        return HttpResponse(response_html, status=200)

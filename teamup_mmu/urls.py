@@ -42,6 +42,8 @@ from .features.user_access_check.views import access_check_endpoint as access_ch
 
 from .features.my_profile.views import index as my_profile_index
 from .features.my_profile.views import edit as my_profile_edit
+from .features.groups import views as group_views
+
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -53,7 +55,13 @@ urlpatterns = [
     path('matching/', matching_view, name='matching'),
     path('matching/<int:iter>/', matching_view, name='matching_with_iter'),
     path('matching/like/', matching_like_view, name='matching_like_view'),
-    path('groups/', views.groups, name='groups'),
+    path('groups/', group_views.groups, name='groups'),
+    path('groups/clear/', group_views.clear, name='clear'),
+    path('groups/create/', group_views.group_create_form, name='group_create_form'),
+    path('groups/create/receive/', group_views.group_create_receive, name='group_create_receive'),
+    path('groups/leave/<int:group_id>/', group_views.group_leave, name='group_leave'),
+    path('groups/<int:group_id>/members/', group_views.group_members_list, name='group_members_list'),
+    path('groups/join_by_code/', group_views.group_join_by_code, name='group_join_by_code'),
     path('settings/', views.settings, name='settings'),
     path('logout/', user_logout, name='user_logout'),
     path('email_verification/send/', user_email_verification_send, name='user_email_verification_send'),

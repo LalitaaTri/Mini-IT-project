@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS users CASCADE;
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT now(),
+    email_verified BOOLEAN DEFAULT FALSE,
+    inactive BOOLEAN DEFAULT FALSE
+);

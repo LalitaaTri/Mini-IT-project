@@ -1,0 +1,35 @@
+<form id="profile_setup_2" hx-post="/profile_setup_2/receive/" hx-target="#message" hx-swap="innerHTML">
+    {% csrf_token %}
+    <h2>Select Your Interests (Choose 2 to 5)</h2>
+    
+    <!-- This div watches for changes and asks Django to re-render the form -->
+    <div hx-post="/profile_setup_2/validate/" hx-trigger="change" hx-target="#profile_setup_2" hx-swap="outerHTML">
+        
+        {% for category_name, interests in categories.items %}
+        <div class="category-section">
+            <h3>{{ category_name }}</h3>
+            
+            {% for interest in interests %}
+            <label class="interest-label">
+                <input type="checkbox" name="interests" value="{{ interest }}"
+                    {% if interest in selected %}checked{% endif %}
+                    {% if at_limit and interest not in selected %}disabled{% endif %}
+                >
+                <span>{{ interest }}</span>
+            </label>
+            {% endfor %}
+            
+        </div>
+        {% endfor %}
+        
+    </div>
+
+    <div style="margin-bottom: 15px; font-weight: bold; color: gray;">
+        {{ count }} / 5 Selected
+    </div>
+
+    <!-- The submit button disables itself if Django says it isn't valid yet -->
+    <button type="submit" {% if not is_valid %}disabled{% endif %}>Complete Profile</button>
+</form>
+
+<div id="message"></div>

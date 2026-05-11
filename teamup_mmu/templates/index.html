@@ -1,0 +1,61 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeamUp MMU</title>
+    <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'teamup_mmu/css/index.css' %}">
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="{% url 'index' %}" class="logo">TeamUp MMU</a>
+      <a href="{% url 'signup_page' %}" class="btn btn-login">Log In</a>
+    </nav>    
+  </header>
+  
+  <main>
+    <section class="hero">
+      <h1>Find Your Perfect Groupmates</h1>
+      <p>Skip the hassle of forming groups. Connect with MMU students, combine your skills, and build the ultimate team for your assignments.</p>
+      <a href="{% url 'signup_page' %}" class="btn btn-signup">Sign Up Now</a>
+    </section>
+
+    <section class="features">
+      <h2>Why Choose TeamUp?</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h3>Swiping Mechanism</h3>
+          <p>Easily swipe left or right to choose whichever groupmates you want.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Skill-Based Search</h3>
+          <p>Need a Python coder, a UI/UX designer, or a report writer? Filter by the exact skills you are missing.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Instant Connections</h3>
+          <p>Reach out securely to potential groupmates right here on campus before finalizing your roster.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="how-it-works">
+      <h2>How It Works</h2>
+      <div class="steps">
+        <ol>
+          <li><strong>Create Your Profile:</strong> List your course, major, and strengths.</li>
+          <li><strong>Browse or Post:</strong> Look for available students or post a vacancy for your existing group.</li>
+          <li><strong>Team Up:</strong> Connect, collaborate, and ace your assignments.</li>
+        </ol>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 TeamUp MMU Cyberjaya</p>
+  </footer>
+</body>
+</html>

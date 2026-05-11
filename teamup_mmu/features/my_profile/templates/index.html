@@ -1,0 +1,77 @@
+{% extends "nav.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Add your squircle CSS here or link your profile_setup_2.css */
+    .interest-label input[type="checkbox"] { display: none; }
+    .interest-label span { display: inline-block; padding: 8px 15px; margin: 5px; background: #f0f0f0; border-radius: 15px; cursor: pointer; }
+    .interest-label input[type="checkbox"]:checked + span { background: #001561; color: white; }
+    
+    .profile-edit-container { max-width: 600px; margin: 40px auto; padding: 30px; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    .profile-edit-container input[type="text"], .profile-edit-container input[type="number"], .profile-edit-container select, .profile-edit-container textarea { width: 100%; padding: 10px; margin: 8px 0 20px 0; border: 1px solid #ccc; border-radius: 8px; }
+    .profile-edit-container button { background: #001561; color: white; padding: 12px 25px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; width: 100%; }
+</style>
+
+<div class="profile-edit-container">
+    <div style="text-align: center; margin-bottom: 20px;">
+        <img src="{% static 'teamup_mmu/profile.png' %}" alt="Profile" style="width: 120px; border-radius: 50%;">
+        <h2>Edit My Profile</h2>
+        <p>{{ context.email }}</p>
+    </div>
+
+    <!-- HTMX form targeting the status div below -->
+    <form hx-post="/my_profile/edit/" hx-target="#edit-status" hx-swap="innerHTML">
+        {% csrf_token %}
+
+        <label>Username</label>
+        <input type="text" name="username" value="{{ context.profile.username }}" required>
+
+        <label>Headline (Introduction)</label>
+        <input type="text" name="introduction" value="{{ context.profile.introduction }}" required>
+
+        <label>About Me</label>
+        <textarea name="descriptions" required rows="4">{{ context.profile.descriptions }}</textarea>
+
+        <label>Faculty</label>
+        <select name="faculty" required>
+            <option value="FCI" {% if context.profile.faculty == 'FCI' %}selected{% endif %}>FCI</option>
+            <option value="FOE" {% if context.profile.faculty == 'FOE' %}selected{% endif %}>FOE</option>
+            <option value="FCM" {% if context.profile.faculty == 'FCM' %}selected{% endif %}>FCM</option>
+            <option value="FOM" {% if context.profile.faculty == 'FOM' %}selected{% endif %}>FOM</option>
+        </select>
+
+        <label>Program</label>
+        <input type="text" name="program" value="{{ context.profile.program }}" required>
+
+        <div style="display: flex; gap: 20px;">
+            <div style="flex: 1;">
+                <label>Year of Study</label>
+                <input type="number" name="year_of_study" value="{{ context.profile.year_of_study }}" min="1" max="5" required>
+            </div>
+            <div style="flex: 1;">
+                <label>cGPA</label>
+                <input type="number" name="cgpa" step="0.01" min="0.00" max="4.00" value="{{ context.profile.cgpa }}" required>
+            </div>
+        </div>
+
+        <h3>Interests (Select 2 to 5)</h3>
+        {% for category_name, interests in context.categories.items %}
+            <div style="margin-bottom: 15px;">
+                <h4 style="margin-bottom: 5px; color: #555;">{{ category_name }}</h4>
+                {% for interest in interests %}
+                    <label class="interest-label">
+                        <input type="checkbox" name="interests" value="{{ interest }}"
+                            {% if interest in context.selected_interests %}checked{% endif %}>
+                        <span>{{ interest }}</span>
+                    </label>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <div id="edit-status" style="text-align: center; margin: 15px 0; font-weight: bold; color: red;"></div>
+        
+        <button type="submit">Save Changes</button>
+    </form>
+</div>
+{% endblock %}

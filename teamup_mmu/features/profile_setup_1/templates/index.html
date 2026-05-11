@@ -1,0 +1,46 @@
+<form id="profile_setup_1" hx-post="/profile_setup_1/receive/"
+   hx-target="this"
+   hx-swap="outerHTML">
+   {% csrf_token %} 
+   <h2>Basic Profile Setup</h2>
+   
+   <label>Username</label><br>
+   <input type="text" name="username" placeholder="johndoe123" required>
+   <br><br>
+
+   <label>Headline (Short Introduction)</label><br>
+   <input type="text" name="introduction" placeholder="e.g., Web dev looking for groupmates" required>
+   <br><br>
+
+   <label>About Me</label><br>
+   <textarea name="descriptions" placeholder="Detail your skills, working style, and what kind of projects you like..." required></textarea>
+   <br><br>
+
+   <label>Faculty</label><br>
+   <select name="faculty" required>
+       <option value="" disabled selected>Select your faculty</option>
+       <option value="FCI">Faculty of Computing and Informatics (FCI)</option>
+       <option value="FOE">Faculty of Engineering (FOE)</option>
+       <option value="FCM">Faculty of Creative Multimedia (FCM)</option>
+       <option value="FOM">Faculty of Management (FOM)</option>
+       <option value="FCA">Faculty of Cinematic Arts (FCA)</option>
+   </select>
+   <br><br>
+
+   <label>Program</label><br>
+   <input type="text" name="program" placeholder="e.g., Foundation in Computing" required>
+   <br><br>
+
+   <label>Year of Study</label><br>
+   <select name="year_of_study" required>
+       <option value="" disabled selected>Select year</option>
+       <option value="1">Year 1 / Foundation</option>
+       <option value="2">Year 2</option>
+       <option value="3">Year 3</option>
+       <option value="4">Year 4</option>
+       <option value="5">Year 5+</option>
+   </select>
+   <br><br>
+
+   <button type="submit">Continue to Interests</button>
+</form>

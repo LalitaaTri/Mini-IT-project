@@ -1,0 +1,89 @@
+# 1. Ignore the 'bin' and 'obj' folders everywhere
+**/bin/
+**/obj/
+
+# 2. Specifically for your mobile project root
+# Ignore everything in that folder first...
+mobile/teamup_mmu/*
+
+# 3. ...BUT "un-ignore" (allow) these specific file types
+!mobile/teamup_mmu/*.xaml
+!mobile/teamup_mmu/*.cs
+!mobile/teamup_mmu/*.csproj
+!mobile/teamup_mmu/*.sln
+!mobile/teamup_mmu/Platforms/
+
+# 4. Explicitly keep the keystore OUT
+mobile/*.keystore
+
+# But "un-ignore" APK files so they can be tracked
+!**/bin/**/*.apk
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+
+# Django
+*.log
+*.sqlite3
+db.sqlite3
+/staticfiles/
+/static/
+/media/
+*.pot
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE and editor files
+*.sublime-project
+*.sublime-workspace
+
+# Testing
+.coverage
+.pytest_cache/
+htmlcov/
+
+# Environment
+.env
+.env.local
+.env.*.local

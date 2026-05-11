@@ -1,0 +1,40 @@
+{% load static %}
+<script src="https://unpkg.com/htmx.org@2.0.0"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TeamUp MMU</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'teamup_mmu/css/profile_setup_1.css' %}">
+    <link rel="stylesheet" href="{% static 'teamup_mmu/css/profile_setup_2.css' %}">
+</head>
+<body>
+    <nav>
+        <a style="all:unset; cursor: pointer; display: contents;" href="/">
+            <div class="logo">TeamUp <span class="MM">MM</span><span class="U">U</span></div>
+        </a>
+        <ul class="nav-middle">
+            Creators: Shaun, Lalitaa, Alim
+        </ul>
+    </nav>
+    <div class="container" id="profile-setup-container">
+        {% block content %}
+    
+        {% if setup_page == 1 %}
+            <div hx-get="/profile_setup_1/" hx-trigger="load">
+                <p>Loading Profile Setup 1...</p>
+            </div>
+        
+        {% elif setup_page == 2 %}
+            <div hx-get="/profile_setup_2/" hx-trigger="load">
+                <p>Loading Profile Setup 2...</p>
+            </div>
+        
+        {% endif %}
+    
+        {% endblock %}
+</div>
+</div>
+</body>
+</html>

@@ -163,7 +163,7 @@ async def class_details_modal(request, class_id):
                     is_admin = True
                     
         class_students = await conn.fetch("""
-            SELECT u.email, p.username 
+            SELECT u.id as user_id, u.email, p.username 
             FROM users u
             JOIN user_classes uc ON u.id = uc.user_id
             JOIN profiles p ON u.id = p.id
@@ -240,3 +240,36 @@ async def edit_class(request,class_id):
         """, course_name, course_code, description, class_id)
         return HttpResponse("Class Updated Successfully")
         
+@csrf_exempt
+async def remove_student(request,class_id,student_id):
+    if request.method != "POST":
+        return HttpResponse("Invalid method", status=400)
+    
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized. Please login to proceed ", status=401)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized. Please login to proceed ", status=401)
+        
+        user_id = session['user_id']
+
+        user_role = await conn.fetchval("SELECT role FROM user_classes WHERE user_id=$1 AND class_id=$2", user_id, class_id)
+        # make sure the person removing the student is actually the class admin
+        if user_role != 'admin':
+            return HttpResponse("Forbidden", status=403)
+        # admin cant remove themselves
+        if str(user_id) == str(student_id):
+            return HttpResponse("Cannot remove yourself ", status=400)
+    
+        # Delete the student from the class
+        await conn.execute("DELETE FROM user_classes WHERE user_id=$1 and class_id=$2", student_id, class_id)
+        # Calculate the new number of students
+        new_count = await conn.fetchval("SELECT count(*) FROM user_classes WHERE class_id=$1", class_id)
+        # Send back the updated counter with hx-swap-oob="true"
+        response_html = f'<span id="num_students" hx-swap-oob="true">👤 {new_count} students</span>'
+
+        return HttpResponse(response_html, status=200)

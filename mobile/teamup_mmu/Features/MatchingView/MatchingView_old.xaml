@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="teamup_mmu.MatchingViewOld"
+             Title="Matching"
+             BackgroundColor="#F5F5F5">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+            
+            <!-- Header Section -->
+            <Label Text="Welcome to the Matching Page!" 
+                   FontSize="22" 
+                   FontAttributes="Bold" 
+                   HorizontalOptions="Center" 
+                   TextColor="#001561" />
+            
+            <Label Text="{Binding StatusMessage}" 
+                   HorizontalOptions="Center" 
+                   FontSize="14" />
+
+            <!-- Main User Card -->
+            <Frame BackgroundColor="#e5e8ff"
+                   BorderColor="#c1cefe"
+                   CornerRadius="20"
+                   HasShadow="True"
+                   Padding="25"
+                   Margin="10,0">
+                
+                <VerticalStackLayout Spacing="15" HorizontalOptions="Center">
+                    
+                    <!-- Email Header -->
+                    <Label Text="{Binding UserEmail}" 
+                           FontSize="12" 
+                           TextColor="#555" 
+                           HorizontalOptions="Center" 
+                           LineBreakMode="CharacterWrap" />
+
+                    <!-- Profile Image -->
+                    <Border StrokeShape="RoundRectangle 12"
+                            StrokeThickness="1"
+                            Stroke="#f0f0f0"
+                            HeightRequest="200"
+                            WidthRequest="200"
+                            HorizontalOptions="Center">
+                        <Image Source="profile_placeholder.png" 
+                               Aspect="AspectFill" 
+                               BackgroundColor="White"/>
+                    </Border>
+
+                    <!-- User Details -->
+                    <VerticalStackLayout Spacing="5" HorizontalOptions="Fill">
+                        <Label Text="{Binding AboutText, StringFormat='About: {0}'}" FontSize="14" TextColor="#333" HorizontalTextAlignment="Center" />
+                        <Label Text="Year: 0 (Foundation)" FontSize="14" TextColor="#333" HorizontalTextAlignment="Center" />
+                        <Label Text="Program: Foundation in Computing" FontSize="14" TextColor="#333" HorizontalTextAlignment="Center" />
+                        <Label Text="cGPA: 3.69" FontSize="14" TextColor="#333" HorizontalTextAlignment="Center" />
+                    </VerticalStackLayout>
+
+                    <!-- Like Status -->
+                    <Label x:Name="LikeStatusLabel"
+                           Text="{Binding LikeStatus}" 
+                           TextColor="#001561" 
+                           FontAttributes="Bold" 
+                           FontSize="12"
+                           HorizontalOptions="Center"
+                           CharacterSpacing="1" />
+
+                    <!-- Buttons Container -->
+                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                        
+                        <!-- Like Button -->
+                        <Button Text="Like"
+                                Clicked="OnLikeClicked"
+                                WidthRequest="110"
+                                CornerRadius="25"
+                                BackgroundColor="#001561"
+                                TextColor="White"
+                                FontAttributes="Bold" />
+
+                        <!-- Next Button -->
+                        <Button Text="Next"
+                                Clicked="OnNextClicked"
+                                WidthRequest="110"
+                                CornerRadius="25"
+                                BackgroundColor="#e4e6eb"
+                                TextColor="#050505"
+                                FontAttributes="Bold" />
+                        
+                    </HorizontalStackLayout>
+
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- No Users Found (Conditional visibility can be added later) -->
+            <Label Text="No other users found." 
+                   IsVisible="{Binding IsEmpty}" 
+                   HorizontalOptions="Center" 
+                   Padding="20" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

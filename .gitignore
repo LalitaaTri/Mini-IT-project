@@ -1,17 +1,24 @@
-# 1. Ignore the 'bin' and 'obj' folders everywhere
+# 1. Ignore the build junk everywhere
 **/bin/
 **/obj/
 
-# 2. Specifically for your mobile project root
-# Ignore everything in that folder first...
+# 2. If you were ignoring the whole mobile folder, 'un-ignore' the directory itself
+# This allows Git to peek inside
+!mobile/teamup_mmu/
+
+# 3. Now, ignore everything INSIDE that folder by default
 mobile/teamup_mmu/*
 
-# 3. ...BUT "un-ignore" (allow) these specific file types
+# 4. SURGICAL ALLOWS: Specifically 'un-ignore' the parts you want
+!mobile/teamup_mmu/Features/
+!mobile/teamup_mmu/Platforms/
 !mobile/teamup_mmu/*.xaml
 !mobile/teamup_mmu/*.cs
 !mobile/teamup_mmu/*.csproj
-!mobile/teamup_mmu/*.sln
-!mobile/teamup_mmu/Platforms/
+
+# 5. Re-confirm ignoring the junk inside those specific 'allowed' folders
+mobile/teamup_mmu/Features/**/bin/
+mobile/teamup_mmu/Features/**/obj/
 
 # 4. Explicitly keep the keystore OUT
 mobile/*.keystore

@@ -166,7 +166,7 @@ async def class_details(request, class_id):
         class_admin_email = await conn.fetchval("SELECT email FROM users WHERE id=(SELECT user_id FROM user_classes WHERE class_id=$1 AND role='admin')", class_id)
 
         class_students = await conn.fetch("""
-            SELECT u.id as user_id, u.email, p.username 
+            SELECT u.id as user_id, u.email, p.username, uc.role as user_role
             FROM users u
             JOIN user_classes uc ON u.id = uc.user_id
             JOIN profiles p ON u.id = p.id

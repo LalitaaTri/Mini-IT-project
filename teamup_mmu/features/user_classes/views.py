@@ -287,3 +287,34 @@ async def share_code_modal(request, class_id):
     return render(request, 'user_classes/templates/share_code_modal.html', {
         'join_code' : join_code
     })
+
+@csrf_exempt
+async def delete_class_modal(request,class_id):
+    if request.method != "POST":
+        return HttpResponse("Invalid method", status=400)
+    
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized. Please login to proceed ", status=401)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized. Please login to proceed ", status=401)
+        
+        user_id = session['user_id']
+
+        user_role = await conn.fetchval("SELECT role FROM user_classes WHERE user_id=$1 AND class_id=$2", user_id, class_id)
+        # make sure the person removing the student is actually the class admin
+        if user_role != 'admin':
+            return HttpResponse("Forbidden", status=403)
+
+        # Delete the student from the class
+        await conn.execute("DELETE FROM user_classes WHERE user_id=$1 and class_id=$2", student_id, class_id)
+        # Calculate the new number of students
+        new_count = await conn.fetchval("SELECT count(*) FROM user_classes WHERE class_id=$1", class_id)
+        # Send back the updated counter with hx-swap-oob="true"
+        response_html = f'<span id="num_students" hx-swap-oob="true">👤 {new_count} students</span>'
+
+        return HttpResponse(response_html, status=200)

@@ -174,8 +174,10 @@
                     <a href="#" class="settings-item" hx-get="/classes/share_code_modal/{{ class_details.id }}/" hx-target="#modal-container" hx-swap="innerHTML">
                        Share Join Code
                     </a>
-                    <a href="#" class="settings-item">Add Students</a>
-                    <a href="#" class="settings-item danger">Delete Class</a>
+                    <a href="#" class="settings-item">Add Students (not done yet) </a>
+                    <a href="#" class="settings-item danger" hx-get="/classes/delete_class_modal/{{ class_details.id }}/" hx-target="#modal-container" hx-swap="innerHTML">
+                        Delete Class
+                    </a>
                 </div>
             </details>
 

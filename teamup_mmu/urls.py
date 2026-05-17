@@ -23,6 +23,8 @@ from .features.user_classes.views import leave_class_confirm
 from .features.user_classes.views import edit_class
 from .features.user_classes.views import remove_student 
 from .features.user_classes.views import share_code_modal
+from .features.user_classes.views import delete_class_modal
+
 
 
 
@@ -101,6 +103,7 @@ urlpatterns = [
     path('classes/edit_class/<int:class_id>/', edit_class, name='edit_class'),
     path('classes/remove_student/<int:class_id>/<int:student_id>/', remove_student, name = 'remove_student'),
     path('classes/share_code_modal/<int:class_id>/', share_code_modal, name='share_code_modal'),
+    path('classes/delete_class_modal/<int:class_id>/', delete_class_modal, name='delete_class_modal'),
 
 
     path('admin/', admin.site.urls)

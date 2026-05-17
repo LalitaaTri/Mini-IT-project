@@ -1,0 +1,21 @@
+<div id="delete-class-modal" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;">
+    <!-- The white popup box -->
+    <div style="background: white; padding: 1.5rem; border-radius: 15px; width: 90%; max-width: 400px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); position: relative;">
+        
+        <!-- Close button to remove the modal from the screen -->
+        <button onclick="document.getElementById('delete-class-modal').remove()" style="position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: #555;">&times;</button>
+        
+        <!-- Leave the class form -->
+        <form style="display: flex; flex-direction: column; align-items: center;" hx-post="/classes/delete_class_confirm/" hx-target="#delete-class-modal" hx-swap="outerHTML">
+            <!-- We use a hidden input to pass the class ID to the backend -->
+            <input type="hidden" name="class_id" value="{{ class_id }}">
+            
+            <h2 style="text-align: center; margin-bottom: 0px;">Confirm Delete Class</h2>
+            <p style="text-align: center;margin-bottom: 35px;">Are you sure you want to delete <strong>"{{ course_name }} {{ course_code }}"</strong>?</p>
+            
+            <!-- Submit button for the form -->
+            <button type="submit" style="background-color: red; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold;">Yes, Delete Class</button>
+        </form>
+    
+    </div>
+</div>

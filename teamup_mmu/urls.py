@@ -17,11 +17,13 @@ from .features.user_classes.views import join_modal
 from .features.user_classes.views import join_by_code
 from .features.user_classes.views import create_modal
 from .features.user_classes.views import create_class
-from .features.user_classes.views import class_details_modal
+from .features.user_classes.views import class_details
 from .features.user_classes.views import leave_class
 from .features.user_classes.views import leave_class_confirm
 from .features.user_classes.views import edit_class
 from .features.user_classes.views import remove_student 
+from .features.user_classes.views import share_code_modal
+
 
 
 from .features.matching_matches.views import index as matching_matches_view
@@ -88,15 +90,18 @@ urlpatterns = [
     path('access_check/', access_check_endpoint, name='access_check_endpoint'),
     path('my_profile/', my_profile_index, name='my_profile'),
     path('my_profile/edit/', my_profile_edit, name='my_profile_edit'),
+
     path('classes/join_modal/', join_modal, name='join_modal'),
     path('classes/join_by_code/', join_by_code, name='join_by_code'),
     path('classes/create_modal/', create_modal, name='create_modal'),
     path('classes/create_class/', create_class, name='create_class'),
-    path('classes/class_details_modal/<int:class_id>/', class_details_modal, name='class_details_modal'),
+    path('classes/class_details/<int:class_id>/', class_details, name='class_details'),
     path('classes/leave_class/<int:class_id>/', leave_class, name='leave_modal'),
     path('classes/leave_class_confirm/', leave_class_confirm, name='leave_class_confirm'),
     path('classes/edit_class/<int:class_id>/', edit_class, name='edit_class'),
     path('classes/remove_student/<int:class_id>/<int:student_id>/', remove_student, name = 'remove_student'),
+    path('classes/share_code_modal/<int:class_id>/', share_code_modal, name='share_code_modal'),
+
 
     path('admin/', admin.site.urls)
 ]

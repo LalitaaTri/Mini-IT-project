@@ -144,7 +144,7 @@ async def create_class(request):
             return render(request, 'user_classes/templates/create_class_modal.html', {'error_message': 'Error creating class.'})
 
 # Return the class details modal HTML when a user clicks on a class
-async def class_details_modal(request, class_id):
+async def class_details(request, class_id):
     pool = await Database.get_pool()
     async with pool.acquire() as conn:
         target_class = await conn.fetchrow("SELECT * FROM classes WHERE id=$1", class_id)
@@ -161,7 +161,10 @@ async def class_details_modal(request, class_id):
                 user_role = await conn.fetchval("SELECT role FROM user_classes WHERE user_id=$1 AND class_id=$2", user_id, class_id)
                 if user_role == 'admin':
                     is_admin = True
-                    
+        
+        class_admin = await conn.fetchval("SELECT username FROM profiles WHERE id=(SELECT user_id FROM user_classes WHERE class_id=$1 AND role='admin')", class_id)
+        class_admin_email = await conn.fetchval("SELECT email FROM users WHERE id=(SELECT user_id FROM user_classes WHERE class_id=$1 AND role='admin')", class_id)
+
         class_students = await conn.fetch("""
             SELECT u.id as user_id, u.email, p.username 
             FROM users u
@@ -171,10 +174,12 @@ async def class_details_modal(request, class_id):
         """, class_id)
         #do for number of groups here as well
 
-        return render(request, 'user_classes/templates/class_details_modal.html', {
+        return render(request, 'user_classes/templates/class_details.html', {
             'class_details': target_class,
             'class_students': class_students,
             'num_students': len(class_students), # for ttl number of students
+            'class_admin_name' : class_admin,
+            'class_admin_email' : class_admin_email,
             'is_admin': is_admin
 
         })
@@ -273,3 +278,12 @@ async def remove_student(request,class_id,student_id):
         response_html = f'<span id="num_students" hx-swap-oob="true">👤 {new_count} students</span>'
 
         return HttpResponse(response_html, status=200)
+
+async def share_code_modal(request, class_id):
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        # Fetch the join code for this specific class
+        join_code = await conn.fetchval("SELECT join_code FROM classes WHERE id=$1", class_id)
+    return render(request, 'user_classes/templates/share_code_modal.html', {
+        'join_code' : join_code
+    })

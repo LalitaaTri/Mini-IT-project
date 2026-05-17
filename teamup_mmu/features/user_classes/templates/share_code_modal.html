@@ -1,0 +1,39 @@
+<div id="share-modal" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;">
+    
+    <!-- The white popup box -->
+    <div style="background: white; padding: 2rem; border-radius: 15px; width: 90%; max-width: 400px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); position: relative;">
+        
+        <!-- Close button to remove the modal from the screen -->
+        <button onclick="document.getElementById('share-modal').remove()" style="position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: #555;">&times;</button>
+        
+        <h2 style="margin-top: 0; color: #00186d; font-size: 1.5rem;">🔗 Share Join Code</h2>
+        <p style="color: #666; margin-bottom: 0.5rem; font-size: 1rem; padding-bottom: 15px;">Give this secret code to your students so they can join your class.</p>
+        
+        <!-- The Join Code Container -->
+        <div style="background: #f8fafc; border: 1px solid #00186d7a; padding: 1rem; border-radius: 8px; font-size: 1.5rem; font-weight: bold; letter-spacing: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; position: relative;">
+            <!-- The Code -->
+            <div style=" font-style: italic; color: #222a37d0; user-select: all; cursor: pointer;" title="Click to highlight!">
+                {{ join_code }}
+            </div>
+            <!-- The Tiny Copy Icon Button -->
+            <button 
+                onclick="navigator.clipboard.writeText('{{ join_code }}'); document.getElementById('copy-tooltip').style.opacity='1'; setTimeout(() => document.getElementById('copy-tooltip').style.opacity='0', 2000);"
+                style="background: #edf2f7; border: none; padding: 0.8rem; border-radius: 50%; cursor: pointer; color: #4a5568; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"
+                onmouseover="this.style.background='#e2e8f0'; this.style.color='#2a2e34'" 
+                onmouseout="this.style.background='#edf2f7'; this.style.color='#4a5568'"
+                title="Copy Code">
+                
+                <!-- The Dark 'Copied!' Tooltip (Hidden by default) -->
+                <div id="copy-tooltip" style="position: absolute; bottom: -35px; right: 5px; background: #2a2e34; color: white; padding: 6px 14px; border-radius: 6px; font-size: 0.9rem; opacity: 0; transition: opacity 0.2s; pointer-events: none; font-weight: normal; letter-spacing: normal;">
+                    Copied to clipboard!
+                </div>
+
+                <!-- The SVG Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+                    <path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z"/>
+                </svg>
+            </button>
+        </div>
+
+    </div>
+</div>

@@ -1,4 +1,5 @@
 from ..user_access_check.views import *
+from django.shortcuts import render, redirect
 
 async def index(request):
     passed_login_check, status, email, id = await access_check(request)

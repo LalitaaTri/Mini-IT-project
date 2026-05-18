@@ -1,9 +1,39 @@
-<h2>Sign up</h2>
-<form id="signup-form" hx-post="/user_signup/receive/"
-   hx-target="#signup-form"
-   hx-swap="innerHTML">
-   {% csrf_token %} <input type="text" name="email" placeholder="MMU Email" required>
-   <br>
-   <input type="password" name="password" placeholder="Password" required>
-   <br><button type="submit">Submit</button>
-</form>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+    <meta charset="UTF-8">
+    <title>Sign Up - TeamUp MMU</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'teamup_mmu/css/signup.css' %}">
+</head>
+<body>
+    <nav>
+        <a style="all:unset; cursor: pointer; display: contents;" href="/">
+            <div class="logo">TeamUp <span class="MM">MM</span><span class="U">U</span></div>
+        </a>
+        <ul class="nav-middle">
+            Creators: Shaun, Lalitaa, Alim
+        </ul>
+    </nav>
+    <div class="container">
+        <h2>Create an Account</h2>
+        
+        <!-- Give the card an ID of auth-box -->
+        <div class="form-card" id="auth-box">
+            <form hx-post="/signup/receive/" hx-target="#auth-box" hx-swap="innerHTML">
+                {% csrf_token %}
+                <!-- Added autocomplete="username" and width/box-sizing -->
+                <input type="email" name="email" placeholder="MMU Email Address" required autocomplete="username" style="width: 100%; box-sizing: border-box; margin-bottom: 12px;">
+                
+                <!-- Added autocomplete="new-password" -->
+                <input type="password" name="password" placeholder="Password" required autocomplete="new-password" style="width: 100%; box-sizing: border-box; margin-bottom: 12px;">
+                
+                <button type="submit" style="width: 100%; box-sizing: border-box;">Sign Up</button>
+            </form>
+            
+            <div id="signup-message" style="margin-top: 15px; font-weight: bold; color: red;"></div>
+        </div>
+</body>
+</html>

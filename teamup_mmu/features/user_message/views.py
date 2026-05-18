@@ -1,4 +1,6 @@
 from ..user_access_check.views import *
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
 
 async def index(request, another_user_id):
     if request.method == "GET":

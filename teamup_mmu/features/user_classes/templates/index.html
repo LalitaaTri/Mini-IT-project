@@ -67,7 +67,12 @@
         cursor: pointer; 
         transition: 0.3s; 
     }
-    .leave_btn:hover { background-color: #e90000dd; }
+    .leave_btn:hover:not(:disabled) { background-color: #e90000dd; }
+    .leave_btn:disabled {
+        background-color: #b11f1f80;
+        color: #f1f5f9;
+        cursor: not-allowed;
+    }
 
 </style>
 
@@ -84,7 +89,7 @@
     {% if my_classes %}
         <ul class="class-list">
             {% for c in my_classes %}
-            <li class="class-card" hx-get="/classes/class_details_modal/{{ c.id }}/" hx-target="#modal-container" hx-swap="innerHTML">
+            <li class="class-card" hx-get="/classes/class_details/{{ c.id }}/" hx-target="body" hx-push-url="true">
                 
                 <!-- Left side of the card -->
                 <div class="class-info">
@@ -93,7 +98,12 @@
                 </div>
 
                 <!-- Right side of the card (stopPropagation! to prevent accident cliking to view details) -->
-                <button class="leave_btn" onclick="event.stopPropagation();" hx-get="/classes/leave_class/{{ c.id }}/" hx-target="#modal-container" hx-swap="innerHTML">Leave</button>
+                <button class="leave_btn" onclick="event.stopPropagation();" 
+                    {% if c.user_role == 'admin' %}
+                    disabled title="As the creator, you cannot leave this class. You must delete it instead."
+                    {% else %}
+                    hx-get="/classes/leave_class/{{ c.id }}/" hx-target="#modal-container" hx-swap="innerHTML"
+                    {% endif %}>Leave</button>
                 
             </li>
             {% endfor %}

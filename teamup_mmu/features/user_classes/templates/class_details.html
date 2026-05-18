@@ -1,0 +1,360 @@
+<!-- htmx apparently wasnt working cuz this thing isnt in index.html anymore -->
+<script src="https://unpkg.com/htmx.org@1.9.11"></script>
+<style>
+    body {
+            font-family: sans-serif;
+    }
+
+    @keyframes blink-border {
+        0% {
+            border-color: #003e9b9c;
+        }
+
+        50% {
+            border-color: #003e9b;
+            box-shadow: 0 0 5px rgb(162, 202, 255);
+        }
+
+        100% {
+            border-color: #003e9b9c;
+        }
+    }
+
+    .blinking-outline {
+        animation: blink-border 1.5s infinite ease-in-out;
+    }
+
+    .back-btn{
+        text-decoration: none; 
+        color: #00186d; 
+        font-weight: bold; 
+        font-size: 1.1rem; 
+        display: flex; 
+        align-items: center; 
+        gap: 8px;
+    }
+
+    .back-btn:hover{
+        color: #0019839c;
+    }
+
+    /* Settings Dropdown */
+    .settings-dropdown {
+        position: relative;
+        user-select: none;
+    }
+
+    .settings-dropdown summary {
+        /* list-style: none; */
+        cursor: pointer;
+        color: #7f8a9c;
+        transition: color 0.2s;
+        display: flex;
+        align-items: center;
+        padding: 0;
+    }
+
+    /* .settings-dropdown summary::-webkit-details-marker {
+        display: none; Hides the default arrow on Chrome/Edge
+    } */
+
+    .settings-dropdown summary:hover {
+        color: rgb(7, 23, 109);
+    }
+
+    .settings-menu {
+        position: absolute;
+        right: 0;
+        top: 100%;
+        margin-top: 0.5rem;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        padding: 0.5rem;
+        z-index: 100;
+        min-width: 180px;
+    }
+
+    .settings-item {
+        display: block;
+        padding: 0.5rem 1rem;
+        color: #4a5568;
+        text-decoration: none;
+        font-size: 0.95rem;
+        border-radius: 4px;
+        transition: background 0.2s;
+    }
+
+    .settings-item:hover {
+        background: #f7f9fc; /* its light blue */
+    }
+
+    .settings-item.danger {
+        color: #ef4444;
+        margin-top: 0.2rem;
+    }
+
+    .settings-item.danger:hover {
+        background: #fee2e2;
+    }
+
+</style>
+
+
+
+{% extends 'nav.html' %}
+
+{% block content %}
+
+
+<div style="padding: 1rem 2rem; background: #f8fafc; border-bottom: 1px solid #e2e8f0; margin-bottom: 2rem;">
+    <a href="/classes/" class="back-btn">
+        &larr; Back to Classes
+    </a>
+</div>
+
+<div
+    style="margin: 0 auto; background: white; padding: 2rem; border-radius: 12px; width: 100%; max-width: 1100px; height: 70vh; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); position: relative; display: flex; flex-direction: column; gap: 1.5rem;">
+
+    <!-- Header Section -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; flex-grow: 1; padding-right: 20px;">
+
+            <!-- DISPLAY MODE: Course Name text -->
+            <h1 id="display-course-name" style="margin: 0; color: #2a2e34; font-size: 1.8rem; font-weight: 700;">
+                {{class_details.course_name }}</h1>
+
+            <!-- EDIT MODE: Course Name input (Hidden by default) -->
+            <input id="edit-course-name" class="blinking-outline" type="text"
+                value="{{ class_details.course_name }}"
+                style="display: none; font-size: 1.8rem; font-weight: 700; padding: 0.2rem 0.5rem; border: 1.5px solid rgba(0, 24, 108, 0.78); border-radius: 6px; width: 60%; outline: none; font-family: inherit;">
+
+            <div
+                style="display: flex; gap: 1.5rem; color: #7f8a9c; font-size: 0.95rem; align-items: center; margin-top: 0.2rem;">
+                <!-- DISPLAY MODE: Course Code text -->
+                <span id="display-course-code" style="font-weight: 600; color: #50555f;">{{class_details.course_code }}</span>
+                <!-- EDIT MODE: Course Code input (Hidden by default) -->
+                <input id="edit-course-code" class="blinking-outline" type="text"
+                    value="{{ class_details.course_code }}"
+                    style="display: none; font-size: 0.95rem; font-weight: 100; padding: 0.2rem 0.5rem; border: 1.5px solid rgba(0, 24, 108, 0.78); border-radius: 6px; width: 20%; outline: none; font-family: inherit;">
+
+                <span id="num_students">👤 {{ num_students|default:'0' }} students</span>
+                <span id="num_groups">👥 {{ num_groups|default:'0' }} groups</span>
+                <span id="class_admin_name"> Created by {{ class_admin_name|default:'Default' }} , {{ class_admin_email|default:'Unknown' }} </span>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 30px; align-items: center;">
+            {% if is_admin %}
+            <!-- Edit (Pencil) / Save Button -->
+            <button onclick="toggleEditMode()"
+                style="background: none; border: none; cursor: pointer; color: #7f8a9c; transition: color 0.2s; display: flex; align-items: center; padding: 0;"
+                onmouseover="this.style.color='rgb(7, 23, 109)'" onmouseout="this.style.color='#7f8a9c'"
+                title="Edit Class">
+
+                <!-- Pencil Icon -->
+                <svg id="icon-pencil" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
+                    width="24px" fill="currentColor">
+                    <path
+                        d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z" />
+                </svg>
+
+                <!-- Save Checkmark Icon (Hidden by default) -->
+                <svg id="icon-save" style="display: none; color: #008b20;" xmlns="http://www.w3.org/2000/svg"
+                    height="28px" viewBox="0 -960 960 960" width="28px" fill="currentColor">
+                    <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
+                </svg>
+            </button>
+
+            <!-- Settings (Gear) Button -->
+            <details class="settings-dropdown">
+                
+                <!-- The visible button -->
+                <summary>
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+                        <path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z" />
+                    </svg>
+                </summary>
+
+                <!-- The dropdown menu content -->
+                <div class="settings-menu">
+                    <a href="#" class="settings-item" hx-get="/classes/share_code_modal/{{ class_details.id }}/" hx-target="#modal-container" hx-swap="innerHTML">
+                       Share Join Code
+                    </a>
+                    <a href="#" class="settings-item">Add Students (not done yet) </a>
+                    <a href="#" class="settings-item danger" hx-get="/classes/delete_class_modal/{{ class_details.id }}/" hx-target="#modal-container" hx-swap="innerHTML">
+                        Delete Class
+                    </a>
+                </div>
+            </details>
+
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Description Section -->
+    <div
+        style="background-color: #f7f9fc; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0; color: #4a5568; font-size: 0.95rem; line-height: 1.5;">
+
+        <!-- DISPLAY MODE: Description -->
+        <div id="display-description">
+            {% if class_details.description %}
+            {{ class_details.description }}
+            {% else %}
+            <span style="font-style: italic; color: #a0aec0;">No description provided for this class.</span>
+            {% endif %}
+        </div>
+
+        <!-- EDIT MODE: Description Textarea (Hidden by default) -->
+        <textarea id="edit-description" class="blinking-outline"
+            style="display: none; width: 100%; min-height: 80px; padding: 0.5rem; border: 1.5px solid rgba(0, 24, 108, 0.78); border-radius: 6px; box-sizing: border-box; outline: none; font-family: inherit; font-size: inherit;">{{ class_details.description|default:'' }}</textarea>
+
+    </div>
+
+
+    <!-- Navigation Tabs -->
+    <div style="display: flex; gap: 2rem; border-bottom: 1px solid #e2e8f0; margin-top: 0.5rem;">
+        <div
+            style="font-weight: 600; color: #00186d; border-bottom: 2px solid #00186d; padding-bottom: 0.5rem; margin-bottom: -1px; cursor: pointer;">
+            Students</div>
+        <div style="font-weight: 600; color: #7f8a9c; padding-bottom: 0.5rem; cursor: pointer; transition: color 0.2s;"
+            onmouseover="this.style.color='#2a2e34'" onmouseout="this.style.color='#7f8a9c'"> Groups </div>
+        <div style="font-weight: 600; color: #7f8a9c; padding-bottom: 0.5rem; cursor: pointer; transition: color 0.2s;"
+            onmouseover="this.style.color='#2a2e34'" onmouseout="this.style.color='#7f8a9c'"> Chat / Announcements
+        </div>
+    </div>
+
+    <!-- Students List -->
+    <div
+        style="display: flex; flex-direction: column; gap: 0.8rem; overflow-y: auto; max-height: 40vh; padding-right: 0.5rem; margin-top: 0.5rem;">
+
+        {% for student in class_students %}
+        {% if student.user_role == 'admin' %}
+            <!-- admin view -->
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.2rem; background: #f4fff48f; border: 1px solid #c2e4c3; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+                onmouseover="this.style.borderColor='#006d18'; this.style.boxShadow='0 4px 12px rgba(0,24,109,0.08)'"
+                onmouseout="this.style.borderColor='#c2e4c3'; this.style.boxShadow='none'" title="Click for more info">
+                <!-- it shows on hover -->
+
+            <div style="display: flex; flex-direction: column; gap: 0.2rem;">
+                <span style="font-weight: 600; color: #2a2e34;">{{ student.username|default:"Student Name" }}</span>
+                <span style="font-size: 0.85rem; color: #7f8a9c;">{{ student.email|default:"studentemail@mmu.edu.my"}}</span>
+            </div>
+        {% else %}
+        <!-- Individual Student Card -->
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.2rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+            onmouseover="this.style.borderColor='#00186d'; this.style.boxShadow='0 4px 12px rgba(0,24,109,0.08)'"
+            onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'" title="Click for more info">
+            <!-- it shows on hover -->
+
+            <div style="display: flex; flex-direction: column; gap: 0.2rem;">
+                <span style="font-weight: 600; color: #2a2e34;">{{ student.username|default:"Student Name" }}</span>
+                <span style="font-size: 0.85rem; color: #7f8a9c;">{{ student.email|default:"studentemail@mmu.edu.my"}}</span>
+            </div>
+
+            {% if is_admin %}
+            <!-- Remove Button -->
+            <!-- The event.stopPropagation() stops the row click event from firing when you click the remove button -->
+            <button onclick="event.stopPropagation();"
+                {% if student.user_id == current_user_id %}
+                disabled title="You cannot remove yourself from the class."
+                style="background: none; border: none; font-size: 1.4rem; cursor: not-allowed; color: #e2e8f0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%;"
+                {% else %}
+                hx-post="/classes/remove_student/{{ class_details.id }}/{{ student.user_id }}/"
+                hx-confirm="Are you sure you want to remove this student?" hx-target="closest div" hx-swap="outerHTML"
+                style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #cbd5e1; transition: all 0.2s; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%;"
+                onmouseover="this.style.color='#ef4444'; this.style.background='#fee2e2'"
+                onmouseout="this.style.color='#cbd5e1'; this.style.background='none'" title="Remove student"
+                {% endif %}>
+                &times;
+            </button>
+            {% endif %}
+        {% endif %}
+        </div>
+        {% empty %}
+        <!-- Placeholder if there are no students -->
+        <div
+            style="text-align: center; padding: 2rem; color: #7f8a9c; font-style: italic; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1;">
+            No students are currently in this class.
+        </div>
+        {% endfor %}
+
+    </div>
+
+</div>
+
+<!-- This is where the popup will appear -->
+<div id="modal-container"></div>
+
+<!-- javascript for the edit class details inline is here -->
+<script>
+    // Notice we added 'async' here!
+    async function toggleEditMode() {
+        const isEditing = document.getElementById('edit-course-name').style.display === 'block';
+
+        if (isEditing) {
+            // 1. Grab the exact text the user just typed into the boxes
+            const newName = document.getElementById('edit-course-name').value;
+            const newCode = document.getElementById('edit-course-code').value;
+            const newDesc = document.getElementById('edit-description').value;
+
+            // 2. Send the data to our new python URL (which we will build in Step 2!)
+            try {
+                const response = await fetch(`/classes/edit_class/{{ class_details.id }}/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        'course_name': newName,
+                        'course_code': newCode,
+                        'description': newDesc
+                    })
+                });
+
+                if (response.ok) {
+                    // Update the visual text so the user sees their changes instantly
+                    document.getElementById('display-course-name').innerText = newName;
+                    document.getElementById('display-course-code').innerText = newCode;
+                    document.getElementById('display-description').innerText = newDesc || "No description provided for this class.";
+
+                    const bgTitle = document.getElementById('bg-title-{{ class_details.id }}');
+                    const bgDesc = document.getElementById('bg-desc-{{ class_details.id }}');
+                    if (bgTitle) bgTitle.innerText = newCode + " - " + newName;
+                    if (bgDesc) bgDesc.innerText = newDesc;
+
+                    // Revert UI back to display mode
+                    document.getElementById('edit-course-name').style.display = 'none';
+                    document.getElementById('display-course-name').style.display = 'block';
+                    document.getElementById('edit-course-code').style.display = 'none';
+                    document.getElementById('display-course-code').style.display = 'block';
+                    document.getElementById('edit-description').style.display = 'none';
+                    document.getElementById('display-description').style.display = 'block';
+                    document.getElementById('icon-save').style.display = 'none';
+                    document.getElementById('icon-pencil').style.display = 'block';
+                } else {
+                    alert("Error saving class. Check the server!");
+                }
+            } catch (error) {
+                console.error("Save Error:", error);
+            }
+
+        } else {
+            // USER CLICKED EDIT: Hide text, show inputs
+            document.getElementById('display-course-name').style.display = 'none';
+            document.getElementById('edit-course-name').style.display = 'block';
+
+            document.getElementById('display-course-code').style.display = 'none';
+            document.getElementById('edit-course-code').style.display = 'block';
+
+            document.getElementById('display-description').style.display = 'none';
+            document.getElementById('edit-description').style.display = 'block';
+
+            document.getElementById('icon-pencil').style.display = 'none';
+            document.getElementById('icon-save').style.display = 'block';
+
+            document.getElementById('edit-course-name').focus();
+        }
+    }
+</script>
+
+{% endblock %}

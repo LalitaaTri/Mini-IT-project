@@ -27,7 +27,7 @@ async def index(request):
 
         # 5. Get classes the user is ALREADY enrolled in
         my_classes = await conn.fetch("""
-            SELECT c.* FROM classes c
+            SELECT c.*, uc.role as user_role FROM classes c
             JOIN user_classes uc ON c.id = uc.class_id
             WHERE uc.user_id = $1
         """, user_id)
@@ -141,10 +141,10 @@ async def create_class(request):
             response['HX-Redirect'] = '/classes/'
             return response
         except Exception as e:
-            return render(request, 'user_classes/templates/create_class_modal.html', {'error_message': 'Error creating class.'})
+            return render(request, 'user_classes/templates/create_class_modal.html', {'error_message': f'Error creating class: {str(e)}'})
 
 # Return the class details modal HTML when a user clicks on a class
-async def class_details_modal(request, class_id):
+async def class_details(request, class_id):
     pool = await Database.get_pool()
     async with pool.acquire() as conn:
         target_class = await conn.fetchrow("SELECT * FROM classes WHERE id=$1", class_id)
@@ -161,9 +161,12 @@ async def class_details_modal(request, class_id):
                 user_role = await conn.fetchval("SELECT role FROM user_classes WHERE user_id=$1 AND class_id=$2", user_id, class_id)
                 if user_role == 'admin':
                     is_admin = True
-                    
+        
+        class_admin = await conn.fetchval("SELECT username FROM profiles WHERE id=(SELECT user_id FROM user_classes WHERE class_id=$1 AND role='admin')", class_id)
+        class_admin_email = await conn.fetchval("SELECT email FROM users WHERE id=(SELECT user_id FROM user_classes WHERE class_id=$1 AND role='admin')", class_id)
+
         class_students = await conn.fetch("""
-            SELECT u.id as user_id, u.email, p.username 
+            SELECT u.id as user_id, u.email, p.username, uc.role as user_role
             FROM users u
             JOIN user_classes uc ON u.id = uc.user_id
             JOIN profiles p ON u.id = p.id
@@ -171,11 +174,14 @@ async def class_details_modal(request, class_id):
         """, class_id)
         #do for number of groups here as well
 
-        return render(request, 'user_classes/templates/class_details_modal.html', {
+        return render(request, 'user_classes/templates/class_details.html', {
             'class_details': target_class,
             'class_students': class_students,
             'num_students': len(class_students), # for ttl number of students
-            'is_admin': is_admin
+            'class_admin_name' : class_admin,
+            'class_admin_email' : class_admin_email,
+            'is_admin': is_admin,
+            'current_user_id': user_id if 'user_id' in locals() else None
 
         })
 
@@ -211,6 +217,10 @@ async def leave_class_confirm(request):
         user_id = session['user_id']
         
         try: 
+            user_role = await conn.fetchval("SELECT role FROM user_classes WHERE user_id=$1 AND class_id=$2", user_id, int(class_id))
+            if user_role == 'admin':
+                return HttpResponse("Creator cannot leave the class. You must delete the class instead.", status=403)
+
             await conn.execute("DELETE FROM user_classes WHERE user_id=$1 and class_id=$2", user_id, int(class_id))
 
             response = HttpResponse("Left successfully!")
@@ -273,3 +283,61 @@ async def remove_student(request,class_id,student_id):
         response_html = f'<span id="num_students" hx-swap-oob="true">👤 {new_count} students</span>'
 
         return HttpResponse(response_html, status=200)
+
+async def share_code_modal(request, class_id):
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        # Fetch the join code for this specific class
+        join_code = await conn.fetchval("SELECT join_code FROM classes WHERE id=$1", class_id)
+    return render(request, 'user_classes/templates/share_code_modal.html', {
+        'join_code' : join_code
+    })
+
+async def delete_class_modal(request, class_id):
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        # Fetch the class details to show the name in the modal
+        target_class = await conn.fetchrow("SELECT course_name, course_code FROM classes WHERE id=$1", class_id)
+        
+    return render(request, 'user_classes/templates/delete_class_modal.html', {
+        'class_id': class_id,
+        'course_name': target_class['course_name'],
+        'course_code': target_class['course_code']
+    })
+
+@csrf_exempt
+async def delete_class_confirm(request):
+    if request.method != "POST":
+        return HttpResponse("Invalid method", status=400)
+    
+    # Grab the hidden input value from your HTML form
+    class_id = int(request.POST.get('class_id'))
+    
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+        
+        user_id = session['user_id']
+        user_role = await conn.fetchval("SELECT role FROM user_classes WHERE user_id=$1 AND class_id=$2", user_id, class_id)
+        
+        # Make sure only the admin can delete the class
+        if user_role != 'admin':
+            return HttpResponse("Forbidden: Only the class admin can delete this class.", status=403)
+
+        # 1. Delete all student connections to this class
+        await conn.execute("DELETE FROM user_classes WHERE class_id=$1", class_id)
+        
+        # 2. Delete the actual class
+        await conn.execute("DELETE FROM classes WHERE id=$1", class_id)
+
+    # Tell HTMX to redirect the user back to the classes dashboard
+    response = HttpResponse()
+    response['HX-Redirect'] = "/classes/"
+    return response
+

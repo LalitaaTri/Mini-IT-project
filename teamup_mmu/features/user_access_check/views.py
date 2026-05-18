@@ -53,6 +53,6 @@ async def access_check_endpoint(request):
         elif status == "incomplete_profile":
             dicti["target"] = "/profile_setup/"
         else:
-            dicti["target"] = "/user_login/" # New standalone login page
+            dicti["target"] = "/login/" # New standalone login page
         
     return JsonResponse(dicti)

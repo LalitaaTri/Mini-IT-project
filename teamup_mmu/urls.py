@@ -26,8 +26,7 @@ from .features.user_classes.views import share_code_modal
 from .features.user_classes.views import delete_class_modal
 from .features.user_classes.views import delete_class_confirm
 
-
-
+from .features.my_profile.views import profile_modal as user_profile_modal
 
 
 from .features.matching_matches.views import index as matching_matches_view
@@ -105,6 +104,9 @@ urlpatterns = [
     path('classes/share_code_modal/<int:class_id>/', share_code_modal, name='share_code_modal'),
     path('classes/delete_class_modal/<int:class_id>/', delete_class_modal, name='delete_class_modal'),
     path('classes/delete_class_confirm/', delete_class_confirm, name='delete_class_confirm'),
+
+    path('profile/modal/<int:user_id>/', user_profile_modal, name='user_profile_modal'),
+
 
 
     path('admin/', admin.site.urls)

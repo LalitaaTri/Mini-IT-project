@@ -68,3 +68,27 @@ async def edit(request):
             """, username, intro, desc, year, faculty, program, cgpa, interests, id)
 
         return HttpResponse("<span style='color: green;'>Profile updated successfully!</span>")
+
+# Lalitaa added this for profile info pop-up
+
+async def profile_modal(request, user_id):
+    passed_login_check, status, email, my_id = await access_check(request)
+    if not passed_login_check:
+        return HttpResponse("Unauthorized", status=401)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        profile = await conn.fetchrow("""
+            SELECT p.username, p.introduction, p.descriptions, p.year_of_study, p.faculty, p.program, p.cgpa, p.interests, u.email
+            FROM profiles p
+            JOIN users u ON p.id = u.id
+            WHERE p.id=$1
+        """, user_id)
+
+    if not profile:
+        return HttpResponse("User not found", status=404)
+
+    context = {
+        'profile': profile,
+    }
+    return render(request, 'my_profile/templates/profile_modal.html', {'context': context})

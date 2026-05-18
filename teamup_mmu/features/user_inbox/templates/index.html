@@ -2,14 +2,16 @@
 {% load static %}
 
 {% block content %}
-    <h2>Welcome to the Your Inbox Page!</h2>
-    <p>This content only shows up after you login.</p>
+    <h2>Your Inbox</h2>
+    <p style="text-align: center; color: #555;">Manage your chats and group invitations here.</p>
+    
     <style>
         /* Centers the entire list on the page */
-        #user-list {
+        #user-list, #invite-list {
             display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
             padding-top: 20px;
         }
 
@@ -26,7 +28,18 @@
             font-family: 'Inter', sans-serif;
         }
 
-        /* Styling the email/name at the top */
+        /* Special styling for Invites to make them stand out a bit */
+        .invite-card {
+            background-color: #fffbf0; 
+            border: 1px solid #ffe4a0;
+        }
+        
+        .invite-card h4 {
+            color: #001561;
+            margin: 10px 0;
+            font-size: 1.2rem;
+        }
+
         .user-card p:first-child {
             font-weight: 600;
             font-size: 0.85rem;
@@ -35,17 +48,6 @@
             word-break: break-all;
         }
 
-        /* The profile image */
-        .user-card img {
-            width: 100%;
-            max-width: 250px;
-            background: white;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
-            border: 1px solid #f0f0f0;
-        }
-
-        /* About and details text */
         .user-card p {
             font-size: 0.9rem;
             color: #333;
@@ -53,55 +55,96 @@
             margin: 8px 0;
         }
 
-        /* Status text (e.g., "Not liked yet") */
-        #like-status {
-            font-weight: 600;
-            color: #001561;
-            margin: 1.5rem 0;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
         /* The Buttons */
         .user-card button {
             width: 120px;
             padding: 10px;
             margin: 5px;
-            border-radius: 25px; /* Pill-shaped to match your Nav Bar */
+            border-radius: 25px; 
             border: none;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
-        /* Like Button - Using your Navy Blue theme */
-        button[hx-post*="like"] {
-            background-color: #001561;
-            color: white;
-        }
-
-        /* Next Button - Lighter grey to distinguish it */
-        button[hx-get*="matching_with_iter"] {
-            background-color: #e4e6eb;
-            color: #050505;
-        }
-
-        /* Hover effects */
+        /* Action Buttons */
+        .btn-primary { background-color: #001561; color: white; }
+        .btn-accept { background-color: #28a745; color: white; }
+        .btn-decline { background-color: #dc3545; color: white; }
+        
         .user-card button:hover {
             transform: translateY(-2px);
             opacity: 0.9;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        
+        .section-title {
+            color: #001561;
+            border-bottom: 2px solid #e5e8ff;
+            padding-bottom: 10px;
+            width: 50%;
+            margin: 30px auto 10px auto;
+            text-align: left;
         }
     </style>
+
+    <!-- SECTION 1: PENDING INVITES -->
+    <h3 class="section-title">Pending Invites</h3>
+    <div id="invite-list">
+        {% for invite in context.invites_l %}
+            <!-- Notice the ID here: this allows HTMX to delete this specific card when accepted/declined -->
+            <div class="user-card invite-card" id="invite-card-{{ invite.invite_id }}">
+                
+                <p><strong>{{ invite.sender_name|default:invite.sender_email }}</strong> invited you to join a group:</p>
+                <h4>{{ invite.group_name }}</h4>
+                <p style="font-size: 0.8rem; color: gray;">Sent: {{ invite.created_at|date:"M d, Y" }}</p>
+                
+                <div style="margin-top: 20px;">
+                    <!-- Notice these point to URLs we haven't built yet! -->
+                    <button class="btn-accept" 
+                            hx-post="/groups/invites/{{ invite.invite_id }}/accept/" 
+                            hx-target="#invite-card-{{ invite.invite_id }}" 
+                            hx-swap="outerHTML">
+                        Accept
+                    </button>
+                    <button class="btn-decline" 
+                            hx-post="/groups/invites/{{ invite.invite_id }}/decline/" 
+                            hx-target="#invite-card-{{ invite.invite_id }}" 
+                            hx-swap="outerHTML">
+                        Decline
+                    </button>
+                </div>
+            </div>
+        {% empty %}
+            <p style="color: #777;">No pending invites.</p>
+        {% endfor %}
+    </div>
+
+    <!-- SECTION 2: CHATS -->
+    <h3 class="section-title">Your Chats</h3>
     <div id="user-list">
         {% for chat in context.chats_l %}
             <div class="user-card">
                 <p>Chat with: {{ chat.another_user_email }}</p>
-                <p>{{ chat.last_message.sender_id }}: {{ chat.last_message.content }} ({{ chat.last_message.created_at }})</p>
-                <button hx-get="{% url 'user_message_index_view' chat.another_user_id %}" hx-target="#user-list" hx-swap="innerHTML">Open Chat</button>
+                
+                {% if chat.last_message %}
+                    <p style="font-style: italic; background: white; padding: 10px; border-radius: 8px;">
+                        <strong>{{ chat.last_message.sender_id }}:</strong> {{ chat.last_message.content }}
+                    </p>
+                    <p style="font-size: 0.75rem; color: gray;">{{ chat.last_message.created_at|date:"M d, Y H:i" }}</p>
+                {% else %}
+                    <p>No messages yet.</p>
+                {% endif %}
+                
+                <button class="btn-primary" 
+                        hx-get="{% url 'user_message_index_view' chat.another_user_id %}" 
+                        hx-target="#user-list" 
+                        hx-swap="innerHTML">
+                    Open Chat
+                </button>
             </div>
         {% empty %}
-            <p>No chats yet.</p>
+            <p style="color: #777;">No active chats.</p>
         {% endfor %}
     </div>
 {% endblock %}

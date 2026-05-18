@@ -5,7 +5,9 @@ from ..user_access_check.views import *
 
 async def receive(request):
     passed_login_check, status, email, id = await access_check(request)
-    if not passed_login_check:
+    
+    # NEW EXCEPTION ADDED HERE
+    if not passed_login_check and status != "incomplete_profile":
         return redirect("/")
         
     if request.method == 'POST':
@@ -48,6 +50,9 @@ async def receive(request):
 
 async def index(request):
     passed_login_check, status, email, id = await access_check(request)
-    if not passed_login_check:
+    
+    # NEW EXCEPTION ADDED HERE
+    if not passed_login_check and status != "incomplete_profile":
         return redirect("/")
+        
     return render(request, 'profile_setup_1/templates/index.html')

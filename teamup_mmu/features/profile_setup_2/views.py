@@ -13,7 +13,9 @@ INTEREST_CATEGORIES = {
 
 async def index(request):
     passed_login_check, status, email, id = await access_check(request)
-    if not passed_login_check:
+    
+    # NEW EXCEPTION ADDED HERE
+    if not passed_login_check and status != "incomplete_profile":
         return redirect("/")
         
     # Initial load: 0 selected, nothing disabled, submit button invalid
@@ -27,9 +29,10 @@ async def index(request):
     return render(request, 'profile_setup_2/templates/index.html', context)
 
 async def validate(request):
-    """This is triggered by HTMX every time a checkbox is clicked"""
     passed_login_check, status, email, id = await access_check(request) 
-    if not passed_login_check:
+    
+    # NEW EXCEPTION ADDED HERE
+    if not passed_login_check and status != "incomplete_profile":
         return HttpResponse("Unauthorized", status=401)
 
     if request.method == 'POST':
@@ -46,9 +49,10 @@ async def validate(request):
         return render(request, 'profile_setup_2/templates/index.html', context)
 
 async def receive(request):
-    """This handles the final database save when they click Submit"""
     passed_login_check, status, email, id = await access_check(request) 
-    if not passed_login_check:
+    
+    # NEW EXCEPTION ADDED HERE
+    if not passed_login_check and status != "incomplete_profile":
         return redirect("/")
         
     if request.method == 'POST':

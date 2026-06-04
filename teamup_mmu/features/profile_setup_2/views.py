@@ -25,6 +25,7 @@ async def index(request):
     context = {
         'categories': INTEREST_CATEGORIES,
         'classes_ids': [class_record['id'] for class_record in classes_records],
+        'classes_codes': [class_record['course_code'] for class_record in classes_records],
         'selected': [],
         'count': 0,
         'at_limit': False,

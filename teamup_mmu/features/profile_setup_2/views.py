@@ -45,10 +45,18 @@ async def validate(request):
     if request.method == 'POST':
         selected = request.POST.getlist('interests')
         count = len(selected)
+
+        pool = await Database.get_pool()
+        async with pool.acquire() as conn:
+            classes_records = await conn.fetch("SELECT id, course_code FROM classes")
+        # Initial load: 0 selected, nothing disabled, submit button invalid
+        class_ids = [class_record['id'] for class_record in classes_records]
+        class_codes = [class_record['course_code'] for class_record in classes_records]
+        zipped_classes = zip(class_ids, class_codes)
         
         context = {
             'categories': INTEREST_CATEGORIES,
-
+            'zipped_classes': zipped_classes,
             'selected': selected,
             'count': count,
             'at_limit': count >= 5,           # True if they hit the max

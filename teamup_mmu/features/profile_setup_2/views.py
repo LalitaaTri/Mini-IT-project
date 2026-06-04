@@ -22,10 +22,12 @@ async def index(request):
     async with pool.acquire() as conn:
         classes_records = await conn.fetch("SELECT id, course_code FROM classes")
     # Initial load: 0 selected, nothing disabled, submit button invalid
+    class_ids = [class_record['id'] for class_record in classes_records]
+    class_codes = [class_record['course_code'] for class_record in classes_records]
+    zipped_classes = zip(class_ids, class_codes)
     context = {
         'categories': INTEREST_CATEGORIES,
-        'classes_ids': [class_record['id'] for class_record in classes_records],
-        'classes_codes': [class_record['course_code'] for class_record in classes_records],
+        'zipped_classes': zipped_classes,
         'selected': [],
         'count': 0,
         'at_limit': False,

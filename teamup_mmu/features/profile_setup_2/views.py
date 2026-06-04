@@ -18,9 +18,13 @@ async def index(request):
     if not passed_login_check and status != "incomplete_profile":
         return redirect("/")
         
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        classes_records = await conn.fetch("SELECT id, course_code FROM classes")
     # Initial load: 0 selected, nothing disabled, submit button invalid
     context = {
         'categories': INTEREST_CATEGORIES,
+        'classes_ids': [class_record['id'] for class_record in classes_records],
         'selected': [],
         'count': 0,
         'at_limit': False,
@@ -41,6 +45,7 @@ async def validate(request):
         
         context = {
             'categories': INTEREST_CATEGORIES,
+
             'selected': selected,
             'count': count,
             'at_limit': count >= 5,           # True if they hit the max
@@ -56,14 +61,17 @@ async def receive(request):
         return redirect("/")
         
     if request.method == 'POST':
+        classes_ids = request.POST.getlist('classes_ids')
+        if len(classes_ids) > 8:
+            return HttpResponse("Please select no more than 8 classes.")
+
         interests = request.POST.getlist('interests')
         if len(interests) < 2 or len(interests) > 5:
             return HttpResponse("Please select between 2 and 5 topics.")
             
         pool = await Database.get_pool()
         async with pool.acquire() as conn:
-            await conn.execute("UPDATE profiles SET interests=$1 WHERE id=$2", interests, id)
-            
+            await conn.execute("UPDATE profiles SET interests=$1, classes_ids=$2 WHERE id=$3", interests, classes_ids, id)
         response = HttpResponse("Profile complete!")
         response['HX-Redirect'] = '/matching/'
         return response

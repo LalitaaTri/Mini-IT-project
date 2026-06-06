@@ -46,6 +46,10 @@ async def validate(request):
         selected = request.POST.getlist('interests')
         count = len(selected)
 
+        selected_classes = request.POST.getlist('classes_ids') 
+        # Convert them to integers so they match your database IDs easily in the template
+        selected_classes = [int(cid) for cid in selected_classes if cid.isdigit()]
+
         pool = await Database.get_pool()
         async with pool.acquire() as conn:
             classes_records = await conn.fetch("SELECT id, course_code FROM classes")
@@ -57,6 +61,7 @@ async def validate(request):
         context = {
             'categories': INTEREST_CATEGORIES,
             'zipped_classes': zipped_classes,
+            'selected_classes': selected_classes,
             'selected': selected,
             'count': count,
             'at_limit': count >= 5,           # True if they hit the max
@@ -83,6 +88,11 @@ async def receive(request):
         pool = await Database.get_pool()
         async with pool.acquire() as conn:
             await conn.execute("UPDATE profiles SET interests=$1, classes_ids=$2 WHERE id=$3", interests, classes_ids, id)
+            for class_id in classes_ids:
+                await conn.execute("""
+                    INSERT INTO user_classes (user_id, class_id) 
+                    VALUES ($1, $2)
+                """, id, int(class_id))
         response = HttpResponse("Profile complete!")
         response['HX-Redirect'] = '/matching/'
         return response

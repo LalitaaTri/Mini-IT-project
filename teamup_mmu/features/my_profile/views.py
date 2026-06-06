@@ -21,7 +21,9 @@ async def index(request):
     # Initial load: 0 selected, nothing disabled, submit button invalid
     class_ids = [class_record['id'] for class_record in classes_records]
     class_codes = [class_record['course_code'] for class_record in classes_records]
-    zipped_classes = list(zip(class_ids, class_codes))
+    class_sections = [class_record['section'] for class_record in classes_records]
+    class_trimesters = [class_record['trimester'] for class_record in classes_records]
+    zipped_classes = list(zip(class_ids, class_codes, class_sections, class_trimesters))
     async with pool.acquire() as conn:
         profile = await conn.fetchrow("""
             SELECT username, introduction, descriptions, year_of_study, faculty, program, cgpa, interests

@@ -16,12 +16,11 @@
 <div class="profile-edit-container">
     <div style="text-align: center; margin-bottom: 20px;">
         <img src="{% static 'teamup_mmu/profile.png' %}" alt="Profile" style="width: 120px; border-radius: 50%;">
-        <h2>Edit My Profile 2</h2>
+        <h2>Edit My Profile</h2>
         <p>{{ context.email }}</p>
     </div>
 
     <!-- HTMX form targeting the status div below -->
-     {{ context.zipped_classes }}
     <form hx-post="/my_profile/edit/" hx-target="#edit-status" hx-swap="innerHTML">
         {% csrf_token %}
 
@@ -69,9 +68,13 @@
                 {% endfor %}
             </div>
         {% endfor %}
-        {% for class_id, class_code in context.zipped_classes %}
-        <input type="checkbox" name="classes_ids" value="{{ class_id }}" style="">
-        Class Code: {{ class_code }} <br>
+        Form
+        {% for class_id, class_code, class_section, class_trimester in context.zipped_classes %}
+        <label style="display: block; margin: 5px 0;">
+            <input type="checkbox" name="classes_ids" value="{{ class_id }}" 
+                {% if class_id in selected_classes %}checked{% endif %}>
+            Class Code: {{ class_code }} - Section: {{ class_section }} - Trimester: {{ class_trimester }} <br>
+        </label>
         {% endfor %}
 
         <div id="edit-status" style="text-align: center; margin: 15px 0; font-weight: bold; color: red;"></div>

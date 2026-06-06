@@ -20,14 +20,18 @@ async def index(request):
         
     pool = await Database.get_pool()
     async with pool.acquire() as conn:
-        classes_records = await conn.fetch("SELECT id, course_code FROM classes")
+        classes_records = await conn.fetch("SELECT * FROM classes")
     # Initial load: 0 selected, nothing disabled, submit button invalid
+    selected_classes = request.POST.getlist('classes_ids') 
     class_ids = [class_record['id'] for class_record in classes_records]
     class_codes = [class_record['course_code'] for class_record in classes_records]
-    zipped_classes = zip(class_ids, class_codes)
+    class_sections = [class_record['section'] for class_record in classes_records]
+    class_trimesters = [class_record['trimester'] for class_record in classes_records]
+    zipped_classes = list(zip(class_ids, class_codes, class_sections, class_trimesters))
     context = {
         'categories': INTEREST_CATEGORIES,
         'zipped_classes': zipped_classes,
+        'selected_classes': selected_classes,
         'selected': [],
         'count': 0,
         'at_limit': False,
@@ -52,11 +56,13 @@ async def validate(request):
 
         pool = await Database.get_pool()
         async with pool.acquire() as conn:
-            classes_records = await conn.fetch("SELECT id, course_code FROM classes")
+            classes_records = await conn.fetch("SELECT * FROM classes")
         # Initial load: 0 selected, nothing disabled, submit button invalid
         class_ids = [class_record['id'] for class_record in classes_records]
         class_codes = [class_record['course_code'] for class_record in classes_records]
-        zipped_classes = zip(class_ids, class_codes)
+        class_sections = [class_record['section'] for class_record in classes_records]
+        class_trimesters = [class_record['trimester'] for class_record in classes_records]
+        zipped_classes = list(zip(class_ids, class_codes, class_sections, class_trimesters))
         
         context = {
             'categories': INTEREST_CATEGORIES,

@@ -15,5 +15,5 @@ CREATE TABLE IF NOT EXISTS profiles (
     classes_ids INTEGER[] CHECK (
         array_length(classes_ids, 1) >= 0 AND 
         array_length(classes_ids, 1) <= 8
-    ),
+    )
 );

@@ -181,8 +181,8 @@ async def class_details(request, class_id):
             'class_admin_name' : class_admin,
             'class_admin_email' : class_admin_email,
             'is_admin': is_admin,
-            'current_user_id': user_id if 'user_id' in locals() else None
-
+            'current_user_id': user_id if 'user_id' in locals() else None,
+            'active_tab': 'students'
         })
 
 
@@ -341,3 +341,115 @@ async def delete_class_confirm(request):
     response['HX-Redirect'] = "/classes/"
     return response
 
+@csrf_exempt
+async def class_tab(request, class_id, tab_name):
+    # 1. Verify user's session token
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+        user_id = session['user_id']
+
+        target_class = await conn.fetchrow("SELECT * FROM classes WHERE id=$1", class_id)
+        if not target_class:
+            return HttpResponse("Class not found", status=404)
+
+        # 2. Verify that the user is actually enrolled in this class
+        user_role = await conn.fetchval("SELECT role FROM user_classes WHERE user_id=$1 AND class_id=$2", user_id, class_id)
+        if not user_role:
+            return HttpResponse("Forbidden: You are not in this class", status=403)
+        is_admin = (user_role == 'admin')
+
+        # 3. Build context for rendering
+        context = {
+            'class_details': target_class,
+            'active_tab': tab_name,
+            'is_admin': is_admin,
+            'current_user_id': user_id,
+        }
+
+        # 4. Fetch the specific data needed for the requested tab
+        if tab_name == 'students':
+            class_students = await conn.fetch("""
+                SELECT u.id as user_id, u.email, p.username, uc.role as user_role
+                FROM users u
+                JOIN user_classes uc ON u.id = uc.user_id
+                JOIN profiles p ON u.id = p.id
+                WHERE uc.class_id = $1
+            """, class_id)
+            context['class_students'] = class_students
+        elif tab_name == 'groups':
+            context['class_groups'] = []
+        elif tab_name == 'announcements':
+            announcements = await conn.fetch("""
+                SELECT ca.*, p.username as sender_name, u.email as sender_email
+                FROM class_announcements ca
+                JOIN users u ON ca.sender_id = u.id
+                LEFT JOIN profiles p ON u.id = p.id
+                WHERE ca.class_id = $1
+                ORDER BY ca.created_at ASC
+            """, class_id)
+            context['announcements'] = announcements
+
+        # 5. Render and return the partial tab container template
+        return render(request, 'user_classes/templates/tabs_section.html', context)
+
+
+@csrf_exempt
+async def send_announcement(request, class_id):
+    if request.method != 'POST':
+        return HttpResponse("Invalid method", status=400)
+
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+
+    content = request.POST.get('content', '').strip()
+    if not content:
+        return HttpResponse("Content cannot be empty", status=400)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+        user_id = session['user_id']
+
+        target_class = await conn.fetchrow("SELECT * FROM classes WHERE id=$1", class_id)
+        if not target_class:
+            return HttpResponse("Class not found", status=404)
+
+        # Only class admins can post announcements
+        user_role = await conn.fetchval("SELECT role FROM user_classes WHERE user_id=$1 AND class_id=$2", user_id, class_id)
+        if user_role != 'admin':
+            return HttpResponse("Forbidden: Only admin can post announcements", status=403)
+
+        # Insert new announcement
+        await conn.execute("""
+            INSERT INTO class_announcements (class_id, sender_id, content)
+            VALUES ($1, $2, $3)
+        """, class_id, user_id, content)
+
+        # Fetch the updated list of announcements to reload the feed
+        announcements = await conn.fetch("""
+            SELECT ca.*, p.username as sender_name, u.email as sender_email
+            FROM class_announcements ca
+            JOIN users u ON ca.sender_id = u.id
+            LEFT JOIN profiles p ON u.id = p.id
+            WHERE ca.class_id = $1
+            ORDER BY ca.created_at ASC
+        """, class_id)
+
+        context = {
+            'class_details': target_class,
+            'active_tab': 'announcements',
+            'is_admin': True,
+            'current_user_id': user_id,
+            'announcements': announcements
+        }
+        return render(request, 'user_classes/templates/tabs_section.html', context)

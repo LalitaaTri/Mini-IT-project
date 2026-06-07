@@ -25,6 +25,9 @@ from .features.user_classes.views import remove_student
 from .features.user_classes.views import share_code_modal
 from .features.user_classes.views import delete_class_modal
 from .features.user_classes.views import delete_class_confirm
+from .features.user_classes.views import class_tab
+from .features.user_classes.views import send_announcement
+
 
 from .features.my_profile.views import profile_modal as user_profile_modal
 
@@ -111,6 +114,9 @@ urlpatterns = [
     path('classes/share_code_modal/<int:class_id>/', share_code_modal, name='share_code_modal'),
     path('classes/delete_class_modal/<int:class_id>/', delete_class_modal, name='delete_class_modal'),
     path('classes/delete_class_confirm/', delete_class_confirm, name='delete_class_confirm'),
+    path('classes/class_details/<int:class_id>/tab/<str:tab_name>/', class_tab, name='class_tab'),
+    path('classes/class_details/<int:class_id>/announcements/send/', send_announcement, name='send_announcement'),
+
 
     path('profile/modal/<int:user_id>/', user_profile_modal, name='user_profile_modal'),
 

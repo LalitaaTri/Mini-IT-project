@@ -30,10 +30,19 @@
             <button type="submit" {% if context.like_status == 'Liked' %}disabled{% endif %}>Like</button>
         </form>
         
+<!-- The Invite Button -->
+        <button hx-get="/invite_modal/{{ context.user_obj.id }}/" 
+                hx-target="#modal-container" 
+                hx-swap="innerHTML"
+                style="background: #5b73df; color: white; border-radius: 25px; padding: 10px 15px; border: none; cursor: pointer;">
+            Invite to Group
+        </button>
+        
         <button hx-get="{% url 'matching_with_iter' context.next_iter %}"
            hx-target="#user-list"
            hx-swap="innerHTML">Next</button>
     </div>
+<div id="modal-container"></div>
 {% else %}
     <div class="user-card">No other users found.</div>
 {% endif %}

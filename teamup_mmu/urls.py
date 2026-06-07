@@ -50,6 +50,9 @@ from .features.user_access_check.views import access_check_endpoint as access_ch
 from .features.my_profile.views import index as my_profile_index
 from .features.my_profile.views import edit as my_profile_edit
 from .features.groups import views as group_views
+from .features.group_invite_modal import views as group_invite_modal_views
+
+
 
 
 urlpatterns = [
@@ -68,6 +71,10 @@ urlpatterns = [
     path('groups/leave/<int:group_id>/', group_views.group_leave, name='group_leave'),
     path('groups/<int:group_id>/members/', group_views.group_members_list, name='group_members_list'),
     path('groups/join_by_code/', group_views.group_join_by_code, name='group_join_by_code'),
+    path('groups/invites/<int:invite_id>/accept/', group_views.invite_accept, name='invite_accept'),
+    path('groups/invites/<int:invite_id>/decline/', group_views.invite_decline, name='invite_decline'),
+    path('invite_modal/<int:target_user_id>/', group_invite_modal_views.load_modal, name='load_invite_modal'),
+    path('invite_modal/send/', group_invite_modal_views.send_invite, name='send_invite_modal'),
     path('settings/', views.settings, name='settings'),
     path('logout/', user_logout, name='user_logout'),
     path('email_verification/send/', user_email_verification_send, name='user_email_verification_send'),

@@ -4,7 +4,14 @@
         <!-- Show Username instead of just email if it exists -->
         <h2>{{ context.user_obj.username|default:context.user_obj.email }}</h2>
         
-        <img src="{% static 'teamup_mmu/profile.png' %}" alt="Profile Picture">
+        <img src="{% static 'teamup_mmu/profile.png' %}" 
+                     alt="Profile Picture"
+                     hx-get="/user_profile/{{ context.user_obj.id }}/" 
+                     hx-target="#profile-modal-container" 
+                     hx-swap="innerHTML" 
+                     style="cursor: pointer; transition: transform 0.2s;"
+                     onmouseover="this.style.transform='scale(1.05)'"
+                     onmouseout="this.style.transform='scale(1)'">
         
         <!-- Inject real data from the database -->
         <p><strong>Headline:</strong> {{ context.user_obj.introduction }}</p>
@@ -31,12 +38,21 @@
         </form>
         
 <!-- The Invite Button -->
-        <button hx-get="/invite_modal/{{ context.user_obj.id }}/" 
-                hx-target="#modal-container" 
-                hx-swap="innerHTML"
-                style="background: #5b73df; color: white; border-radius: 25px; padding: 10px 15px; border: none; cursor: pointer;">
-            Invite to Group
-        </button>
+<div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 10px;">
+            <button hx-get="/connect_modal/invite/{{ context.user_obj.id }}/" 
+                    hx-target="#modal-container" 
+                    hx-swap="innerHTML"
+                    style="background: #5b73df; color: white; border-radius: 25px; padding: 10px 15px; border: none; cursor: pointer;">
+                Invite to Group
+            </button>
+            
+            <button hx-get="/connect_modal/request/{{ context.user_obj.id }}/" 
+                    hx-target="#modal-container" 
+                    hx-swap="innerHTML"
+                    style="background: #28a745; color: white; border-radius: 25px; padding: 10px 15px; border: none; cursor: pointer;">
+                Request to Join
+            </button>
+        </div>
         
         <button hx-get="{% url 'matching_with_iter' context.next_iter %}"
            hx-target="#user-list"

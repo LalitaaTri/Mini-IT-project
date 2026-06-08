@@ -86,7 +86,14 @@
                     ✉️ {{ user.email }}
                 </p>
                 
-                <img src="{% static 'teamup_mmu/profile.png' %}" alt="Profile Picture">
+                <img src="{% static 'teamup_mmu/profile.png' %}" 
+                     alt="Profile Picture"
+                     hx-get="/user_profile/{{ user.id }}/" 
+                     hx-target="#profile-modal-container" 
+                     hx-swap="innerHTML" 
+                     style="cursor: pointer; transition: transform 0.2s;"
+                     onmouseover="this.style.transform='scale(1.05)'"
+                     onmouseout="this.style.transform='scale(1)'">
                 
                 <!-- Injected Profile Data -->
                 <p><strong>About:</strong> {{ user.descriptions }}</p>

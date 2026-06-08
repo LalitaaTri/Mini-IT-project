@@ -52,6 +52,8 @@ from .features.my_profile.views import index as my_profile_index
 from .features.my_profile.views import edit as my_profile_edit
 from .features.groups import views as group_views
 from .features.group_invite_modal import views as group_invite_modal_views
+from .features.user_profile import views as user_profile_views
+
 
 
 
@@ -74,8 +76,12 @@ urlpatterns = [
     path('groups/join_by_code/', group_views.group_join_by_code, name='group_join_by_code'),
     path('groups/invites/<int:invite_id>/accept/', group_views.invite_accept, name='invite_accept'),
     path('groups/invites/<int:invite_id>/decline/', group_views.invite_decline, name='invite_decline'),
-    path('invite_modal/<int:target_user_id>/', group_invite_modal_views.load_modal, name='load_invite_modal'),
-    path('invite_modal/send/', group_invite_modal_views.send_invite, name='send_invite_modal'),
+    path('connect_modal/invite/<int:target_user_id>/', group_invite_modal_views.load_invite_modal, name='load_invite_modal'),
+    path('connect_modal/request/<int:target_user_id>/', group_invite_modal_views.load_request_modal, name='load_request_modal'),
+    path('connect_modal/send_invite/', group_invite_modal_views.send_invite, name='send_invite_modal'),
+    path('connect_modal/send_request/', group_invite_modal_views.send_request, name='send_request_modal'),
+    path('groups/requests/<int:req_id>/accept/', group_views.request_accept, name='request_accept'),
+    path('groups/requests/<int:req_id>/decline/', group_views.request_decline, name='request_decline'),
     path('settings/', views.settings, name='settings'),
     path('logout/', user_logout, name='user_logout'),
     path('email_verification/send/', user_email_verification_send, name='user_email_verification_send'),
@@ -99,7 +105,7 @@ urlpatterns = [
     path('access_check/', access_check_endpoint, name='access_check_endpoint'),
     path('my_profile/', my_profile_index, name='my_profile'),
     path('my_profile/edit/', my_profile_edit, name='my_profile_edit'),
-
+    path('user_profile/<int:target_user_id>/', user_profile_views.load_profile_modal, name='user_profile_modal'),
     path('classes/join_modal/', join_modal, name='join_modal'),
     path('classes/join_by_code/', join_by_code, name='join_by_code'),
     path('classes/create_modal/', create_modal, name='create_modal'),

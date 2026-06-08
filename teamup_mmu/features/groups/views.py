@@ -265,3 +265,57 @@ async def invite_decline(request, invite_id):
 
         # Returning an empty string with HTMX outerHTML swap completely deletes the card from the screen instantly!
         return HttpResponse("")
+    
+
+async def request_accept(request, req_id):
+    """Handles an Admin approving someone's request to join their group"""
+    passed_login_check, status, email, id = await access_check(request)
+    if not passed_login_check: return HttpResponse("Unauthorized", status=401)
+
+    if request.method == 'POST':
+        pool = await Database.get_pool()
+        async with pool.acquire() as conn:
+            # 1. Verify the request exists and this user is the admin
+            join_req = await conn.fetchrow("SELECT group_id, sender_id FROM group_requests WHERE id=$1 AND admin_id=$2 AND status='pending'", req_id, id)
+            
+            if not join_req:
+                return HttpResponse("<p style='color: red; text-align: center;'>Request not found.</p>")
+            
+            group_id = join_req['group_id']
+            sender_id = join_req['sender_id']
+
+            # 2. Check Capacity
+            group = await conn.fetchrow("SELECT max_members FROM groups WHERE id=$1", group_id)
+            current_count = await conn.fetchval("SELECT COUNT(*) FROM group_members WHERE group_id=$1", group_id)
+            
+            if current_count >= group['max_members']:
+                await conn.execute("UPDATE group_requests SET status='failed' WHERE id=$1", req_id)
+                return HttpResponse("<div style='background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 10px; text-align: center;'>Your group is full.</div>")
+
+            # 3. Add them to the group
+            already_in = await conn.fetchval("SELECT 1 FROM group_members WHERE group_id=$1 AND user_id=$2", group_id, sender_id)
+            if not already_in:
+                await conn.execute("INSERT INTO group_members (group_id, user_id) VALUES ($1, $2)", group_id, sender_id)
+
+            # 4. Mark as Accepted
+            await conn.execute("UPDATE group_requests SET status='accepted' WHERE id=$1", req_id)
+
+        # Replace the card with a success message
+        return HttpResponse("""
+            <div style='background-color: #d4edda; color: #155724; padding: 15px; border-radius: 10px; text-align: center; width: 50%; margin: 0 auto 20px auto;'>
+                <strong>Approved!</strong> They are now in the group.
+            </div>
+        """)
+
+async def request_decline(request, req_id):
+    """Handles denying a join request"""
+    passed_login_check, status, email, id = await access_check(request)
+    if not passed_login_check: return HttpResponse("Unauthorized", status=401)
+
+    if request.method == 'POST':
+        pool = await Database.get_pool()
+        async with pool.acquire() as conn:
+            await conn.execute("UPDATE group_requests SET status='declined' WHERE id=$1 AND admin_id=$2", req_id, id)
+
+        # Deletes the card from the screen
+        return HttpResponse("")

@@ -7,7 +7,7 @@
     
     <style>
         /* Centers the entire list on the page */
-        #user-list, #invite-list {
+        #user-list, #request-list, #invite-list {
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -120,6 +120,35 @@
         {% endfor %}
     </div>
 
+    <h3 class="section-title">Join Requests</h3>
+    <div id="request-list">
+        {% for req in context.requests_l %}
+            <div class="user-card" id="request-card-{{ req.request_id }}" style="background-color: #f0f8ff; border: 1px solid #bce8f1;">
+                
+                <p><strong>{{ req.sender_name|default:req.sender_email }}</strong> wants to join your group:</p>
+                <h4 style="color: #001561; margin: 10px 0; font-size: 1.2rem;">{{ req.group_name }}</h4>
+                <p style="font-size: 0.8rem; color: gray;">Requested: {{ req.created_at|date:"M d, Y" }}</p>
+                
+                <div style="margin-top: 20px;">
+                    <button class="btn-accept" 
+                            hx-post="/groups/requests/{{ req.request_id }}/accept/" 
+                            hx-target="#request-card-{{ req.request_id }}" 
+                            hx-swap="outerHTML">
+                        Approve
+                    </button>
+                    <button class="btn-decline" 
+                            hx-post="/groups/requests/{{ req.request_id }}/decline/" 
+                            hx-target="#request-card-{{ req.request_id }}" 
+                            hx-swap="outerHTML">
+                        Deny
+                    </button>
+                </div>
+            </div>
+        {% empty %}
+            <p style="color: #777; margin-bottom: 30px;">No pending requests to join your groups.</p>
+        {% endfor %}
+    </div>
+    
     <!-- SECTION 2: CHATS -->
     <h3 class="section-title">Your Chats</h3>
     <div id="user-list">

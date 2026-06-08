@@ -11,16 +11,10 @@ async def index(request):
     if request.method == "GET":
         pool = await Database.get_pool()
         async with pool.acquire() as conn:
-            # 1. FETCH GROUP INVITES (New Feature)
-            # We join the groups and profiles tables to get readable names instead of just IDs
+            
+            # 1. FETCH GROUP INVITES (Them inviting YOU)
             invites_records = await conn.fetch("""
-                SELECT 
-                    gi.id as invite_id,
-                    g.id as group_id,
-                    g.name as group_name,
-                    p.username as sender_name,
-                    u.email as sender_email,
-                    gi.created_at
+                SELECT gi.id as invite_id, g.id as group_id, g.name as group_name, p.username as sender_name, u.email as sender_email, gi.created_at
                 FROM group_invites gi
                 JOIN groups g ON gi.group_id = g.id
                 JOIN users u ON gi.sender_id = u.id
@@ -28,9 +22,19 @@ async def index(request):
                 WHERE gi.receiver_id = $1 AND gi.status = 'pending'
                 ORDER BY gi.created_at DESC
             """, id)
-            
-            # Convert records to a list of dicts for the template
             invites_l = [dict(record) for record in invites_records]
+
+            # 2. FETCH JOIN REQUESTS (Them asking to join YOUR group)
+            requests_records = await conn.fetch("""
+                SELECT gr.id as request_id, g.id as group_id, g.name as group_name, p.username as sender_name, u.email as sender_email, gr.created_at
+                FROM group_requests gr
+                JOIN groups g ON gr.group_id = g.id
+                JOIN users u ON gr.sender_id = u.id
+                LEFT JOIN profiles p ON u.id = p.id
+                WHERE gr.admin_id = $1 AND gr.status = 'pending'
+                ORDER BY gr.created_at DESC
+            """, id)
+            requests_l = [dict(record) for record in requests_records]
 
             # 2. FETCH CHATS (Your existing logic)
             l = await conn.fetch("SELECT * FROM users WHERE id!=$1 AND inactive=False", id)

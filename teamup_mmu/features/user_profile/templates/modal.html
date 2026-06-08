@@ -1,0 +1,46 @@
+{% load static %}
+<div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 999;">
+    
+    <div style="background: white; padding: 2rem; border-radius: 15px; width: 350px; max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; font-family: 'Inter', sans-serif;">
+
+        <button onclick="document.getElementById('profile-modal-container').innerHTML=''" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</button>
+
+        <div style="text-align: center;">
+            <img src="{% static 'teamup_mmu/profile.png' %}" alt="Profile Picture" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 10px; border: 3px solid #e5e8ff; object-fit: cover;">
+            <h3 style="margin: 0; color: #001561; font-size: 1.4rem;">{{ context.target_user.username|default:context.target_user.email }}</h3>
+            <p style="color: #666; font-size: 0.9rem; margin-top: 5px;">{{ context.target_user.program|default:"Program not set" }} ({{ context.target_user.faculty|default:"-" }})</p>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+
+        <div style="font-size: 0.95rem; color: #333; line-height: 1.5;">
+            <p style="margin: 5px 0;"><strong>Year of Study:</strong> {{ context.target_user.year_of_study|default:"N/A" }}</p>
+            <p style="margin: 5px 0 15px 0;"><strong>Headline:</strong> <span style="color: #555;">{{ context.target_user.introduction|default:"No bio provided." }}</span></p>
+
+            {% if context.target_user.interests %}
+                <p style="margin-bottom: 5px;"><strong>Interests:</strong></p>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 15px;">
+                    {% for interest in context.target_user.interests %}
+                        <span style="background: #e5e8ff; color: #001561; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">{{ interest }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+            <button hx-get="/connect_modal/invite/{{ context.target_user_id }}/"
+                    hx-target="#modal-container"
+                    hx-swap="innerHTML"
+                    style="background: #5b73df; color: white; border-radius: 25px; padding: 10px 15px; border: none; cursor: pointer; font-weight: 600; flex: 1; transition: opacity 0.2s;">
+                Invite
+            </button>
+            <button hx-get="/connect_modal/request/{{ context.target_user_id }}/"
+                    hx-target="#modal-container"
+                    hx-swap="innerHTML"
+                    style="background: #28a745; color: white; border-radius: 25px; padding: 10px 15px; border: none; cursor: pointer; font-weight: 600; flex: 1; transition: opacity 0.2s;">
+                Request
+            </button>
+        </div>
+
+    </div>
+</div>

@@ -7,4 +7,5 @@
 \i teamup_mmu/features/user_signup/schema.sql
 \i teamup_mmu/features/user_classes/schema.sql
 \i teamup_mmu/features/profile_setup_1/schema.sql
+\i teamup_mmu/features/profile_setup_2/schema.sql
 \i teamup_mmu/features/groups/schema.sql

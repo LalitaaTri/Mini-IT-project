@@ -4,6 +4,7 @@ from teamup_mmu.db import Database
 from ..user_access_check.views import *
 
 async def receive(request):
+    print("recieve function starts")
     passed_login_check, status, email, id = await access_check(request)
     
     # NEW EXCEPTION ADDED HERE
@@ -11,6 +12,7 @@ async def receive(request):
         return redirect("/")
         
     if request.method == 'POST':
+        print("request is pOST")
         # 1. Grab all the new data from the form
         username = request.POST.get('username')
         introduction = request.POST.get('introduction')
@@ -32,7 +34,7 @@ async def receive(request):
                 return HttpResponse("Username is already taken. Please try again.")
                 
             # Execute the massive update query
-            await conn.execute("""
+            result = await conn.execute("""
                 UPDATE profiles 
                 SET username=$1, 
                     introduction=$2, 
@@ -42,10 +44,15 @@ async def receive(request):
                     program=$6
                 WHERE id=$7
             """, username, introduction, descriptions, year_of_study, faculty, program, id)
-            
+            print("id=",id)
+            print("Database update result:", result)
+            row = await conn.fetchrow("SELECT id FROM profiles WHERE id = $1", id)
+            print(f"Does the user exist? {row}")
+
         # Redirect to the main profile setup page to trigger step 2
+        print("Success and redirect")
         response = HttpResponse("Success")
-        response['HX-Redirect'] = '/profile_setup/'
+        response['HX-Redirect'] = '/profile_setup/?step=2'
         return response
 
 async def index(request):

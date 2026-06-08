@@ -166,7 +166,7 @@ async def class_details(request, class_id):
         class_admin_email = await conn.fetchval("SELECT email FROM users WHERE id=(SELECT user_id FROM user_classes WHERE class_id=$1 AND role='admin')", class_id)
 
         class_students = await conn.fetch("""
-            SELECT u.id as user_id, u.email, p.username, uc.role as user_role
+            SELECT u.id as user_id, u.email, p.username, uc.role as user_role, u.email_verified
             FROM users u
             JOIN user_classes uc ON u.id = uc.user_id
             JOIN profiles p ON u.id = p.id
@@ -376,7 +376,7 @@ async def class_tab(request, class_id, tab_name):
         # 4. Fetch the specific data needed for the requested tab
         if tab_name == 'students':
             class_students = await conn.fetch("""
-                SELECT u.id as user_id, u.email, p.username, uc.role as user_role
+                SELECT u.id as user_id, u.email, p.username, uc.role as user_role, u.email_verified
                 FROM users u
                 JOIN user_classes uc ON u.id = uc.user_id
                 JOIN profiles p ON u.id = p.id
@@ -483,6 +483,7 @@ async def add_students_modal(request, class_id):
             WHERE u.id NOT IN (
                 SELECT user_id FROM user_classes WHERE class_id = $1
             ) AND u.inactive = FALSE
+              AND u.email_verified = TRUE
             LIMIT 5
         """, class_id)
 
@@ -519,6 +520,7 @@ async def add_students_search(request, class_id):
             WHERE u.id NOT IN (
                 SELECT user_id FROM user_classes WHERE class_id = $1
             ) AND u.inactive = FALSE
+              AND u.email_verified = TRUE
               AND (p.username ILIKE $2 OR u.email ILIKE $2)
             LIMIT 10
         """, class_id, search_pattern)
@@ -609,9 +611,9 @@ async def upload_csv(request, class_id):
         for row in csv_data:
             if not row:
                 continue
-            # Trim whitespace and convert to lowercase for matching
+            # Trim whitespace and convert to lowercase for matching. Only allows @mmu.edu.my emails
             email = row[0].strip().lower()
-            if email and ('@' in email):
+            if email and ('@mmu.edu.my' in email):
                 emails_to_enroll.append(email)
 
         success_count = 0
@@ -620,24 +622,34 @@ async def upload_csv(request, class_id):
 
         # 7. Enroll students from the emails parsed
         for email in emails_to_enroll:
-            # Look up active student by email
-            student = await conn.fetchrow("SELECT id FROM users WHERE email=$1 AND inactive=FALSE", email)
-            if not student:
-                skipped_count += 1
-                failed_emails.append(email)
-                continue
-
-            student_id = student['id']
+            # Look up student by email
+            student = await conn.fetchrow("SELECT id FROM users WHERE email=$1", email)
             
+            if not student:
+                # User does not exist, create a stub account for them
+                student_id = await conn.fetchval(
+                    "INSERT INTO users (email, password, email_verified) VALUES ($1, 'PENDING_INVITE', FALSE) RETURNING id",
+                    email
+                )
+                # Create a blank profile matching their new user id
+                await conn.execute("INSERT INTO profiles (id, username) VALUES ($1, $2)", student_id, None)
+                
+                # Print the simulated email invitation link to the console log
+                invite_url = f"http://127.0.0.1:8000/signup/?email={email}"
+                print(f"\n[EMAIL SIMULATION] Sent invite to {email}: {invite_url}\n")
+            else:
+                student_id = student['id']
+
             # Check if student is already in the class
             already_in = await conn.fetchval("SELECT 1 FROM user_classes WHERE user_id=$1 AND class_id=$2", student_id, class_id)
             if already_in:
                 skipped_count += 1
                 continue
 
-            # Enroll student
+            # Enroll student in the class
             await conn.execute("INSERT INTO user_classes (user_id, class_id, role) VALUES ($1, $2, 'student')", student_id, class_id)
             success_count += 1
+
 
         # 8. Fetch the new student count
         new_count = await conn.fetchval("SELECT count(*) FROM user_classes WHERE class_id=$1", class_id)

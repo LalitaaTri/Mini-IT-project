@@ -26,9 +26,15 @@
         hx-swap="innerHTML">
 
         <div style="display: flex; flex-direction: column; gap: 0.2rem;">
-            <span style="font-weight: 600; color: #2a2e34;">{{ student.username|default:"Student Name" }}</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-weight: 600; color: #2a2e34;">{{ student.username|default:"Invited Student" }}</span>
+                {% if not student.email_verified %}
+                    <span style="background: #fef3c7; color: #d97706; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 12px;" title="This student hasn't completed setup yet.">Pending</span>
+                {% endif %}
+            </div>
             <span style="font-size: 0.85rem; color: #7f8a9c;">{{ student.email|default:"studentemail@mmu.edu.my"}}</span>
         </div>
+
 
         {% if is_admin %}
         <!-- Remove Student Button (Admin Only) -->

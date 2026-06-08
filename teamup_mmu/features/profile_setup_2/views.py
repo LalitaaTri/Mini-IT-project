@@ -28,6 +28,7 @@ async def index(request):
     class_sections = [class_record['section'] for class_record in classes_records]
     class_trimesters = [class_record['trimester'] for class_record in classes_records]
     zipped_classes = list(zip(class_ids, class_codes, class_sections, class_trimesters))
+    setup_page_val = int(request.GET.get('step', 2))
     context = {
         'categories': INTEREST_CATEGORIES,
         'zipped_classes': zipped_classes,
@@ -35,7 +36,8 @@ async def index(request):
         'selected': [],
         'count': 0,
         'at_limit': False,
-        'is_valid': False
+        'is_valid': False,
+        'setup_page': setup_page_val
     }
     return render(request, 'profile_setup_2/templates/index.html', context)
 

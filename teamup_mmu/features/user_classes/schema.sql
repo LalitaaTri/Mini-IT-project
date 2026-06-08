@@ -6,7 +6,9 @@ CREATE TABLE IF NOT EXISTS classes (
     course_code VARCHAR(20) NOT NULL,
     course_name VARCHAR(100) NOT NULL,
     description TEXT,
-    join_code TEXT UNIQUE NOT NULL
+    join_code TEXT UNIQUE NOT NULL,
+    trimester VARCHAR(20) NOT NULL,
+    section VARCHAR(20) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS user_classes (
@@ -19,7 +21,7 @@ CREATE TABLE IF NOT EXISTS user_classes (
 );
 
 -- Insert some dummy MMU classes for testing
-INSERT INTO classes (course_code, course_name, description, join_code) VALUES
-('TCS3111', 'Software Engineering', 'Learn about software development life cycles and project management.', 'SE123'),
-('TCS3151', 'Object Oriented Programming', 'Java programming concepts and OOP principles.', 'OOP456'),
-('TSN2201', 'Computer Networks', 'Network protocols, layers, and architectures.', 'NET789');
+INSERT INTO classes (course_code, course_name, description, join_code, trimester, section) VALUES
+('TCS3111', 'Software Engineering', 'Learn about software development life cycles and project management.', 'SE123', '2610', 'TC1L'),
+('TCS3151', 'Object Oriented Programming', 'Java programming concepts and OOP principles.', 'OOP456', '2610', 'TC3L'),
+('TSN2201', 'Computer Networks', 'Network protocols, layers, and architectures.', 'NET789', '2610', 'TC2L');

@@ -21,7 +21,13 @@
             
         </div>
         {% endfor %}
-        
+        {% for class_id, class_code, class_section, class_trimester in zipped_classes %}
+        <label style="display: block; margin: 5px 0;">
+            <input type="checkbox" name="classes_ids" value="{{ class_id }}" 
+                {% if class_id in selected_classes %}checked{% endif %}>
+            Class Code: {{ class_code }} - Section: {{ class_section }} - Trimester: {{ class_trimester }} <br>
+        </label>
+        {% endfor %}
     </div>
 
     <div style="margin-bottom: 15px; font-weight: bold; color: gray;">

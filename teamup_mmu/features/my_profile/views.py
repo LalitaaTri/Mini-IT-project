@@ -17,6 +17,14 @@ async def index(request):
 
     pool = await Database.get_pool()
     async with pool.acquire() as conn:
+        classes_records = await conn.fetch("SELECT id, course_code FROM classes")
+    # Initial load: 0 selected, nothing disabled, submit button invalid
+    class_ids = [class_record['id'] for class_record in classes_records]
+    class_codes = [class_record['course_code'] for class_record in classes_records]
+    class_sections = [class_record['section'] for class_record in classes_records]
+    class_trimesters = [class_record['trimester'] for class_record in classes_records]
+    zipped_classes = list(zip(class_ids, class_codes, class_sections, class_trimesters))
+    async with pool.acquire() as conn:
         profile = await conn.fetchrow("""
             SELECT username, introduction, descriptions, year_of_study, faculty, program, cgpa, interests
             FROM profiles WHERE id=$1
@@ -26,8 +34,10 @@ async def index(request):
         'profile': profile,
         'email': email,
         'categories': INTEREST_CATEGORIES,
-        'selected_interests': profile['interests'] if profile and profile['interests'] else []
+        'selected_interests': profile['interests'] if profile and profile['interests'] else [],
+        'zipped_classes': zipped_classes
     }
+    print("zipped_classes:", list(zipped_classes))
     return render(request, 'my_profile/templates/index.html', {'context': context})
 
 async def edit(request):

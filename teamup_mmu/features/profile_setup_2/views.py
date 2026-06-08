@@ -85,7 +85,10 @@ async def receive(request):
         return redirect("/")
         
     if request.method == 'POST':
-        classes_ids = request.POST.getlist('classes_ids')
+        raw_classes_ids = request.POST.getlist('classes_ids')
+        
+        # 2. Convert them to integers right away
+        classes_ids = [int(cid) for cid in raw_classes_ids if cid.isdigit()]
         if len(classes_ids) > 8:
             return HttpResponse("Please select no more than 8 classes.")
 

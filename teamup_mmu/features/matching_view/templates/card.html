@@ -1,8 +1,11 @@
 {% load static %}
+<p>Filter</p>
+<button>filter</button>
 {% if context.user_obj %}
     <div class="user-card">
         <!-- Show Username instead of just email if it exists -->
         <h2>{{ context.user_obj.username|default:context.user_obj.email }}</h2>
+        <p>Classes: {{ context.user_obj.classes_ids|join:", " }}</p>
         
         <img src="{% static 'teamup_mmu/profile.png' %}" alt="Profile Picture">
         

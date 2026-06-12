@@ -13,7 +13,7 @@ async def index(request, iter=0):
 # In matching_view/views.py index()
         other_users = await conn.fetch("""
             SELECT u.id, u.email, p.username, p.introduction, p.descriptions, 
-                   p.year_of_study, p.faculty, p.program, p.interests, p.cgpa
+                   p.year_of_study, p.faculty, p.program, p.interests, p.cgpa, p.classes_ids
             FROM users u
             INNER JOIN profiles p ON u.id = p.id
             WHERE u.id != $1 AND u.email_verified = $2 AND u.inactive = $3

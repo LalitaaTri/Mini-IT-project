@@ -18,6 +18,7 @@ async def index(request, iter=0):
             INNER JOIN profiles p ON u.id = p.id
             WHERE u.id != $1 AND u.email_verified = $2 AND u.inactive = $3
         """, id, True, False)
+        my_user = await conn.fetchrow("SELECT * FROM profiles WHERE id=$1", id)
         
     like_status = 'Not liked yet'
     if len(other_users):
@@ -30,7 +31,8 @@ async def index(request, iter=0):
     context = {
         'user_obj': [] if not other_users else other_users[iter],
         'next_iter': iter,
-        'like_status': like_status
+        'like_status': like_status,
+        'my_user': my_user
     }
     
     if request.headers.get('HX-Request'):

@@ -7,7 +7,9 @@ CREATE TABLE IF NOT EXISTS classes (
     course_code VARCHAR(20) NOT NULL,
     course_name VARCHAR(100) NOT NULL,
     description TEXT,
-    join_code TEXT UNIQUE NOT NULL
+    join_code TEXT UNIQUE NOT NULL,
+    trimester VARCHAR(20) NOT NULL,
+    section VARCHAR(20) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS user_classes (

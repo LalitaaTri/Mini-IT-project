@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "2/crTF4wsoo=",
+  "dgSpecHash": "Cf37rGqB/WY=",
   "success": true,
   "projectFilePath": "/Users/alim/Desktop/Mini-IT/Mini-IT-project/mobile/teamup_mmu/teamup_mmu.csproj",
   "expectedPackageFiles": [
@@ -117,17 +117,10 @@
     "/Users/alim/.nuget/packages/xamarin.kotlinx.coroutines.core/1.10.2.1/xamarin.kotlinx.coroutines.core.1.10.2.1.nupkg.sha512",
     "/Users/alim/.nuget/packages/xamarin.kotlinx.coroutines.core.jvm/1.10.2.1/xamarin.kotlinx.coroutines.core.jvm.1.10.2.1.nupkg.sha512",
     "/Users/alim/.nuget/packages/xamarin.kotlinx.serialization.core/1.9.0.1/xamarin.kotlinx.serialization.core.1.9.0.1.nupkg.sha512",
-    "/Users/alim/.nuget/packages/xamarin.kotlinx.serialization.core.jvm/1.9.0.1/xamarin.kotlinx.serialization.core.jvm.1.9.0.1.nupkg.sha512"
+    "/Users/alim/.nuget/packages/xamarin.kotlinx.serialization.core.jvm/1.9.0.1/xamarin.kotlinx.serialization.core.jvm.1.9.0.1.nupkg.sha512",
+    "/Users/alim/.nuget/packages/microsoft.netcore.app.ref/10.0.7/microsoft.netcore.app.ref.10.0.7.nupkg.sha512",
+    "/Users/alim/.nuget/packages/microsoft.netcore.app.ref/10.0.7/microsoft.netcore.app.ref.10.0.7.nupkg.sha512",
+    "/Users/alim/.nuget/packages/microsoft.netcore.app.ref/10.0.7/microsoft.netcore.app.ref.10.0.7.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "NU1900",
-      "level": "Warning",
-      "message": "Error occurred while getting package vulnerability data: Access to the path '/Users/alim/.local/share/NuGet/http-cache' is denied.",
-      "projectPath": "/Users/alim/Desktop/Mini-IT/Mini-IT-project/mobile/teamup_mmu/teamup_mmu.csproj",
-      "warningLevel": 1,
-      "filePath": "/Users/alim/Desktop/Mini-IT/Mini-IT-project/mobile/teamup_mmu/teamup_mmu.csproj",
-      "targetGraphs": []
-    }
-  ]
+  "logs": []
 }

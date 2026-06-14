@@ -1,3 +1,4 @@
+from django.core.files import uploadedfile
 from teamup_mmu.features.user_classes.views import leave_class
 from django.contrib import admin
 from django.urls import path
@@ -25,9 +26,16 @@ from .features.user_classes.views import remove_student
 from .features.user_classes.views import share_code_modal
 from .features.user_classes.views import delete_class_modal
 from .features.user_classes.views import delete_class_confirm
+from .features.user_classes.views import class_tab
+from .features.user_classes.views import send_announcement
+from .features.user_classes.views import add_students_modal
+from .features.user_classes.views import add_students_search
+from .features.user_classes.views import add_student_direct
+from .features.user_classes.views import upload_csv
 
 
 
+from .features.my_profile.views import profile_modal as user_profile_modal
 
 
 from .features.matching_matches.views import index as matching_matches_view
@@ -112,6 +120,16 @@ urlpatterns = [
     path('classes/share_code_modal/<int:class_id>/', share_code_modal, name='share_code_modal'),
     path('classes/delete_class_modal/<int:class_id>/', delete_class_modal, name='delete_class_modal'),
     path('classes/delete_class_confirm/', delete_class_confirm, name='delete_class_confirm'),
+    path('classes/class_details/<int:class_id>/tab/<str:tab_name>/', class_tab, name='class_tab'),
+    path('classes/class_details/<int:class_id>/announcements/send/', send_announcement, name='send_announcement'),
+    path('classes/add_students_modal/<int:class_id>/', add_students_modal, name='add_students_modal' ),
+    path('classes/add_students_search/<int:class_id>/', add_students_search, name='add_students_search'),
+    path('classes/add_student_direct/<int:class_id>/<int:student_id>/', add_student_direct, name='add_student_direct'),
+    path('classes/upload_csv/<int:class_id>/', upload_csv, name='upload_csv'),
+
+
+    path('profile/modal/<int:user_id>/', user_profile_modal, name='user_profile_modal'),
+
 
 
     path('admin/', admin.site.urls)

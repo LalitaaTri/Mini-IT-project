@@ -182,7 +182,7 @@
                     <a href="#" class="settings-item" hx-get="/classes/share_code_modal/{{ class_details.id }}/" hx-target="#modal-container" hx-swap="innerHTML">
                        Share Join Code
                     </a>
-                    <a href="#" class="settings-item">Add Students (not done yet) </a>
+                    <a href="#" class="settings-item" hx-get="/classes/add_students_modal/{{ class_details.id }}/" hx-target="#modal-container" hx-swap="innerHTML">Add Students</a>
                     <a href="#" class="settings-item danger" hx-get="/classes/delete_class_modal/{{ class_details.id }}/" hx-target="#modal-container" hx-swap="innerHTML">
                         Delete Class
                     </a>
@@ -213,73 +213,9 @@
     </div>
 
 
-    <!-- Navigation Tabs -->
-    <div style="display: flex; gap: 2rem; border-bottom: 1px solid #e2e8f0; margin-top: 0.5rem;">
-        <div
-            style="font-weight: 600; color: #00186d; border-bottom: 2px solid #00186d; padding-bottom: 0.5rem; margin-bottom: -1px; cursor: pointer;">
-            Students</div>
-        <div style="font-weight: 600; color: #7f8a9c; padding-bottom: 0.5rem; cursor: pointer; transition: color 0.2s;"
-            onmouseover="this.style.color='#2a2e34'" onmouseout="this.style.color='#7f8a9c'"> Groups </div>
-        <div style="font-weight: 600; color: #7f8a9c; padding-bottom: 0.5rem; cursor: pointer; transition: color 0.2s;"
-            onmouseover="this.style.color='#2a2e34'" onmouseout="this.style.color='#7f8a9c'"> Chat / Announcements
-        </div>
-    </div>
-
-    <!-- Students List -->
-    <div
-        style="display: flex; flex-direction: column; gap: 0.8rem; overflow-y: auto; max-height: 40vh; padding-right: 0.5rem; margin-top: 0.5rem;">
-
-        {% for student in class_students %}
-        {% if student.user_role == 'admin' %}
-            <!-- admin view -->
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.2rem; background: #f4fff48f; border: 1px solid #c2e4c3; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
-                onmouseover="this.style.borderColor='#006d18'; this.style.boxShadow='0 4px 12px rgba(0,24,109,0.08)'"
-                onmouseout="this.style.borderColor='#c2e4c3'; this.style.boxShadow='none'" title="Click for more info">
-                <!-- it shows on hover -->
-
-            <div style="display: flex; flex-direction: column; gap: 0.2rem;">
-                <span style="font-weight: 600; color: #2a2e34;">{{ student.username|default:"Student Name" }}</span>
-                <span style="font-size: 0.85rem; color: #7f8a9c;">{{ student.email|default:"studentemail@mmu.edu.my"}}</span>
-            </div>
-        {% else %}
-        <!-- Individual Student Card -->
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.2rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
-            onmouseover="this.style.borderColor='#00186d'; this.style.boxShadow='0 4px 12px rgba(0,24,109,0.08)'"
-            onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'" title="Click for more info">
-            <!-- it shows on hover -->
-
-            <div style="display: flex; flex-direction: column; gap: 0.2rem;">
-                <span style="font-weight: 600; color: #2a2e34;">{{ student.username|default:"Student Name" }}</span>
-                <span style="font-size: 0.85rem; color: #7f8a9c;">{{ student.email|default:"studentemail@mmu.edu.my"}}</span>
-            </div>
-
-            {% if is_admin %}
-            <!-- Remove Button -->
-            <!-- The event.stopPropagation() stops the row click event from firing when you click the remove button -->
-            <button onclick="event.stopPropagation();"
-                {% if student.user_id == current_user_id %}
-                disabled title="You cannot remove yourself from the class."
-                style="background: none; border: none; font-size: 1.4rem; cursor: not-allowed; color: #e2e8f0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%;"
-                {% else %}
-                hx-post="/classes/remove_student/{{ class_details.id }}/{{ student.user_id }}/"
-                hx-confirm="Are you sure you want to remove this student?" hx-target="closest div" hx-swap="outerHTML"
-                style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #cbd5e1; transition: all 0.2s; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%;"
-                onmouseover="this.style.color='#ef4444'; this.style.background='#fee2e2'"
-                onmouseout="this.style.color='#cbd5e1'; this.style.background='none'" title="Remove student"
-                {% endif %}>
-                &times;
-            </button>
-            {% endif %}
-        {% endif %}
-        </div>
-        {% empty %}
-        <!-- Placeholder if there are no students -->
-        <div
-            style="text-align: center; padding: 2rem; color: #7f8a9c; font-style: italic; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1;">
-            No students are currently in this class.
-        </div>
-        {% endfor %}
-
+    <!-- Tabs Section -->
+    <div id="tabs-section" style="display: flex; flex-direction: column; gap: 1rem; flex-grow: 1;">
+        {% include 'user_classes/templates/tabs_section.html' %}
     </div>
 
 </div>

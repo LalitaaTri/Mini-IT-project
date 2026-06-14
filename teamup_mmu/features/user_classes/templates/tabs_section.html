@@ -1,0 +1,29 @@
+<!-- Navigation Tabs -->
+<div style="display: flex; gap: 2rem; border-bottom: 1px solid #e2e8f0; margin-top: 0.5rem; user-select: none;">
+    <div hx-get="/classes/class_details/{{ class_details.id }}/tab/students/" hx-target="#tabs-section" hx-swap="innerHTML"
+        style="font-weight: 600; padding-bottom: 0.5rem; cursor: pointer; transition: color 0.2s; {% if active_tab == 'students' %}color: #00186d; border-bottom: 2px solid #00186d; margin-bottom: -1px;{% else %}color: #7f8a9c;{% endif %}"
+        {% if active_tab != 'students' %}onmouseover="this.style.color='#2a2e34'" onmouseout="this.style.color='#7f8a9c'"{% endif %}>
+        Students
+    </div>
+    <div hx-get="/classes/class_details/{{ class_details.id }}/tab/groups/" hx-target="#tabs-section" hx-swap="innerHTML"
+        style="font-weight: 600; padding-bottom: 0.5rem; cursor: pointer; transition: color 0.2s; {% if active_tab == 'groups' %}color: #00186d; border-bottom: 2px solid #00186d; margin-bottom: -1px;{% else %}color: #7f8a9c;{% endif %}"
+        {% if active_tab != 'groups' %}onmouseover="this.style.color='#2a2e34'" onmouseout="this.style.color='#7f8a9c'"{% endif %}>
+        Groups
+    </div>
+    <div hx-get="/classes/class_details/{{ class_details.id }}/tab/announcements/" hx-target="#tabs-section" hx-swap="innerHTML"
+        style="font-weight: 600; padding-bottom: 0.5rem; cursor: pointer; transition: color 0.2s; {% if active_tab == 'announcements' %}color: #00186d; border-bottom: 2px solid #00186d; margin-bottom: -1px;{% else %}color: #7f8a9c;{% endif %}"
+        {% if active_tab != 'announcements' %}onmouseover="this.style.color='#2a2e34'" onmouseout="this.style.color='#7f8a9c'"{% endif %}>
+        Chat / Announcements
+    </div>
+</div>
+
+<!-- Tab Content Wrapper -->
+<div style="display: flex; flex-direction: column; gap: 0.8rem; overflow-y: auto; max-height: 40vh; padding-right: 0.5rem; margin-top: 0.5rem; flex-grow: 1;">
+    {% if active_tab == 'students' %}
+        {% include 'user_classes/templates/tab_students.html' %}
+    {% elif active_tab == 'groups' %}
+        {% include 'user_classes/templates/tab_groups.html' %}
+    {% elif active_tab == 'announcements' %}
+        {% include 'user_classes/templates/tab_announcements.html' %}
+    {% endif %}
+</div>

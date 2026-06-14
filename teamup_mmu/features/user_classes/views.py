@@ -166,13 +166,13 @@ async def class_details(request, class_id):
         class_admin_email = await conn.fetchval("SELECT email FROM users WHERE id=(SELECT user_id FROM user_classes WHERE class_id=$1 AND role='admin')", class_id)
 
         class_students = await conn.fetch("""
-            SELECT u.id as user_id, u.email, p.username, uc.role as user_role
+            SELECT u.id as user_id, u.email, p.username, uc.role as user_role, u.email_verified
             FROM users u
             JOIN user_classes uc ON u.id = uc.user_id
             JOIN profiles p ON u.id = p.id
             WHERE uc.class_id = $1
+            ORDER BY CASE WHEN uc.role = 'admin' THEN 0 ELSE 1 END, LOWER(p.username) ASC
         """, class_id)
-        #do for number of groups here as well
 
         return render(request, 'user_classes/templates/class_details.html', {
             'class_details': target_class,
@@ -181,8 +181,8 @@ async def class_details(request, class_id):
             'class_admin_name' : class_admin,
             'class_admin_email' : class_admin_email,
             'is_admin': is_admin,
-            'current_user_id': user_id if 'user_id' in locals() else None
-
+            'current_user_id': user_id if 'user_id' in locals() else None,
+            'active_tab': 'students'
         })
 
 
@@ -341,3 +341,327 @@ async def delete_class_confirm(request):
     response['HX-Redirect'] = "/classes/"
     return response
 
+@csrf_exempt
+async def class_tab(request, class_id, tab_name):
+    # 1. Verify user's session token
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+        user_id = session['user_id']
+
+        target_class = await conn.fetchrow("SELECT * FROM classes WHERE id=$1", class_id)
+        if not target_class:
+            return HttpResponse("Class not found", status=404)
+
+        # 2. Verify that the user is actually enrolled in this class
+        user_role = await conn.fetchval("SELECT role FROM user_classes WHERE user_id=$1 AND class_id=$2", user_id, class_id)
+        if not user_role:
+            return HttpResponse("Forbidden: You are not in this class", status=403)
+        is_admin = (user_role == 'admin')
+
+        # 3. Build context for rendering
+        context = {
+            'class_details': target_class,
+            'active_tab': tab_name,
+            'is_admin': is_admin,
+            'current_user_id': user_id,
+        }
+
+        # 4. Fetch the specific data needed for the requested tab
+        if tab_name == 'students':
+            class_students = await conn.fetch("""
+                SELECT u.id as user_id, u.email, p.username, uc.role as user_role, u.email_verified
+                FROM users u
+                JOIN user_classes uc ON u.id = uc.user_id
+                JOIN profiles p ON u.id = p.id
+                WHERE uc.class_id = $1
+                ORDER BY CASE WHEN uc.role = 'admin' THEN 0 ELSE 1 END, LOWER(p.username) ASC
+            """, class_id)
+            context['class_students'] = class_students
+        elif tab_name == 'groups':
+            context['class_groups'] = []
+        elif tab_name == 'announcements':
+            announcements = await conn.fetch("""
+                SELECT ca.*, p.username as sender_name, u.email as sender_email
+                FROM class_announcements ca
+                JOIN users u ON ca.sender_id = u.id
+                LEFT JOIN profiles p ON u.id = p.id
+                WHERE ca.class_id = $1
+                ORDER BY ca.created_at ASC
+            """, class_id)
+            context['announcements'] = announcements
+
+        # 5. Render and return the partial tab container template
+        return render(request, 'user_classes/templates/tabs_section.html', context)
+
+
+@csrf_exempt
+async def send_announcement(request, class_id):
+    if request.method != 'POST':
+        return HttpResponse("Invalid method", status=400)
+
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+
+    content = request.POST.get('content', '').strip()
+    if not content:
+        return HttpResponse("Content cannot be empty", status=400)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+        user_id = session['user_id']
+
+        target_class = await conn.fetchrow("SELECT * FROM classes WHERE id=$1", class_id)
+        if not target_class:
+            return HttpResponse("Class not found", status=404)
+
+        # Only class admins can post announcements
+        user_role = await conn.fetchval("SELECT role FROM user_classes WHERE user_id=$1 AND class_id=$2", user_id, class_id)
+        if user_role != 'admin':
+            return HttpResponse("Forbidden: Only admin can post announcements", status=403)
+
+        # Insert new announcement
+        await conn.execute("""
+            INSERT INTO class_announcements (class_id, sender_id, content)
+            VALUES ($1, $2, $3)
+        """, class_id, user_id, content)
+
+        # Fetch the updated list of announcements to reload the feed
+        announcements = await conn.fetch("""
+            SELECT ca.*, p.username as sender_name, u.email as sender_email
+            FROM class_announcements ca
+            JOIN users u ON ca.sender_id = u.id
+            LEFT JOIN profiles p ON u.id = p.id
+            WHERE ca.class_id = $1
+            ORDER BY ca.created_at ASC
+        """, class_id)
+
+        context = {
+            'class_details': target_class,
+            'active_tab': 'announcements',
+            'is_admin': True,
+            'current_user_id': user_id,
+            'announcements': announcements
+        }
+        return render(request, 'user_classes/templates/tabs_section.html', context)
+
+@csrf_exempt
+async def add_students_modal(request, class_id):
+    # 1. Verify the user has a session token
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        # 2. Check if session is active
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+        user_id = session['user_id']
+
+        # 3. Check if the current user is an admin of the class
+        user_role = await conn.fetchval("SELECT role FROM user_classes WHERE user_id=$1 AND class_id=$2", user_id, class_id)
+        if user_role != 'admin':
+            return HttpResponse("Forbidden: Only class admins can invite students", status=403)
+
+        # 4. Fetch 5 suggested students who are NOT in the class yet
+        suggestions = await conn.fetch("""
+            SELECT u.id, u.email, p.username, p.program
+            FROM users u
+            JOIN profiles p ON u.id = p.id
+            WHERE u.id NOT IN (
+                SELECT user_id FROM user_classes WHERE class_id = $1
+            ) AND u.inactive = FALSE
+              AND u.email_verified = TRUE
+            LIMIT 5
+        """, class_id)
+
+    # 5. Render the modal template with the Suggestions context
+    return render(request, 'user_classes/templates/add_students_modal.html', {
+        'class_id': class_id,
+        'suggestions': suggestions
+    })
+
+@csrf_exempt
+async def add_students_search(request, class_id):
+    # 1. Verify the user has a session token
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+
+    # 2. Get the search input from GET params (HTMX sends this in query param)
+    query = request.GET.get('search_query', '').strip()
+    if not query:
+        # If the input is empty, return an empty results list
+        return render(request, 'user_classes/templates/search_results.html', {
+            'class_id': class_id,
+            'results': []
+        })
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        # 3. Perform a case-insensitive search by username or email
+        search_pattern = f"%{query}%"
+        results = await conn.fetch("""
+            SELECT u.id, u.email, p.username, p.program
+            FROM users u
+            JOIN profiles p ON u.id = p.id
+            WHERE u.id NOT IN (
+                SELECT user_id FROM user_classes WHERE class_id = $1
+            ) AND u.inactive = FALSE
+              AND u.email_verified = TRUE
+              AND (p.username ILIKE $2 OR u.email ILIKE $2)
+            LIMIT 10
+        """, class_id, search_pattern)
+
+    # 4. Render the search results cards partial template
+    return render(request, 'user_classes/templates/search_results.html', {
+        'class_id': class_id,
+        'results': results
+    })
+
+@csrf_exempt
+async def add_student_direct(request, class_id, student_id):
+    if request.method != 'POST':
+        return HttpResponse("Invalid method", status=400)
+
+    # 1. Verify the user has a session token
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        # 2. Check session is active
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+        user_id = session['user_id']
+
+        # 3. Check if the current user is an admin of the class
+        user_role = await conn.fetchval("SELECT role FROM user_classes WHERE user_id=$1 AND class_id=$2", user_id, class_id)
+        if user_role != 'admin':
+            return HttpResponse("Forbidden", status=403)
+
+        # 4. Enroll the student with role='student'
+        await conn.execute("INSERT INTO user_classes (user_id, class_id, role) VALUES ($1, $2, 'student')", student_id, class_id)
+
+        # 5. Get the updated total count of students in the class
+        new_count = await conn.fetchval("SELECT count(*) FROM user_classes WHERE class_id=$1", class_id)
+
+    # 6. Return the direct HTML response (with OOB swap)
+    response_html = (
+        f'<button disabled style="background: #e2fce6; color: #1e7e34; border: 1px solid #c2e4c3; '
+        f'padding: 6px 12px; border-radius: 6px; font-weight: 600; cursor: not-allowed;">Added</button>'
+        f'<span id="num_students" hx-swap-oob="true">👤 {new_count} students</span>'
+    )
+    return HttpResponse(response_html, status=200)
+
+@csrf_exempt
+async def upload_csv(request, class_id):
+    if request.method != 'POST':
+        return HttpResponse("Invalid method", status=400)
+
+    # 1. Verify the user has a session token
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+
+    # 2. Get the uploaded file
+    csv_file = request.FILES.get('csv_file')
+    if not csv_file:
+        return HttpResponse("<span style='color: red;'>Please choose a CSV file first.</span>", status=200)
+
+    # 3. Basic extension verification
+    if not csv_file.name.endswith('.csv'):
+        return HttpResponse("<span style='color: red;'>Invalid file format. Please upload a .csv file.</span>", status=200)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        # 4. Check session is active
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+        user_id = session['user_id']
+
+        # 5. Check if the current user is an admin of the class
+        user_role = await conn.fetchval("SELECT role FROM user_classes WHERE user_id=$1 AND class_id=$2", user_id, class_id)
+        if user_role != 'admin':
+            return HttpResponse("Forbidden", status=403)
+
+        # 6. Parse the CSV file contents
+        import csv
+        import io
+        
+        file_data = csv_file.read().decode('utf-8')
+        csv_data = csv.reader(io.StringIO(file_data))
+        
+        emails_to_enroll = []
+        for row in csv_data:
+            if not row:
+                continue
+            # Trim whitespace and convert to lowercase for matching. Only allows @mmu.edu.my emails
+            email = row[0].strip().lower()
+            if email and ('@mmu.edu.my' in email or '@student.mmu.edu.my' in email):
+                emails_to_enroll.append(email)
+
+        success_count = 0
+        skipped_count = 0
+        failed_emails = []
+
+        # 7. Enroll students from the emails parsed
+        for email in emails_to_enroll:
+            # Look up student by email
+            student = await conn.fetchrow("SELECT id FROM users WHERE email=$1", email)
+            
+            if not student:
+                # User does not exist, create a stub account for them
+                student_id = await conn.fetchval(
+                    "INSERT INTO users (email, password, email_verified, inactive) VALUES ($1, 'PENDING_INVITE', FALSE, TRUE) RETURNING id",
+                    email
+                )
+                # Create a blank profile matching their new user id
+                await conn.execute("INSERT INTO profiles (id, username) VALUES ($1, $2)", student_id, None)
+                
+                # Print the simulated email invitation link to the console log
+                invite_url = f"http://127.0.0.1:8000/signup/?email={email}"
+                print(f"\n[EMAIL SIMULATION] Sent invite to {email}: {invite_url}\n")
+            else:
+                student_id = student['id']
+
+            # Check if student is already in the class
+            already_in = await conn.fetchval("SELECT 1 FROM user_classes WHERE user_id=$1 AND class_id=$2", student_id, class_id)
+            if already_in:
+                skipped_count += 1
+                continue
+
+            # Enroll student in the class
+            await conn.execute("INSERT INTO user_classes (user_id, class_id, role) VALUES ($1, $2, 'student')", student_id, class_id)
+            success_count += 1
+
+
+        # 8. Fetch the new student count
+        new_count = await conn.fetchval("SELECT count(*) FROM user_classes WHERE class_id=$1", class_id)
+
+    # 9. Return status response (with OOB swap)
+    if success_count > 0:
+        msg = f"<span style='color: green;'>Successfully added {success_count} students!</span>"
+    else:
+        msg = "<span style='color: #4a5568;'>No new students were added.</span>"
+
+    if failed_emails:
+        msg += f" <span style='color: #ef4444; font-size: 0.85rem;' title='{', '.join(failed_emails)}'>({len(failed_emails)} emails not found)</span>"
+
+    response_html = f"{msg}<span id='num_students' hx-swap-oob='true'>👤 {new_count} students</span>"
+    return HttpResponse(response_html, status=200)

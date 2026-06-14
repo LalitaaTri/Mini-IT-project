@@ -1,0 +1,75 @@
+<div id="team-settings-modal" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.25s ease;">
+    <div style="background: white; border-radius: 12px; width: 100%; max-width: 440px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); overflow: hidden; animation: modalEnter 0.25s ease-out;">
+        
+        <!-- Modal Header -->
+        <div style="background: #00186d; padding: 1.25rem 1.5rem; color: white; display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 600;">Team Settings</h3>
+            <button onclick="document.getElementById('team-settings-modal').remove()" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
+        </div>
+
+        <!-- Form -->
+        <form hx-post="/classes/teams_settings/{{ class_id }}/save/" hx-target="#save-status" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;">
+            {% csrf_token %}
+            
+            <!-- Toggle Team Formation -->
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 600; color: #1e293b; font-size: 0.95rem;">Enable Team Formation</span>
+                <label style="position: relative; display: inline-block; width: 44px; height: 22px;">
+                    <input type="checkbox" name="teams_enabled" {% if class_details.groups_enabled %}checked{% endif %} style="opacity: 0; width: 0; height: 0;" id="toggle-teams-checkbox" onchange="toggleInputs(this.checked)">
+                    <span id="toggle-slider" style="position: absolute; cursor: pointer; inset: 0; background-color: {% if class_details.groups_enabled %}#10b981{% else %}#cbd5e1{% endif %}; border-radius: 34px; transition: 0.2s;">
+                        <span id="toggle-knob" style="position: absolute; content: ''; height: 16px; width: 16px; left: {% if class_details.groups_enabled %}24px{% else %}4px{% endif %}; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.2s;"></span>
+                    </span>
+                </label>
+            </div>
+
+            <!-- Configuration Inputs -->
+            <div id="settings-inputs-wrapper" style="display: {% if class_details.groups_enabled %}flex{% else %}none{% endif %}; flex-direction: column; gap: 1rem;">
+                <!-- Max Teams -->
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                    <label style="font-weight: 600; color: #475569; font-size: 0.88rem;">Maximum Teams</label>
+                    <input type="number" name="max_teams" value="{{ class_details.max_groups|default:10 }}" min="1" max="50" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; outline: none;">
+                </div>
+                
+                <!-- Max Members per Team -->
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                    <label style="font-weight: 600; color: #475569; font-size: 0.88rem;">Maximum Members per Team</label>
+                    <input type="number" name="max_members" value="{{ class_details.max_members_per_group |default:5 }}" min="1" max="20" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; outline: none;">
+                </div>
+            </div>
+
+            <!-- Status message container -->
+            <div id="save-status" style="font-size: 0.88rem; text-align: center; min-height: 20px;"></div>
+
+            <!-- Footer Action Buttons -->
+            <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
+                <button type="button" onclick="document.getElementById('team-settings-modal').remove()" style="flex: 1; padding: 10px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 600; color: #475569; cursor: pointer; font-size: 0.9rem;">Cancel</button>
+                <button type="submit" style="flex: 1; padding: 10px; background: #00186d; border: none; border-radius: 6px; font-weight: 600; color: white; cursor: pointer; font-size: 0.9rem; box-shadow: 0 4px 10px rgba(0, 24, 109, 0.15);">Save Settings</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function toggleInputs(enabled) {
+        const wrapper = document.getElementById('settings-inputs-wrapper');
+        const slider = document.getElementById('toggle-slider');
+        const knob = document.getElementById('toggle-knob');
+        
+        if (enabled) {
+            wrapper.style.display = 'flex';
+            slider.style.backgroundColor = '#10b981';
+            knob.style.left = '24px';
+        } else {
+            wrapper.style.display = 'none';
+            slider.style.backgroundColor = '#cbd5e1';
+            knob.style.left = '4px';
+        }
+    }
+</script>
+
+<style>
+    @keyframes modalEnter {
+        from { transform: scale(0.95); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+</style>

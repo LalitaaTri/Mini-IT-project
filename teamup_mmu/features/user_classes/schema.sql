@@ -8,8 +8,11 @@ CREATE TABLE IF NOT EXISTS classes (
     course_name VARCHAR(100) NOT NULL,
     description TEXT,
     join_code TEXT UNIQUE NOT NULL,
-    trimester VARCHAR(20) NOT NULL,
-    section VARCHAR(20) NOT NULL
+    trimester VARCHAR(20) NOT NULL DEFAULT 'Trimester 1',
+    section VARCHAR(20) NOT NULL DEFAULT 'TC1L',
+    groups_enabled BOOLEAN DEFAULT FALSE,
+    max_groups INTEGER DEFAULT 10,
+    max_members_per_group INTEGER DEFAULT 5
 );
 
 CREATE TABLE IF NOT EXISTS user_classes (
@@ -27,4 +30,14 @@ CREATE TABLE IF NOT EXISTS class_announcements (
     sender_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE IF NOT EXISTS group_requests (
+    id SERIAL PRIMARY KEY,
+    group_id INTEGER REFERENCES groups(id) ON DELETE CASCADE,
+    student_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    status VARCHAR(20) DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(group_id, student_id)
 );

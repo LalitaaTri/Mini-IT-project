@@ -1,3 +1,232 @@
-<div style="text-align: center; padding: 3rem 2rem; color: #7f8a9c; font-style: italic; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1;">
-    Groups section is under development.
+{% if not class_details.groups_enabled %}
+<!-- TEAMS DISABLED VIEW -->
+<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3.5rem 2rem; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 12px; text-align: center; gap: 1.25rem;">
+    <div style="width: 64px; height: 64px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; color: #64748b;">
+        <svg xmlns="http://www.w3.org/2000/svg" height="32px" viewBox="0 -960 960 960" width="32px" fill="currentColor">
+            <path d="M0-240v-63q0-43 44-70t116-27q13 0 25 .5t24 1.5q-15 21-22 45.5T180-303v63H0Zm240 0v-63q0-43 44-70t116-27q72 0 116 27t44 70v63H240Zm540 0v-63q0-27-7-50t-22-45.5q12-1 24-1.5t25-.5q72 0 116 27t44 70v63H780Zm-480-80q-50 0-85-35t-35-85q0-50 35-85t85-35q50 0 85 35t35 85q0 50-35 85t-85 35Zm-440-40q-33 0-56.5-23.5T-200-480q0-33 23.5-56.5T-120-560q33 0 56.5 23.5T-40-480q0 33-23.5 56.5T-120-400Zm760 0q-33 0-56.5-23.5T560-480q0-33 23.5-56.5T640-560q33 0 56.5 23.5T720-480q0 33-23.5 56.5T680-400Zm-280-80q-33 0-56.5-23.5T320-560q0-33 23.5-56.5T400-640q33 0 56.5 23.5T480-560q0 33-23.5 56.5T400-480Z"/>
+        </svg>
+    </div>
+    <div>
+        <h4 style="margin: 0 0 0.5rem 0; font-size: 1.1rem; font-weight: 600; color: #1e293b;">Coursework Team Formation is Disabled</h4>
+        <p style="margin: 0; font-size: 0.9rem; color: #64748b; max-width: 400px; line-height: 1.5;">
+            {% if is_admin %}
+                Enable and configure teams to allow students to group up for coursework and assignments.
+            {% else %}
+                Your lecturer has not enabled coursework team formation for this class yet.
+            {% endif %}
+        </p>
+    </div>
+    {% if is_admin %}
+    <button hx-get="/classes/teams_settings_modal/{{ class_details.id }}/" hx-target="#modal-container" style="padding: 10px 20px; background: #00186d; border: none; border-radius: 8px; font-weight: 600; color: white; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 12px rgba(0, 24, 109, 0.2);">
+        <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="currentColor">
+            <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/>
+        </svg>
+        Enable Team Formation
+    </button>
+    {% endif %}
 </div>
+
+{% else %}
+
+<!-- TEAMS ENABLED VIEW -->
+<div style="display: flex; flex-direction: column; gap: 1.25rem;">
+    
+    <!-- Top Action / Info Bar -->
+    <div style="display: flex; align-items: center; gap: 1.5rem; background: #f8fafc; border: 1px solid #e2e8f0; padding: 0.85rem 1.25rem; border-radius: 10px;">
+        <div style="font-size: 0.88rem; color: #475569; display: flex; align-items: center; gap: 0.4rem;">
+            <span style="display: inline-block; width: 8px; height: 8px; background: #00186d; border-radius: 50%;"></span>
+            <strong>Max Teams:</strong> {{ class_details.max_groups }}
+        </div>
+        <div style="font-size: 0.88rem; color: #475569; display: flex; align-items: center; gap: 0.4rem;">
+            <span style="display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></span>
+            <strong>Members Limit:</strong> Max {{ class_details.max_members_per_group }} per team
+        </div>
+    </div>
+
+    <!-- Student Status/Banners -->
+    {% if not is_admin %}
+        {% if user_team_id %}
+            <!-- User is in a Team -->
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #e0f2fe; border: 1px solid #bae6fd; padding: 0.9rem 1.25rem; border-radius: 10px; color: #0369a1; font-size: 0.92rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 500;">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor">
+                        <path d="m424-312 282-282-56-56-226 226-114-114-56 56 170 170Zm56 232q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T208-763q54-54 127-85.5T480-880q83 0 156 31.5T763-720q54 54 85.5 127T880-480q0 83-31.5 156T752-197q-54 54-127 85.5T480-80Z"/>
+                    </svg>
+                    <span>You are currently in team <strong>{{ user_team_name }}</strong>.</span>
+                </div>
+                <button hx-post="/classes/leave_team/{{ user_team_id }}/" hx-confirm="Are you sure you want to leave this team?" hx-target="#tabs-section" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2); transition: all 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">
+                    Leave Team
+                </button>
+            </div>
+        {% elif user_pending_request_team_id %}
+            <!-- User Has Pending Request -->
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #fffbeb; border: 1px solid #fef3c7; padding: 0.9rem 1.25rem; border-radius: 10px; color: #b45309; font-size: 0.92rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 500;">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor">
+                        <path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Z"/>
+                    </svg>
+                    <span>Request to join team <strong>{{ user_pending_request_team_name }}</strong> is pending leader approval.</span>
+                </div>
+                <button hx-post="/classes/cancel_request/{{ user_pending_request_team_id }}/" hx-target="#tabs-section" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
+                    Cancel Request
+                </button>
+            </div>
+        {% elif user_declined_request_id %}
+            <!-- User request declined alert -->
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #fef2f2; border: 1px solid #fee2e2; padding: 0.9rem 1.25rem; border-radius: 10px; color: #b91c1c; font-size: 0.92rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 500;">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor">
+                        <path d="m40-120 440-760 440 760H40Zm104-60h672L480-720 144-180Zm336-40q17 0 28.5-11.5T520-260q0-17-11.5-28.5T480-300q-17 0-28.5 11.5T440-260q0 17 11.5 28.5T480-220Zm-40-120h80v-200h-80v200Z"/>
+                    </svg>
+                    <span>Your request to join team <strong>{{ user_declined_team_name }}</strong> was declined.</span>
+                </div>
+                <button hx-post="/classes/dismiss_declined/{{ user_declined_request_id }}/" hx-target="#tabs-section" style="background: none; border: none; color: #b91c1c; font-weight: 600; font-size: 0.85rem; cursor: pointer; text-decoration: underline;">
+                    Dismiss
+                </button>
+            </div>
+        {% endif %}
+    {% endif %}
+
+    <!-- Teams Grid Layout -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.25rem; margin-top: 0.5rem;">
+        {% for t in class_teams %}
+            {% if t.leader_id %}
+                <!-- CLAIMED/ACTIVE TEAM CARD -->
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.85rem; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 15px -3px rgba(0, 0, 0, 0.08)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.05)';">
+                    
+                    <!-- Title and members badge -->
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
+                        <div>
+                            <h4 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 0.4rem;">
+                                {{ t.name }}
+                                {% if t.whatsapp_link and user_team_id == t.id %}
+                                <a href="{{ t.whatsapp_link }}" target="_blank" style="color: #25d366; display: inline-flex; align-items: center;" title="Join WhatsApp Group">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                      <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.907h.004c4.368 0 7.926-3.559 7.93-7.926A7.859 7.859 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.69-4.98c-.202-.101-1.194-.588-1.378-.654-.184-.066-.318-.1-.452.1-.134.201-.52.655-.637.788-.117.135-.235.151-.437.05-.202-.101-.85-.313-1.618-.997-.597-.533-1-1.192-1.118-1.395-.118-.202-.012-.311.089-.412.09-.09.202-.234.302-.35.1-.117.135-.2.203-.335.067-.135.034-.251-.017-.352-.05-.101-.452-1.09-.62-1.49-.163-.393-.33-.34-.452-.346-.118-.006-.253-.007-.388-.007a.75.75 0 0 0-.544.25c-.184.2-.702.686-.702 1.675 0 .99.72 1.95 82 2.079.12.017 2.449 3.743 5.932 5.247.828.358 1.474.57 1.98.73.832.263 1.588.225 2.185.135.665-.1 1.378-.564 1.57-1.112.19-.548.19-1.018.13-1.112-.059-.09-.223-.151-.426-.25z"/>
+                                    </svg>
+                                </a>
+                                {% endif %}
+                            </h4>
+                            <span style="font-size: 0.8rem; color: #64748b; font-weight: 500;">Led by {{ t.leader_username }}</span>
+                        </div>
+                        <span style="font-size: 0.75rem; font-weight: 700; background: {% if t.current_members_count >= t.max_members %}#fee2e2; color: #ef4444;{% else %}#e0f2fe; color: #0369a1;{% endif %} padding: 4px 8px; border-radius: 9999px;">
+                            {{ t.current_members_count }}/{{ t.max_members }}
+                        </span>
+                    </div>
+
+                    <!-- Description -->
+                    <p style="margin: 0; font-size: 0.85rem; color: #475569; min-height: 38px; line-height: 1.4;">
+                        {{ t.description|default:"No description provided yet." }}
+                    </p>
+
+                    <!-- Divider -->
+                    <div style="border-top: 1px solid #f1f5f9; margin: 0.25rem 0;"></div>
+
+                    <!-- Members Section -->
+                    <div>
+                        <div style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 0.4rem; letter-spacing: 0.05em;">Members</div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+                            {% for m in t.members %}
+                                <span style="font-size: 0.82rem; background: #f8fafc; border: 1px solid #e2e8f0; color: #334155; padding: 3px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.3rem;">
+                                    👤 {{ m.username }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Card Actions -->
+                    <div style="margin-top: auto; padding-top: 0.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                        
+                        <!-- Leader view: Manage requests -->
+                        {% if t.leader_id == current_user_id %}
+                            {% if t.pending_requests %}
+                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                                    <div style="font-size: 0.75rem; font-weight: 700; color: #b45309; display: flex; align-items: center; gap: 0.3rem;">
+                                        <span style="display: inline-block; width: 6px; height: 6px; background: #d97706; border-radius: 50%;"></span>
+                                        Pending Join Requests
+                                    </div>
+                                    {% for req in t.pending_requests %}
+                                        <div style="display: flex; justify-content: space-between; align-items: center; background: white; border: 1px solid #e2e8f0; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem;">
+                                            <span style="font-weight: 500; color: #1e293b;">{{ req.username }}</span>
+                                            <div style="display: flex; gap: 0.3rem;">
+                                                <!-- Approve button -->
+                                                <button hx-post="/classes/approve_request/{{ req.request_id }}/" hx-target="#tabs-section" style="background: #10b981; border: none; color: white; border-radius: 4px; padding: 3px 6px; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Approve Request">
+                                                    ✔
+                                                </button>
+                                                <!-- Decline button -->
+                                                <button hx-post="/classes/decline_request/{{ req.request_id }}/" hx-target="#tabs-section" style="background: #ef4444; border: none; color: white; border-radius: 4px; padding: 3px 6px; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Decline Request">
+                                                    ✖
+                                                </button>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Edit Team details button -->
+                            <button hx-get="/classes/edit_team_modal/{{ t.id }}/" hx-target="#modal-container" style="width: 100%; border: 1px solid #cbd5e1; background: white; padding: 7px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor">
+                                    <path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/>
+                                </svg>
+                                Edit Team Info
+                            </button>
+                        {% elif not is_admin %}
+                            <!-- Student action -->
+                            {% if not user_team_id %}
+                                {% if user_pending_request_team_id == t.id %}
+                                    <button disabled style="width: 100%; padding: 8px; background: #fffbeb; border: 1px solid #fef3c7; color: #b45309; font-weight: 600; border-radius: 6px; font-size: 0.85rem; cursor: not-allowed; display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
+                                        <span style="display: inline-block; width: 6px; height: 6px; background: #b45309; border-radius: 50%; animation: pulse 1.5s infinite;"></span>
+                                        Pending Approval
+                                    </button>
+                                {% elif not user_pending_request_team_id %}
+                                    {% if t.current_members_count >= t.max_members %}
+                                        <button disabled style="width: 100%; padding: 8px; background: #f1f5f9; border: 1px solid #e2e8f0; color: #94a3b8; font-weight: 600; border-radius: 6px; font-size: 0.85rem; cursor: not-allowed;">
+                                            Team Full
+                                        </button>
+                                    {% else %}
+                                        <button hx-post="/classes/join_team/{{ t.id }}/" hx-target="#tabs-section" style="width: 100%; padding: 8px; background: #e0f2fe; border: 1px solid #bae6fd; color: #0369a1; font-weight: 600; border-radius: 6px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#bae6fd'" onmouseout="this.style.background='#e0f2fe'">
+                                            Request to Join
+                                        </button>
+                                    {% endif %}
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            {% else %}
+                <!-- UNCLAIMED/EMPTY TEAM CARD -->
+                <div style="border: 2px dashed #cbd5e1; border-radius: 12px; padding: 1.25rem; background: #f8fafc; display: flex; flex-direction: column; gap: 0.75rem; justify-content: space-between; min-height: 160px; transition: border-color 0.2s, background 0.2s;" onmouseover="this.style.borderColor='#94a3b8'; this.style.background='#f1f5f9';" onmouseout="this.style.borderColor='#cbd5e1'; this.style.background='#f8fafc';">
+                    <div>
+                        <h4 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #475569; display: flex; align-items: center; justify-content: space-between;">
+                            <span>{{ t.name }}</span>
+                            <span style="font-size: 0.72rem; font-weight: 600; color: #64748b; background: #e2e8f0; padding: 3px 6px; border-radius: 4px;">Empty</span>
+                        </h4>
+                        <p style="margin: 0.4rem 0 0 0; font-size: 0.82rem; color: #64748b; font-style: italic; line-height: 1.4;">
+                            This team is not yet claimed. Be the first to start it!
+                        </p>
+                    </div>
+                    
+                    {% if not is_admin and not user_team_id and not user_pending_request_team_id %}
+                        <!-- Claim Team action -->
+                        <button hx-get="/classes/lead_team_modal/{{ t.id }}/" hx-target="#modal-container" style="width: 100%; padding: 8px; background: #00186d; border: none; color: white; font-weight: 600; border-radius: 6px; font-size: 0.85rem; cursor: pointer; box-shadow: 0 4px 8px rgba(0, 24, 109, 0.15); display: flex; align-items: center; justify-content: center; gap: 0.4rem; transition: background 0.2s;" onmouseover="this.style.background='#00104a'" onmouseout="this.style.background='#00186d'">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor">
+                                <path d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H600v-240H360v240H160Zm320-350Z"/>
+                            </svg>
+                            Claim / Lead Team
+                        </button>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+</div>
+{% endif %}
+
+<style>
+    @keyframes pulse {
+        0% { opacity: 0.6; }
+        50% { opacity: 1; }
+        100% { opacity: 0.6; }
+    }
+</style>

@@ -1,0 +1,54 @@
+<div id="lead-team-modal" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.25s ease;">
+    <div style="background: white; border-radius: 12px; width: 100%; max-width: 440px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); overflow: hidden; animation: modalEnter 0.25s ease-out;">
+        
+        <!-- Modal Header -->
+        <div style="background: #00186d; padding: 1.25rem 1.5rem; color: white; display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 600;">
+                {% if is_edit %}Edit Team Info{% else %}Claim & Lead Team{% endif %}
+            </h3>
+            <button onclick="document.getElementById('lead-team-modal').remove()" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
+        </div>
+
+        <!-- Form -->
+        <form hx-post="/classes/save_team_info/{{ team.id }}/" hx-target="#save-team-status" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;">
+            {% csrf_token %}
+            
+            <!-- Team Name (Read Only) -->
+            <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                <label style="font-weight: 600; color: #475569; font-size: 0.88rem;">Team Name</label>
+                <input type="text" value="{{ team.name }}" disabled style="padding: 8px 12px; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; border-radius: 6px; font-size: 0.9rem; outline: none; cursor: not-allowed;">
+            </div>
+
+            <!-- Description -->
+            <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                <label style="font-weight: 600; color: #475569; font-size: 0.88rem;">Description / Project Goal</label>
+                <textarea name="description" placeholder="Briefly describe what your team is working on or who you are looking for..." style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; outline: none; min-height: 80px; resize: vertical; font-family: inherit;">{{ team.description|default:'' }}</textarea>
+            </div>
+            
+            <!-- WhatsApp Group Link -->
+            <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                <label style="font-weight: 600; color: #475569; font-size: 0.88rem;">WhatsApp Group Link (Optional)</label>
+                <input type="url" name="whatsapp_link" value="{{ team.whatsapp_link|default:'' }}" placeholder="https://chat.whatsapp.com/..." style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; outline: none;">
+                <small style="color: #64748b; font-size: 0.78rem;">Visible only to approved team members.</small>
+            </div>
+
+            <!-- Status message container -->
+            <div id="save-team-status" style="font-size: 0.88rem; text-align: center; min-height: 20px;"></div>
+
+            <!-- Footer Action Buttons -->
+            <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
+                <button type="button" onclick="document.getElementById('lead-team-modal').remove()" style="flex: 1; padding: 10px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 600; color: #475569; cursor: pointer; font-size: 0.9rem;">Cancel</button>
+                <button type="submit" style="flex: 1; padding: 10px; background: #00186d; border: none; border-radius: 6px; font-weight: 600; color: white; cursor: pointer; font-size: 0.9rem; box-shadow: 0 4px 10px rgba(0, 24, 109, 0.15);">
+                    {% if is_edit %}Save Changes{% else %}Claim Team{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    @keyframes modalEnter {
+        from { transform: scale(0.95); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+</style>

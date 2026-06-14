@@ -2,7 +2,7 @@ from ..user_access_check.views import *
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 
-async def index(request, iter=0):
+async def index(request, iter=-1):
     pool = await Database.get_pool()
     passed_login_check, status, email, id = await access_check(request)
     if not passed_login_check:
@@ -11,15 +11,24 @@ async def index(request, iter=0):
     async with pool.acquire() as conn:
         # NEW: Join users and profiles tables together to get all the data
 # In matching_view/views.py index()
+        my_user = await conn.fetchrow("SELECT * FROM profiles WHERE id=$1", id)
         other_users = await conn.fetch("""
             SELECT u.id, u.email, p.username, p.introduction, p.descriptions, 
                    p.year_of_study, p.faculty, p.program, p.interests, p.cgpa, p.classes_ids
             FROM users u
             INNER JOIN profiles p ON u.id = p.id
             WHERE u.id != $1 AND u.email_verified = $2 AND u.inactive = $3
-        """, id, True, False)
-        my_user = await conn.fetchrow("SELECT * FROM profiles WHERE id=$1", id)
-        
+            ORDER BY
+                cardinality(
+                    ARRAY(
+                        SELECT DISTINCT UNNEST(p.classes_ids) 
+                        INTERSECT 
+                        SELECT DISTINCT UNNEST($4::integer[])
+                    )
+                ) DESC;
+        """, id, True, False, my_user['classes_ids'] if my_user and my_user['classes_ids'] else [])
+        print("other_users:", list(other_users))
+
     like_status = 'Not liked yet'
     if len(other_users):
         iter = (iter + 1) % len(other_users)

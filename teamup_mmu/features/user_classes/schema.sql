@@ -26,9 +26,3 @@ CREATE TABLE IF NOT EXISTS class_announcements (
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
--- Insert some dummy MMU classes for testing --- delete later
-INSERT INTO classes (course_code, course_name, description, join_code) VALUES
-('TCS3111', 'Software Engineering', 'Learn about software development life cycles and project management.', 'SE123'),
-('TCS3151', 'Object Oriented Programming', 'Java programming concepts and OOP principles.', 'OOP456'),
-('TSN2201', 'Computer Networks', 'Network protocols, layers, and architectures.', 'NET789');

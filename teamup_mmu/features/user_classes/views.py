@@ -613,7 +613,7 @@ async def upload_csv(request, class_id):
                 continue
             # Trim whitespace and convert to lowercase for matching. Only allows @mmu.edu.my emails
             email = row[0].strip().lower()
-            if email and ('@mmu.edu.my' in email):
+            if email and ('@mmu.edu.my' in email or '@student.mmu.edu.my' in email):
                 emails_to_enroll.append(email)
 
         success_count = 0
@@ -628,7 +628,7 @@ async def upload_csv(request, class_id):
             if not student:
                 # User does not exist, create a stub account for them
                 student_id = await conn.fetchval(
-                    "INSERT INTO users (email, password, email_verified) VALUES ($1, 'PENDING_INVITE', FALSE) RETURNING id",
+                    "INSERT INTO users (email, password, email_verified, inactive) VALUES ($1, 'PENDING_INVITE', FALSE, TRUE) RETURNING id",
                     email
                 )
                 # Create a blank profile matching their new user id

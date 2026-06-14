@@ -7,6 +7,7 @@ async def index(request, iter=-1):
     passed_login_check, status, email, id = await access_check(request)
     if not passed_login_check:
         return redirect("/")
+    params = request.GET
         
     async with pool.acquire() as conn:
         # NEW: Join users and profiles tables together to get all the data

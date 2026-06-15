@@ -1,7 +1,7 @@
 {% for student in class_students %}
 {% if student.user_role == 'admin' %}
     <!-- Admin Card -->
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.2rem; background: {% if student.user_id == current_user_id %}#f1f5f9{% else %}#f4fff48f{% endif %}; border: 1px solid #c2e4c3; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.2rem; background: #f4fff48f; border: 1px solid #c2e4c3; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
         onmouseover="this.style.borderColor='#006d18'; this.style.boxShadow='0 4px 12px rgba(0,24,109,0.08)'"
         onmouseout="this.style.borderColor='#c2e4c3'; this.style.boxShadow='none'" title="Click for more info"
         hx-get="/profile/modal/{{ student.user_id }}/"
@@ -21,7 +21,11 @@
     </div>
 {% else %}
     <!-- Regular Student Card -->
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.2rem; background: {% if student.user_id == current_user_id %}#f1f5f9{% else %}#ffffff{% endif %}; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+    <div {% if student.user_id == current_user_id %}
+            style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.2rem; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+         {% else %}
+            style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.2rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+         {% endif %}
         onmouseover="this.style.borderColor='#00186d'; this.style.boxShadow='0 4px 12px rgba(0,24,109,0.08)'"
         onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'" title="Click for more info"
         hx-get="/profile/modal/{{ student.user_id }}/"

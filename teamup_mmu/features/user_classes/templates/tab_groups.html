@@ -109,7 +109,11 @@
                             </h4>
                             <span style="font-size: 0.8rem; color: #64748b; font-weight: 500;">Led by {{ t.leader_username }}</span>
                         </div>
-                        <span style="font-size: 0.75rem; font-weight: 700; background: {% if t.current_members_count >= t.max_members %}#fee2e2; color: #ef4444;{% else %}#e0f2fe; color: #0369a1;{% endif %} padding: 4px 8px; border-radius: 9999px;">
+                        <span {% if t.current_members_count >= t.max_members %}
+                                style="font-size: 0.75rem; font-weight: 700; background: #fee2e2; color: #ef4444; padding: 4px 8px; border-radius: 9999px;"
+                              {% else %}
+                                style="font-size: 0.75rem; font-weight: 700; background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 9999px;"
+                              {% endif %}>
                             {{ t.current_members_count }}/{{ t.max_members }}
                         </span>
                     </div>

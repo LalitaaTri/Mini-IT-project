@@ -1079,6 +1079,9 @@ async def leave_team(request, team_id):
 
         # Remove member
         await conn.execute("DELETE FROM group_members WHERE group_id = $1 AND user_id = $2", team_id, user_id)
+        
+        # Delete any existing invites for this user to this group so they can be freshly re-invited later
+        await conn.execute("DELETE FROM group_invites WHERE group_id = $1 AND receiver_id = $2", team_id, user_id)
 
         # If user was the leader
         if team['leader_id'] == user_id:

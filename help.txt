@@ -1,0 +1,25 @@
+group_invite_modal *
+groups
+
+user_access_check
+
+matching_matches *
+matching_view
+
+my_profile *
+profile_setup_1
+profile_setup_2
+user_profile
+
+user_classes *
+
+user_delete_account
+
+user_email_verification
+user_forgot_password
+user_login
+user_logout
+user_signup
+
+user_inbox *
+user_message

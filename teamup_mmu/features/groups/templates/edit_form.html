@@ -1,0 +1,24 @@
+<div style="margin-top: 15px; padding: 15px; border: 1px solid #f0ad4e; background-color: #fffaf0; border-radius: 10px;">
+    <h4 style="margin-top: 0; color: #f0ad4e;">Edit Group</h4>
+    
+    <form hx-post="/groups/edit/{{ group.id }}/" hx-target="#edit-area-{{ group.id }}" hx-swap="innerHTML">
+        {% csrf_token %}
+        <input type="text" name="name" value="{{ group.name }}" required style="width: 100%; padding: 8px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
+        
+        <textarea name="description" rows="2" style="width: 100%; padding: 8px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">{{ group.description }}</textarea>
+        
+        <input type="text" name="whatsapp_link" value="{{ group.whatsapp_link|default:'' }}" placeholder="WhatsApp URL" style="width: 100%; padding: 8px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
+        
+        <input type="text" name="class_name" value="{{ group.class_name|default:'' }}" placeholder="Class Name (e.g., SWE TC01)" style="width: 100%; padding: 8px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
+        
+        <label style="display: flex; align-items: center; gap: 5px; margin-bottom: 15px; font-size: 0.9rem;">
+            <input type="checkbox" name="is_general" {% if group.is_general %}checked{% endif %}>
+            General Group (Not class specific)
+        </label>
+        
+        <div style="display: flex; gap: 10px;">
+            <button type="submit" style="background: #f0ad4e; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; flex: 1;">Save Changes</button>
+            <button type="button" hx-get="/groups/clear/" hx-target="#edit-area-{{ group.id }}" style="background: #e4e6eb; color: #333; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; flex: 1;">Cancel</button>
+        </div>
+    </form>
+</div>

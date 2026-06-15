@@ -18,9 +18,9 @@ async def groups(request):
         
     pool = await Database.get_pool()
     async with pool.acquire() as conn:
-        # NEW: Added g.join_code to the SELECT statement!
+        # NEW: Added g.leader_id to the SELECT statement
         my_groups = await conn.fetch("""
-            SELECT g.id, g.name, g.description, g.whatsapp_link, g.is_general, g.class_name, g.join_code
+            SELECT g.id, g.name, g.description, g.whatsapp_link, g.is_general, g.class_name, g.join_code, g.leader_id
             FROM groups g
             INNER JOIN group_members gm ON g.id = gm.group_id
             WHERE gm.user_id = $1
@@ -28,7 +28,8 @@ async def groups(request):
         """, id)
 
     context = {
-        'my_groups': my_groups
+        'my_groups': my_groups,
+        'current_user_id': id # NEW: Pass this so HTML knows if you are the leader
     }
     return render(request, 'groups.html', {'context': context})
 
@@ -150,10 +151,8 @@ async def group_members_list(request, group_id):
 
     pool = await Database.get_pool()
     async with pool.acquire() as conn:
-        # 1. Figure out who the leader is
         group = await conn.fetchrow("SELECT leader_id FROM groups WHERE id=$1", group_id)
         
-        # 2. Get all members joined with their profile data
         members = await conn.fetch("""
             SELECT u.id, u.email, p.username, p.program
             FROM group_members gm
@@ -166,7 +165,8 @@ async def group_members_list(request, group_id):
     context = {
         'members': members,
         'leader_id': group['leader_id'] if group else None,
-        'group_id': group_id
+        'group_id': group_id,
+        'current_user_id': id # NEW: We need this to show the "Transfer Leadership" button
     }
     return render(request, 'groups/templates/members_list.html', {'context': context})
 
@@ -319,3 +319,63 @@ async def request_decline(request, req_id):
 
         # Deletes the card from the screen
         return HttpResponse("")
+    
+async def group_edit_form(request, group_id):
+    """Loads the edit form snippet for the leader"""
+    passed_login_check, status, email, id = await access_check(request)
+    if not passed_login_check: return HttpResponse("Unauthorized", status=401)
+        
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        group = await conn.fetchrow("SELECT * FROM groups WHERE id=$1 AND leader_id=$2", group_id, id)
+        if not group: return HttpResponse("<span style='color:red;'>Not authorized.</span>")
+            
+    return render(request, 'groups/templates/edit_form.html', {'group': group})
+
+async def group_edit_receive(request, group_id):
+    """Processes the edit form submission"""
+    passed_login_check, status, email, id = await access_check(request)
+    if not passed_login_check: return HttpResponse("Unauthorized", status=401)
+        
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        description = request.POST.get('description', '').strip()
+        wa_link = request.POST.get('whatsapp_link', '').strip()
+        class_name = request.POST.get('class_name', '').strip()
+        is_general = request.POST.get('is_general') == 'on'
+            
+        pool = await Database.get_pool()
+        async with pool.acquire() as conn:
+            is_admin = await conn.fetchval("SELECT 1 FROM groups WHERE id=$1 AND leader_id=$2", group_id, id)
+            if not is_admin: return HttpResponse("Unauthorized")
+                
+            await conn.execute("""
+                UPDATE groups SET name=$1, description=$2, whatsapp_link=$3, is_general=$4, class_name=$5
+                WHERE id=$6
+            """, name, description, wa_link, is_general, class_name, group_id)
+                
+        # Refresh the page to show new data
+        response = HttpResponse("Updated")
+        response['HX-Refresh'] = "true"
+        return response
+
+async def group_transfer_leader(request, group_id, new_leader_id):
+    """Transfers leadership to another member"""
+    passed_login_check, status, email, id = await access_check(request)
+    if not passed_login_check: return HttpResponse("Unauthorized", status=401)
+        
+    if request.method == 'POST':
+        pool = await Database.get_pool()
+        async with pool.acquire() as conn:
+            # 1. Verify current user is actually the leader
+            is_admin = await conn.fetchval("SELECT 1 FROM groups WHERE id=$1 AND leader_id=$2", group_id, id)
+            if is_admin:
+                # 2. Verify new leader is actually in the group
+                in_group = await conn.fetchval("SELECT 1 FROM group_members WHERE group_id=$1 AND user_id=$2", group_id, new_leader_id)
+                if in_group:
+                    await conn.execute("UPDATE groups SET leader_id=$1 WHERE id=$2", new_leader_id, group_id)
+                        
+        # Refresh the page to update permissions
+        response = HttpResponse("Success")
+        response['HX-Refresh'] = "true"
+        return response

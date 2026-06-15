@@ -17,14 +17,27 @@
                 </div>
 
                 {% if context.current_user_id == context.leader_id and member.id != context.leader_id %}
-                    <form hx-post="/groups/transfer/{{ context.group_id }}/{{ member.id }}/" 
-                          hx-confirm="Make {{ member.username|default:member.email }} the new Leader? You will lose admin rights."
-                          style="margin: 0;">
-                        {% csrf_token %}
-                        <button type="submit" style="background: #e4e6eb; color: #333; border: 1px solid #ccc; padding: 4px 8px; border-radius: 5px; font-size: 0.75rem; cursor: pointer;">
-                            Make Leader
-                        </button>
-                    </form>
+                    <div style="display: flex; gap: 5px;">
+                        
+                        <form hx-post="/groups/transfer/{{ context.group_id }}/{{ member.id }}/" 
+                              hx-confirm="Make {{ member.username|default:member.email }} the new Leader? You will lose admin rights."
+                              style="margin: 0;">
+                            {% csrf_token %}
+                            <button type="submit" style="background: #e4e6eb; color: #333; border: 1px solid #ccc; padding: 4px 8px; border-radius: 5px; font-size: 0.75rem; cursor: pointer;">
+                                Make Leader
+                            </button>
+                        </form>
+
+                        <form hx-post="/groups/kick/{{ context.group_id }}/{{ member.id }}/" 
+                              hx-confirm="Are you sure you want to remove {{ member.username|default:member.email }} from the group?"
+                              style="margin: 0;">
+                            {% csrf_token %}
+                            <button type="submit" style="background: #ffe5e5; color: #cc0000; border: 1px solid #ffcccc; padding: 4px 8px; border-radius: 5px; font-size: 0.75rem; cursor: pointer; font-weight: bold;">
+                                Kick
+                            </button>
+                        </form>
+                        
+                    </div>
                 {% endif %}
 
             </li>

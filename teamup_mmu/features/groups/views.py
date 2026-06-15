@@ -379,3 +379,27 @@ async def group_transfer_leader(request, group_id, new_leader_id):
         response = HttpResponse("Success")
         response['HX-Refresh'] = "true"
         return response
+    
+async def group_kick_member(request, group_id, target_user_id):
+    """Allows the leader to remove a member from the group"""
+    passed_login_check, status, email, id = await access_check(request)
+    if not passed_login_check: return HttpResponse("Unauthorized", status=401)
+
+    if request.method == 'POST':
+        pool = await Database.get_pool()
+        async with pool.acquire() as conn:
+            # 1. Verify current user is actually the leader
+            is_admin = await conn.fetchval("SELECT 1 FROM groups WHERE id=$1 AND leader_id=$2", group_id, id)
+            
+            if is_admin:
+                # 2. Prevent the leader from kicking themselves (they should use 'Leave Group' instead)
+                if target_user_id == id:
+                    return HttpResponse("<span style='color: red;'>You cannot kick yourself.</span>")
+
+                # 3. Remove the user from the group
+                await conn.execute("DELETE FROM group_members WHERE group_id=$1 AND user_id=$2", group_id, target_user_id)
+
+        # Refresh the page to update the member list and group counts instantly
+        response = HttpResponse("Kicked successfully")
+        response['HX-Refresh'] = "true"
+        return response

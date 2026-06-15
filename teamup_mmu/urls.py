@@ -82,6 +82,7 @@ urlpatterns = [
     path('groups/edit/<int:group_id>/', group_views.group_edit_form, name='group_edit_form'),
     path('groups/edit/<int:group_id>/', group_views.group_edit_receive, name='group_edit_receive'), # Note: HTMX POST hits the same URL but different request.method logic
     path('groups/transfer/<int:group_id>/<int:new_leader_id>/', group_views.group_transfer_leader, name='group_transfer_leader'),
+    path('groups/kick/<int:group_id>/<int:target_user_id>/', group_views.group_kick_member, name='group_kick_member'),
 
     path('connect_modal/invite/<int:target_user_id>/', group_invite_modal_views.load_invite_modal, name='load_invite_modal'),
     path('connect_modal/request/<int:target_user_id>/', group_invite_modal_views.load_request_modal, name='load_request_modal'),

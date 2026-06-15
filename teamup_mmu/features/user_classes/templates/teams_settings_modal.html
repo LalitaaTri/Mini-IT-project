@@ -16,14 +16,14 @@
                 <span style="font-weight: 600; color: #1e293b; font-size: 0.95rem;">Enable Team Formation</span>
                 <label style="position: relative; display: inline-block; width: 44px; height: 22px;">
                     <input type="checkbox" name="teams_enabled" {% if class_details.groups_enabled %}checked{% endif %} style="opacity: 0; width: 0; height: 0;" id="toggle-teams-checkbox" onchange="toggleInputs(this.checked)">
-                    <span id="toggle-slider" style="position: absolute; cursor: pointer; inset: 0; background-color: {% if class_details.groups_enabled %}#10b981{% else %}#cbd5e1{% endif %}; border-radius: 34px; transition: 0.2s;">
-                        <span id="toggle-knob" style="position: absolute; content: ''; height: 16px; width: 16px; left: {% if class_details.groups_enabled %}24px{% else %}4px{% endif %}; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.2s;"></span>
+                    <span id="toggle-slider" class="{% if class_details.groups_enabled %}bg-emerald{% else %}bg-slate{% endif %}" style="position: absolute; cursor: pointer; inset: 0; border-radius: 34px; transition: 0.2s;">
+                        <span id="toggle-knob" class="{% if class_details.groups_enabled %}knob-on{% else %}knob-off{% endif %}" style="position: absolute; content: ''; height: 16px; width: 16px; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.2s;"></span>
                     </span>
                 </label>
             </div>
 
             <!-- Configuration Inputs -->
-            <div id="settings-inputs-wrapper" style="display: {% if class_details.groups_enabled %}flex{% else %}none{% endif %}; flex-direction: column; gap: 1rem;">
+            <div id="settings-inputs-wrapper" class="{% if class_details.groups_enabled %}display-flex{% else %}display-none{% endif %}" style="flex-direction: column; gap: 1rem;">
                 <!-- Max Teams -->
                 <div style="display: flex; flex-direction: column; gap: 0.4rem;">
                     <label style="font-weight: 600; color: #475569; font-size: 0.88rem;">Maximum Teams</label>
@@ -68,6 +68,13 @@
 </script>
 
 <style>
+    .bg-emerald { background-color: #10b981; }
+    .bg-slate { background-color: #cbd5e1; }
+    .knob-on { left: 24px; }
+    .knob-off { left: 4px; }
+    .display-flex { display: flex; }
+    .display-none { display: none; }
+
     @keyframes modalEnter {
         from { transform: scale(0.95); opacity: 0; }
         to { transform: scale(1); opacity: 1; }

@@ -35,10 +35,10 @@ INSERT INTO user_classes (user_id, class_id, role) VALUES
 (2, 2, 'admin'),
 (3, 2, 'student');
 
--- 5. Insert dummy groups
+-- 5. Insert dummy casual groups (general, not linked to any class)
 INSERT INTO groups (id, name, description, whatsapp_link, is_general, class_name, max_members, leader_id, created_by, join_code) VALUES
-(1, 'Software Architects', 'A group for TCS3111 Software Engineering project.', 'https://chat.whatsapp.com/test1', FALSE, 'Software Engineering', 5, 1, 1, 'SOFT12'),
-(2, 'OOP Masters', 'A group for TCS3151 OOP assignments.', 'https://chat.whatsapp.com/test2', FALSE, 'Object Oriented Programming', 4, 2, 2, 'OOPM89');
+(1, 'The Debug Squad',    'A casual study group for anyone who loves coding and debugging together.', 'https://chat.whatsapp.com/debugsquad', TRUE, NULL, 6, 1, 1, 'DBG001'),
+(2, 'Weekend Warriors',   'We meet on weekends to work on side projects and have fun!',               'https://chat.whatsapp.com/wkndwar',    TRUE, NULL, 5, 2, 2, 'WKD002');
 
 -- Adjust groups ID sequence
 SELECT setval('groups_id_seq', (SELECT MAX(id) FROM groups));

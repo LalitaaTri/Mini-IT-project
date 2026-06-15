@@ -385,7 +385,108 @@ async def class_tab(request, class_id, tab_name):
             """, class_id)
             context['class_students'] = class_students
         elif tab_name == 'groups':
-            context['class_groups'] = []
+            # 1. Query all coursework Teams that belong to this class by class_id
+            class_groups = await conn.fetch("""
+                SELECT g.id, g.name, g.description, g.whatsapp_link, g.max_members, g.join_code, g.leader_id,
+                       p.username as leader_username,
+                       (SELECT COUNT(*) FROM group_members gm WHERE gm.group_id = g.id) as current_members_count
+                FROM groups g
+                LEFT JOIN profiles p ON g.leader_id = p.id
+                WHERE g.class_id = $1
+                ORDER BY g.id ASC
+            """, class_id)
+
+            # 2. Get all members of all groups in this class
+            group_members_rows = await conn.fetch("""
+                SELECT gm.group_id, u.id as user_id, p.username, u.email
+                FROM group_members gm
+                JOIN users u ON gm.user_id = u.id
+                LEFT JOIN profiles p ON u.id = p.id
+                WHERE gm.group_id IN (
+                    SELECT id FROM groups WHERE class_id = $1
+                )
+                ORDER BY gm.joined_at ASC
+            """, class_id)
+
+            # 3. Get pending requests for groups in this class
+            requests_rows = await conn.fetch("""
+                SELECT qr.id as request_id, qr.group_id, qr.student_id, p.username as student_username, u.email as student_email
+                FROM group_requests qr
+                JOIN users u ON qr.student_id = u.id
+                LEFT JOIN profiles p ON u.id = p.id
+                WHERE qr.status = 'pending' AND qr.group_id IN (
+                    SELECT id FROM groups WHERE class_id = $1
+                )
+                ORDER BY qr.created_at ASC
+            """, class_id)
+
+            # 4. Map members & requests to their respective team dicts
+            class_groups_list = []
+            for g in class_groups:
+                g_dict = dict(g)
+                # Filter members belonging to this team
+                g_members = []
+                for row in group_members_rows:
+                    if row['group_id'] == g['id']:
+                        g_members.append({
+                            'user_id': row['user_id'],
+                            'username': row['username'] or row['email'].split('@')[0]
+                        })
+                g_dict['members'] = g_members
+                
+                # Filter requests (only visible to team leader or admin)
+                g_requests = []
+                if g['leader_id'] == user_id or is_admin:
+                    for req in requests_rows:
+                        if req['group_id'] == g['id']:
+                            # A user cannot approve or decline their own request
+                            if req['student_id'] != user_id:
+                                g_requests.append({
+                                    'request_id': req['request_id'],
+                                    'student_id': req['student_id'],
+                                    'username': req['student_username'] or req['student_email'].split('@')[0]
+                                })
+                g_dict['pending_requests'] = g_requests
+                class_groups_list.append(g_dict)
+
+            # 5. Check if the logged-in user is already in a team in this class
+            user_group_row = await conn.fetchrow("""
+                SELECT gm.group_id, g.name 
+                FROM group_members gm
+                JOIN groups g ON gm.group_id = g.id
+                WHERE gm.user_id = $1 AND g.class_id = $2
+            """, user_id, class_id)
+            user_group_id = user_group_row['group_id'] if user_group_row else None
+            user_group_name = user_group_row['name'] if user_group_row else None
+
+            # 6. Check if the logged-in user has a pending request in this class
+            user_pending_row = await conn.fetchrow("""
+                SELECT qr.group_id, g.name FROM group_requests qr
+                JOIN groups g ON qr.group_id = g.id
+                WHERE qr.student_id = $1 AND qr.status = 'pending' AND g.class_id = $2
+            """, user_id, class_id)
+            user_pending_request_group_id = user_pending_row['group_id'] if user_pending_row else None
+            user_pending_request_group_name = user_pending_row['name'] if user_pending_row else None
+
+            # 7. Check if the logged-in user has a declined request in this class
+            user_declined_row = await conn.fetchrow("""
+                SELECT qr.id as request_id, qr.group_id, g.name FROM group_requests qr
+                JOIN groups g ON qr.group_id = g.id
+                WHERE qr.student_id = $1 AND qr.status = 'declined' AND g.class_id = $2
+            """, user_id, class_id)
+            user_declined_request_id = user_declined_row['request_id'] if user_declined_row else None
+            user_declined_group_name = user_declined_row['name'] if user_declined_row else None
+
+            # 8. Load context values
+            context['class_teams'] = class_groups_list
+            context['user_team_id'] = user_group_id
+            context['user_team_name'] = user_group_name
+            context['user_pending_request_team_id'] = user_pending_request_group_id
+            context['user_pending_request_team_name'] = user_pending_request_group_name
+            context['user_declined_request_id'] = user_declined_request_id
+            context['user_declined_team_name'] = user_declined_group_name
+            context['started_teams_count'] = sum(1 for g in class_groups_list if g['leader_id'] is not None)
+
         elif tab_name == 'announcements':
             announcements = await conn.fetch("""
                 SELECT ca.*, p.username as sender_name, u.email as sender_email
@@ -665,3 +766,501 @@ async def upload_csv(request, class_id):
 
     response_html = f"{msg}<span id='num_students' hx-swap-oob='true'>👤 {new_count} students</span>"
     return HttpResponse(response_html, status=200)
+
+
+
+@csrf_exempt
+async def teams_settings_modal(request, class_id):
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+        user_id = session['user_id']
+
+        user_role = await conn.fetchval("SELECT role FROM user_classes WHERE user_id=$1 AND class_id=$2", user_id, class_id)
+        if user_role != 'admin':
+            return HttpResponse("Forbidden: Only class admins can modify settings", status=403)
+
+        target_class = await conn.fetchrow("SELECT * FROM classes WHERE id=$1", class_id)
+        if not target_class:
+            return HttpResponse("Class not found", status=404)
+
+    return render(request, 'user_classes/templates/teams_settings_modal.html', {
+        'class_id': class_id,
+        'class_details': target_class
+    })
+# when they save the teams settings
+@csrf_exempt
+async def save_group_settings(request, class_id):
+    if request.method != 'POST':
+        return HttpResponse("Invalid method", status=400)
+
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+
+    # Note: hx-post is sending teams_enabled checkbox
+    groups_enabled = request.POST.get('teams_enabled') == 'on'
+    max_groups = request.POST.get('max_teams')
+    max_members = request.POST.get('max_members')
+
+    if groups_enabled and (not max_groups or not max_members):
+        return HttpResponse("<span style='color: red;'>Missing limits fields.</span>", status=400)
+
+    try:
+        max_groups = int(max_groups) if max_groups else 10
+        max_members = int(max_members) if max_members else 5
+    except ValueError:
+        return HttpResponse("<span style='color: red;'>Values must be integers.</span>", status=400)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+        user_id = session['user_id']
+
+        user_role = await conn.fetchval("SELECT role FROM user_classes WHERE user_id=$1 AND class_id=$2", user_id, class_id)
+        if user_role != 'admin':
+            return HttpResponse("Forbidden", status=403)
+
+        target_class = await conn.fetchrow("SELECT * FROM classes WHERE id=$1", class_id)
+        if not target_class:
+            return HttpResponse("Class not found", status=404)
+
+        # Update limits in classes table
+        await conn.execute("""
+            UPDATE classes 
+            SET groups_enabled = $1, max_groups = $2, max_members_per_group = $3 
+            WHERE id = $4
+        """, groups_enabled, max_groups, max_members, class_id)
+
+        if groups_enabled:
+            # Pre-create Teams named "Team 1" to "Team N" if they don't exist yet
+            existing_groups = await conn.fetch("SELECT name FROM groups WHERE class_id = $1", class_id)
+            existing_names = {row['name'] for row in existing_groups}
+            
+            for i in range(1, max_groups + 1):
+                team_name = f"Team {i}"
+                if team_name not in existing_names:
+                    join_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+                    await conn.execute("""
+                        INSERT INTO groups (name, description, whatsapp_link, is_general, class_name, class_id, leader_id, created_by, max_members, join_code)
+                        VALUES ($1, $2, NULL, FALSE, $3, $4, NULL, $5, $6, $7)
+                    """, team_name, f"Assignment team {i} for {target_class['course_code']}", target_class['course_name'], class_id, user_id, max_members, join_code)
+        else:
+            # Delete ALL teams for this class when team formation is disabled
+            # CASCADE handles group_members and group_requests automatically
+            await conn.execute("""
+                DELETE FROM groups 
+                WHERE class_id = $1
+            """, class_id)
+
+    # Return success HTML which HTMX will inject. 
+    # It closes the modal after 1s and tells HTMX to refresh the groups/teams tab view
+    response_html = (
+        "<span style='color: green;'>Settings saved successfully!</span>"
+        "<script>"
+        "setTimeout(() => { document.getElementById('team-settings-modal').remove(); }, 1000);"
+        "htmx.ajax('GET', '/classes/class_details/" + str(class_id) + "/tab/groups/', '#tabs-section');"
+        "</script>"
+    )
+    return HttpResponse(response_html)
+
+
+@csrf_exempt
+async def lead_team_modal(request, team_id):
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+        user_id = session['user_id']
+
+        team = await conn.fetchrow("SELECT * FROM groups WHERE id = $1", team_id)
+        if not team:
+            return HttpResponse("Team not found", status=404)
+
+        if team['leader_id'] is not None:
+            return HttpResponse("Team already has a leader", status=400)
+
+    return render(request, 'user_classes/templates/lead_team_modal.html', {
+        'team': team,
+        'is_edit': False
+    })
+
+
+@csrf_exempt
+async def edit_team_modal(request, team_id):
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+        user_id = session['user_id']
+
+        team = await conn.fetchrow("SELECT * FROM groups WHERE id = $1", team_id)
+        if not team:
+            return HttpResponse("Team not found", status=404)
+
+        if team['leader_id'] != user_id:
+            return HttpResponse("Forbidden: Only the team leader can edit team info", status=403)
+
+    return render(request, 'user_classes/templates/lead_team_modal.html', {
+        'team': team,
+        'is_edit': True
+    })
+
+
+@csrf_exempt
+async def save_team_info(request, team_id):
+    if request.method != 'POST':
+        return HttpResponse("Invalid method", status=400)
+
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+
+    description = request.POST.get('description', '').strip()
+    whatsapp_link = request.POST.get('whatsapp_link', '').strip()
+
+    if whatsapp_link and not (whatsapp_link.startswith('http://') or whatsapp_link.startswith('https://')):
+        return HttpResponse("<span style='color: red;'>WhatsApp link must be a valid URL starting with http:// or https://</span>", status=400)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+        user_id = session['user_id']
+
+        team = await conn.fetchrow("SELECT * FROM groups WHERE id = $1", team_id)
+        if not team:
+            return HttpResponse("Team not found", status=404)
+        class_id = team['class_id']
+
+        # Case 1: Claiming an unclaimed team
+        if team['leader_id'] is None:
+            # Check if user is already in a team in this class
+            in_team = await conn.fetchval("""
+                SELECT COUNT(*) FROM group_members gm
+                JOIN groups g ON gm.group_id = g.id
+                WHERE gm.user_id = $1 AND g.class_id = $2
+            """, user_id, class_id)
+            if in_team > 0:
+                return HttpResponse("<span style='color: red;'>You are already a member of a team in this class! Leave your team first.</span>", status=400)
+
+            # Claim as leader and update details
+            await conn.execute("""
+                UPDATE groups 
+                SET leader_id = $1, description = $2, whatsapp_link = $3, created_by = $1
+                WHERE id = $4
+            """, user_id, description, whatsapp_link or None, team_id)
+
+            # Automatically join as first member
+            await conn.execute("""
+                INSERT INTO group_members (group_id, user_id, joined_at)
+                VALUES ($1, $2, CURRENT_TIMESTAMP)
+            """, team_id, user_id)
+        
+        # Case 2: Editing an existing team (only leader can do this)
+        else:
+            if team['leader_id'] != user_id:
+                return HttpResponse("<span style='color: red;'>Forbidden: Only the team leader can modify team info.</span>", status=403)
+
+            await conn.execute("""
+                UPDATE groups 
+                SET description = $1, whatsapp_link = $2
+                WHERE id = $3
+            """, description, whatsapp_link or None, team_id)
+
+    # Return success HTML which HTMX will inject.
+    # It closes the modal after 1s and tells HTMX to refresh the teams tab view
+    response_html = (
+        "<span style='color: green;'>Team info saved successfully!</span>"
+        "<script>"
+        "setTimeout(() => { document.getElementById('lead-team-modal').remove(); }, 1000);"
+        "htmx.ajax('GET', '/classes/class_details/" + str(class_id) + "/tab/groups/', '#tabs-section');"
+        "</script>"
+    )
+    return HttpResponse(response_html)
+
+
+@csrf_exempt
+async def join_team(request, team_id):
+    if request.method != 'POST':
+        return HttpResponse("Invalid method", status=400)
+
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+        user_id = session['user_id']
+
+        team = await conn.fetchrow("SELECT * FROM groups WHERE id = $1", team_id)
+        if not team:
+            return HttpResponse("Team not found", status=404)
+        class_id = team['class_id']
+
+        # Check if already in a team in this class
+        in_team = await conn.fetchval("""
+            SELECT COUNT(*) FROM group_members gm
+            JOIN groups g ON gm.group_id = g.id
+            WHERE gm.user_id = $1 AND g.class_id = $2
+        """, user_id, class_id)
+        if in_team > 0:
+            return HttpResponse("You are already in a team in this class", status=400)
+
+        # Check if team is full
+        current_members = await conn.fetchval("SELECT COUNT(*) FROM group_members WHERE group_id = $1", team_id)
+        if current_members >= team['max_members']:
+            return HttpResponse("Team is already full", status=400)
+
+        # Clear any existing pending or declined requests for this student in this class
+        await conn.execute("""
+            DELETE FROM group_requests 
+            WHERE student_id = $1 AND group_id IN (
+                SELECT id FROM groups WHERE class_id = $2
+            )
+        """, user_id, class_id)
+
+        # Create new pending request
+        await conn.execute("""
+            INSERT INTO group_requests (group_id, student_id, status, created_at)
+            VALUES ($1, $2, 'pending', CURRENT_TIMESTAMP)
+        """, team_id, user_id)
+
+        return await class_tab(request, class_id, 'groups')
+
+
+@csrf_exempt
+async def leave_team(request, team_id):
+    if request.method != 'POST':
+        return HttpResponse("Invalid method", status=400)
+
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+        user_id = session['user_id']
+
+        team = await conn.fetchrow("SELECT * FROM groups WHERE id = $1", team_id)
+        if not team:
+            return HttpResponse("Team not found", status=404)
+        class_id = team['class_id']
+
+        # Check if user is actually a member of this team
+        is_member = await conn.fetchval("SELECT COUNT(*) FROM group_members WHERE group_id = $1 AND user_id = $2", team_id, user_id)
+        if is_member == 0:
+            return HttpResponse("You are not a member of this team", status=400)
+
+        # Remove member
+        await conn.execute("DELETE FROM group_members WHERE group_id = $1 AND user_id = $2", team_id, user_id)
+
+        # If user was the leader
+        if team['leader_id'] == user_id:
+            # Check if there are other members left
+            next_member = await conn.fetchrow("SELECT user_id FROM group_members WHERE group_id = $1 ORDER BY joined_at ASC LIMIT 1", team_id)
+            if next_member:
+                # Assign next member as leader
+                await conn.execute("UPDATE groups SET leader_id = $1 WHERE id = $2", next_member['user_id'], team_id)
+            else:
+                # Revert team to empty/unclaimed state
+                await conn.execute("""
+                    UPDATE groups 
+                    SET leader_id = NULL, description = NULL, whatsapp_link = NULL, created_by = NULL
+                    WHERE id = $1
+                """, team_id)
+
+        return await class_tab(request, class_id, 'groups')
+
+
+@csrf_exempt
+async def cancel_request(request, team_id):
+    if request.method != 'POST':
+        return HttpResponse("Invalid method", status=400)
+
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+        user_id = session['user_id']
+
+        team = await conn.fetchrow("SELECT * FROM groups WHERE id = $1", team_id)
+        if not team:
+            return HttpResponse("Team not found", status=404)
+        class_id = team['class_id']
+
+        # Delete pending request
+        await conn.execute("DELETE FROM group_requests WHERE group_id = $1 AND student_id = $2 AND status = 'pending'", team_id, user_id)
+
+        return await class_tab(request, class_id, 'groups')
+
+
+@csrf_exempt
+async def approve_request(request, request_id):
+    if request.method != 'POST':
+        return HttpResponse("Invalid method", status=400)
+
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+        user_id = session['user_id']
+
+        # Fetch request details
+        req = await conn.fetchrow("SELECT * FROM group_requests WHERE id = $1", request_id)
+        if not req:
+            return HttpResponse("Request not found", status=404)
+
+        team_id = req['group_id']
+        student_id = req['student_id']
+
+        # Fetch team and verify leader / admin authority
+        team = await conn.fetchrow("SELECT * FROM groups WHERE id = $1", team_id)
+        if not team:
+            return HttpResponse("Team not found", status=404)
+        class_id = team['class_id']
+
+        user_role = await conn.fetchval("SELECT role FROM user_classes WHERE user_id=$1 AND class_id=$2", user_id, class_id)
+        is_admin = user_role == 'admin'
+
+        if team['leader_id'] != user_id and not is_admin:
+            return HttpResponse("Forbidden", status=403)
+
+        # Check if student is already in a team in this class
+        in_team = await conn.fetchval("""
+            SELECT COUNT(*) FROM group_members gm
+            JOIN groups g ON gm.group_id = g.id
+            WHERE gm.user_id = $1 AND g.class_id = $2
+        """, student_id, class_id)
+        if in_team > 0:
+            # Clean up obsolete request
+            await conn.execute("DELETE FROM group_requests WHERE id = $1", request_id)
+            return HttpResponse("Student is already a member of a team in this class", status=400)
+
+        # Check if team is full
+        current_members = await conn.fetchval("SELECT COUNT(*) FROM group_members WHERE group_id = $1", team_id)
+        if current_members >= team['max_members']:
+            return HttpResponse("Team is already full", status=400)
+
+        # Approve and insert student to team members
+        await conn.execute("UPDATE group_requests SET status = 'approved' WHERE id = $1", request_id)
+        await conn.execute("INSERT INTO group_members (group_id, user_id, joined_at) VALUES ($1, $2, CURRENT_TIMESTAMP)", team_id, student_id)
+
+        # Delete any other requests for this student in this class
+        await conn.execute("""
+            DELETE FROM group_requests 
+            WHERE student_id = $1 AND group_id IN (
+                SELECT id FROM groups WHERE class_id = $2
+            )
+        """, student_id, class_id)
+
+        return await class_tab(request, class_id, 'groups')
+
+
+@csrf_exempt
+async def decline_request(request, request_id):
+    if request.method != 'POST':
+        return HttpResponse("Invalid method", status=400)
+
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+        user_id = session['user_id']
+
+        # Fetch request details
+        req = await conn.fetchrow("SELECT * FROM group_requests WHERE id = $1", request_id)
+        if not req:
+            return HttpResponse("Request not found", status=404)
+
+        team_id = req['group_id']
+
+        # Fetch team and verify leader / admin authority
+        team = await conn.fetchrow("SELECT * FROM groups WHERE id = $1", team_id)
+        if not team:
+            return HttpResponse("Team not found", status=404)
+        class_id = team['class_id']
+
+        user_role = await conn.fetchval("SELECT role FROM user_classes WHERE user_id=$1 AND class_id=$2", user_id, class_id)
+        is_admin = user_role == 'admin'
+
+        if team['leader_id'] != user_id and not is_admin:
+            return HttpResponse("Forbidden", status=403)
+
+        # Set status to declined
+        await conn.execute("UPDATE group_requests SET status = 'declined' WHERE id = $1", request_id)
+
+        return await class_tab(request, class_id, 'groups')
+
+
+@csrf_exempt
+async def dismiss_declined(request, request_id):
+    if request.method != 'POST':
+        return HttpResponse("Invalid method", status=400)
+
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+        user_id = session['user_id']
+
+        # Fetch request details
+        req = await conn.fetchrow("SELECT * FROM group_requests WHERE id = $1", request_id)
+        if not req:
+            return HttpResponse("Request not found", status=404)
+        
+        team_id = req['group_id']
+        team = await conn.fetchrow("SELECT * FROM groups WHERE id = $1", team_id)
+        class_id = team['class_id'] if team else None
+
+        # Delete declined request row
+        await conn.execute("DELETE FROM group_requests WHERE id = $1 AND student_id = $2 AND status = 'declined'", request_id, user_id)
+
+        return await class_tab(request, class_id, 'groups')
+
+

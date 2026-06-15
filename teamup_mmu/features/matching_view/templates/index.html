@@ -93,6 +93,8 @@
             opacity: 0.9;
         }
     </style>
+
+<p>My classes: {{ context.my_user.classes_ids|join:", " }}</p>
     <div id="user-list">
         {% include 'matching_view/templates/card.html' %}
     </div>

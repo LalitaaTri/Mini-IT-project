@@ -8,6 +8,26 @@ async def index(request, iter=-1):
     if not passed_login_check:
         return redirect("/")
     params = request.GET
+    url_sort_filter = request.GET.get('sort', 'matches')
+    # 2. THE SECURITY GUARD: Define a strict whitelist of allowed sorting options.
+    # The key is what's in the URL, the value is the exact, safe SQL code.
+    sorting_whitelist = {
+        'newest': 'p.created_at DESC',
+        'oldest': 'p.created_at ASC',
+        'name': 'p.profile_name ASC',
+        'matches': '''cardinality(
+            ARRAY(
+                SELECT UNNEST(p.classes_ids) 
+                INTERSECT 
+                SELECT UNNEST($4::integer[])
+            )
+        ) DESC'''
+    }
+    # 3. Fallback safely if the user types something malicious or weird in the URL
+    if url_sort_filter in sorting_whitelist:
+        order_by_clause = sorting_whitelist[url_sort_filter]
+    else:
+        order_by_clause = sorting_whitelist['matches']
         
     async with pool.acquire() as conn:
         # NEW: Join users and profiles tables together to get all the data

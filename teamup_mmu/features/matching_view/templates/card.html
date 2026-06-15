@@ -1,8 +1,4 @@
 {% load static %}
-<p>My id: {{ context.my_user.id }}</p>
-<p>My classes: {{ context.my_user.classes_ids|join:", " }}</p>
-<p>Filter</p>
-<button>filter by classes</button>
 {% if context.user_obj %}
     <div class="user-card">
         <!-- Show Username instead of just email if it exists -->

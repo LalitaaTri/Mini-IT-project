@@ -109,5 +109,6 @@ async def profile_modal(request, user_id):
     context = {
         'profile': profile,
         'user_id': user_id,
+        'my_id': my_id,
     }
     return render(request, 'my_profile/templates/profile_modal.html', {'context': context})

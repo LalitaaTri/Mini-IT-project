@@ -59,6 +59,7 @@
             </div>
         </div>
         {% endif %}
+        {% if context.user_id != context.my_id %}
         <div style="text-align: right; margin-top: 1rem;">
             <button class="invite-to-group-btn"
                     hx-get="/invite_modal/{{ context.user_id }}/" 
@@ -68,6 +69,7 @@
                 Invite to Group
             </button>
         </div>
+        {% endif %}
     </div>
 </div>
 

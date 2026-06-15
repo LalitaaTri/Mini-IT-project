@@ -12,7 +12,7 @@ async def load_modal(request, target_user_id):
     pool = await Database.get_pool()
     async with pool.acquire() as conn:
         # Fetch only groups where the current user is the leader
-        my_admin_groups = await conn.fetch("SELECT id, name FROM groups WHERE leader_id=$1", id)
+        my_admin_groups = await conn.fetch("SELECT id, name FROM groups WHERE leader_id=$1 AND is_general=TRUE", id)
         
     context = {
         'groups': my_admin_groups,

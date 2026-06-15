@@ -67,6 +67,7 @@ async def index(request):
             # 3. PASS TO CONTEXT
             context = {
                 'invites_l': invites_l,
+                'requests_l': requests_l,
                 'chats_l': chats_l
             }
             return render(request, 'user_inbox/templates/index.html', {'context': context})

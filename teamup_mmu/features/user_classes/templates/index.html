@@ -94,7 +94,7 @@
 <div style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
 
     <!-- Top Action Bar (Search + Buttons) -->
-    <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 40px;">
+    <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 24px; padding-bottom: 40px; border-bottom: 2px solid rgba(0, 24, 109, 0.15);">
     <!-- search input wrapper with icon -->
     <div style="flex-grow: 1; position: relative;">
         <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; color: #888; pointer-events: none;">🔍</span>
@@ -117,13 +117,28 @@
     <button class="create_class_btn" hx-get="/classes/create_modal/" hx-target="#modal-container" hx-swap="innerHTML" title="Create Class" style="height: 48px; width: 48px; font-size: 24px; flex-shrink: 0; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); box-sizing: border-box;">+</button>
 </div>
 
-<div>
-    <div class="h1_section">
-        <h1 style="margin-top: 0; margin-bottom: 20px; font-size: 2.5rem;">My Classes</h1>
+<div style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
+    <div class="h1_section" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 50px;">
+        <h1 style="margin: 0; font-size: 2.5rem;">My Classes</h1>
+        {% if my_classes %}
+        <div style="position: relative; width: 300px;">
+            <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1rem; color: #888; pointer-events: none;">🔍</span>
+            <input type="text" 
+                id="my-classes-search" 
+                name="search_my_classes" 
+                placeholder="Search my classes..." 
+                hx-get="/classes/search_my_classes/" 
+                hx-trigger="keyup changed delay:300ms" 
+                hx-target="#my-classes-list"
+                style="width: 100%; height: 42px; padding: 0 15px 0 40px; border-radius: 21px; border: 1px solid #00198357; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); font-size: 14px; box-sizing: border-box; outline: none; transition: border-color 0.2s;"
+                onfocus="this.style.borderColor='#001561'"
+                onblur="this.style.borderColor='#00198357'">
+        </div>
+        {% endif %}
     </div>
     <!-- Checking if the user has any classes joined -->
     {% if my_classes %}
-        <ul class="class-list">
+        <ul class="class-list" id="my-classes-list">
             {% for c in my_classes %}
             <li class="class-card" hx-get="/classes/class_details/{{ c.id }}/" hx-target="body" hx-push-url="true">
                 
@@ -157,10 +172,11 @@
     document.addEventListener('click', function(event) {
         var searchInput = document.querySelector('input[name="search_query"]');
         var exploreList = document.getElementById('explore-list');
-        if (!searchInput.contains(event.target) && !exploreList.contains(event.target)) {
+        if (searchInput && exploreList && !searchInput.contains(event.target) && !exploreList.contains(event.target)) {
             exploreList.innerHTML = ''; // Hide the dropdown by clearing it
         }
     });
+
 </script>
 
 {% endblock %}

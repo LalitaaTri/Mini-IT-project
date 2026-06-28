@@ -32,7 +32,7 @@ from .features.user_classes.views import add_students_modal
 from .features.user_classes.views import add_students_search
 from .features.user_classes.views import add_student_direct
 from .features.user_classes.views import upload_csv
-from .features.user_classes.views import search_explore
+from .features.user_classes.views import search_explore, search_my_classes
 
 
 from .features.user_classes.views import teams_settings_modal
@@ -132,6 +132,7 @@ urlpatterns = [
     path('classes/add_student_direct/<int:class_id>/<int:student_id>/', add_student_direct, name='add_student_direct'),
     path('classes/upload_csv/<int:class_id>/', upload_csv, name='upload_csv'),
     path('classes/search_explore/', search_explore, name='search_explore'),
+    path('classes/search_my_classes/', search_my_classes, name='search_my_classes'),
 
 
     path('classes/teams_settings_modal/<int:class_id>/', teams_settings_modal, name='teams_settings_modal'),

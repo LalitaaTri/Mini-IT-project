@@ -172,9 +172,9 @@ async def class_details(request, class_id):
             SELECT u.id as user_id, u.email, p.username, uc.role as user_role, u.email_verified
             FROM users u
             JOIN user_classes uc ON u.id = uc.user_id
-            JOIN profiles p ON u.id = p.id
+            LEFT JOIN profiles p ON u.id = p.id
             WHERE uc.class_id = $1
-            ORDER BY CASE WHEN uc.role = 'admin' THEN 0 ELSE 1 END, LOWER(p.username) ASC
+            ORDER BY CASE WHEN uc.role = 'admin' THEN 0 ELSE 1 END, LOWER(COALESCE(p.username, u.email)) ASC
         """, class_id)
 
         return render(request, 'user_classes/templates/class_details.html', {
@@ -282,9 +282,8 @@ async def remove_student(request,class_id,student_id):
         await conn.execute("DELETE FROM user_classes WHERE user_id=$1 and class_id=$2", student_id, class_id)
         # Calculate the new number of students
         new_count = await conn.fetchval("SELECT count(*) FROM user_classes WHERE class_id=$1", class_id)
-        # Send back the updated counter with hx-swap-oob="true"
+        # Return empty body so the card gets removed by outerHTML swap, with OOB update for the counter
         response_html = f'<span id="num_students" hx-swap-oob="true">👤 {new_count} students</span>'
-
         return HttpResponse(response_html, status=200)
 
 async def share_code_modal(request, class_id):
@@ -382,9 +381,9 @@ async def class_tab(request, class_id, tab_name):
                 SELECT u.id as user_id, u.email, p.username, uc.role as user_role, u.email_verified
                 FROM users u
                 JOIN user_classes uc ON u.id = uc.user_id
-                JOIN profiles p ON u.id = p.id
+                LEFT JOIN profiles p ON u.id = p.id
                 WHERE uc.class_id = $1
-                ORDER BY CASE WHEN uc.role = 'admin' THEN 0 ELSE 1 END, LOWER(p.username) ASC
+                ORDER BY CASE WHEN uc.role = 'admin' THEN 0 ELSE 1 END, LOWER(COALESCE(p.username, u.email)) ASC
             """, class_id)
             context['class_students'] = class_students
         elif tab_name == 'groups':
@@ -711,21 +710,21 @@ async def upload_csv(request, class_id):
         file_data = csv_file.read().decode('utf-8')
         csv_data = csv.reader(io.StringIO(file_data))
         
-        emails_to_enroll = []
+        students_to_enroll = []
         for row in csv_data:
-            if not row:
+            if not row or len(row) < 2:
                 continue
-            # Trim whitespace and convert to lowercase for matching. Only allows @mmu.edu.my emails
-            email = row[0].strip().lower()
+            username = row[0].strip()
+            email = row[1].strip().lower()
             if email and ('@mmu.edu.my' in email or '@student.mmu.edu.my' in email):
-                emails_to_enroll.append(email)
+                students_to_enroll.append((username, email))
 
         success_count = 0
         skipped_count = 0
         failed_emails = []
 
-        # 7. Enroll students from the emails parsed
-        for email in emails_to_enroll:
+        # 7. Enroll students from the parsed data
+        for username, email in students_to_enroll:
             # Look up student by email
             student = await conn.fetchrow("SELECT id FROM users WHERE email=$1", email)
             
@@ -735,14 +734,41 @@ async def upload_csv(request, class_id):
                     "INSERT INTO users (email, password, email_verified, inactive) VALUES ($1, 'PENDING_INVITE', FALSE, TRUE) RETURNING id",
                     email
                 )
-                # Create a blank profile matching their new user id
-                await conn.execute("INSERT INTO profiles (id, username) VALUES ($1, $2)", student_id, None)
+                
+                # Ensure unique username
+                username_exists = await conn.fetchval("SELECT 1 FROM profiles WHERE username=$1", username)
+                final_username = username
+                if username_exists:
+                    import random
+                    final_username = f"{username}_{random.randint(100, 999)}"
+                
+                # Create a profile matching their new user id
+                await conn.execute("INSERT INTO profiles (id, username) VALUES ($1, $2)", student_id, final_username)
                 
                 # Print the simulated email invitation link to the console log
                 invite_url = f"http://127.0.0.1:8000/signup/?email={email}"
                 print(f"\n[EMAIL SIMULATION] Sent invite to {email}: {invite_url}\n")
             else:
                 student_id = student['id']
+                # Ensure existing student has a profile and username populated from CSV if missing
+                profile_exists = await conn.fetchval("SELECT 1 FROM profiles WHERE id=$1", student_id)
+                if not profile_exists:
+                    username_exists = await conn.fetchval("SELECT 1 FROM profiles WHERE username=$1", username)
+                    final_username = username
+                    if username_exists:
+                        import random
+                        final_username = f"{username}_{random.randint(100, 999)}"
+                    await conn.execute("INSERT INTO profiles (id, username) VALUES ($1, $2)", student_id, final_username)
+                else:
+                    # Update username with CSV one if the student hasn't registered (unverified) yet
+                    email_verified = await conn.fetchval("SELECT email_verified FROM users WHERE id=$1", student_id)
+                    if not email_verified:
+                        username_exists = await conn.fetchval("SELECT 1 FROM profiles WHERE username=$1 AND id!=$2", username, student_id)
+                        final_username = username
+                        if username_exists:
+                            import random
+                            final_username = f"{username}_{random.randint(100, 999)}"
+                        await conn.execute("UPDATE profiles SET username=$1 WHERE id=$2", final_username, student_id)
 
             # Check if student is already in the class
             already_in = await conn.fetchval("SELECT 1 FROM user_classes WHERE user_id=$1 AND class_id=$2", student_id, class_id)
@@ -811,6 +837,7 @@ async def save_group_settings(request, class_id):
     groups_enabled = request.POST.get('teams_enabled') == 'on'
     max_groups = request.POST.get('max_teams')
     max_members = request.POST.get('max_members')
+    teams_frozen = request.POST.get('teams_frozen') == 'on'
 
     if groups_enabled and (not max_groups or not max_members):
         return HttpResponse("<span style='color: red;'>Missing limits fields.</span>", status=400)
@@ -839,9 +866,9 @@ async def save_group_settings(request, class_id):
         # Update limits in classes table
         await conn.execute("""
             UPDATE classes 
-            SET groups_enabled = $1, max_groups = $2, max_members_per_group = $3 
-            WHERE id = $4
-        """, groups_enabled, max_groups, max_members, class_id)
+            SET groups_enabled = $1, max_groups = $2, max_members_per_group = $3, teams_frozen = $4
+            WHERE id = $5
+        """, groups_enabled, max_groups, max_members, teams_frozen, class_id)
 
         if groups_enabled:
             # Pre-create Teams named "Team 1" to "Team N" if they don't exist yet
@@ -955,6 +982,12 @@ async def save_team_info(request, team_id):
             return HttpResponse("Team not found", status=404)
         class_id = team['class_id']
 
+        # Check if teams are frozen and user is not admin
+        class_details = await conn.fetchrow("SELECT * FROM classes WHERE id=$1", class_id)
+        is_admin = await conn.fetchval("SELECT 1 FROM user_classes WHERE user_id=$1 AND class_id=$2 AND role='admin'", user_id, class_id)
+        if class_details and class_details['teams_frozen'] and not is_admin:
+            return HttpResponse("<span style='color: red;'>Teams are frozen for this class. Changes are not allowed.</span>", status=403)
+
         # Case 1: Claiming an unclaimed team
         if team['leader_id'] is None:
             # Check if user is already in a team in this class
@@ -1023,6 +1056,12 @@ async def join_team(request, team_id):
             return HttpResponse("Team not found", status=404)
         class_id = team['class_id']
 
+        # Check if teams are frozen and user is not admin
+        class_details = await conn.fetchrow("SELECT * FROM classes WHERE id=$1", class_id)
+        is_admin = await conn.fetchval("SELECT 1 FROM user_classes WHERE user_id=$1 AND class_id=$2 AND role='admin'", user_id, class_id)
+        if class_details and class_details['teams_frozen'] and not is_admin:
+            return HttpResponse("Teams are frozen for this class. Join requests are not allowed.", status=403)
+
         # Check if already in a team in this class
         in_team = await conn.fetchval("""
             SELECT COUNT(*) FROM group_members gm
@@ -1075,6 +1114,12 @@ async def leave_team(request, team_id):
             return HttpResponse("Team not found", status=404)
         class_id = team['class_id']
 
+        # Check if teams are frozen and user is not admin
+        class_details = await conn.fetchrow("SELECT * FROM classes WHERE id=$1", class_id)
+        is_admin = await conn.fetchval("SELECT 1 FROM user_classes WHERE user_id=$1 AND class_id=$2 AND role='admin'", user_id, class_id)
+        if class_details and class_details['teams_frozen'] and not is_admin:
+            return HttpResponse("Teams are frozen for this class. Leaving teams is not allowed.", status=403)
+
         # Check if user is actually a member of this team
         is_member = await conn.fetchval("SELECT COUNT(*) FROM group_members WHERE group_id = $1 AND user_id = $2", team_id, user_id)
         if is_member == 0:
@@ -1125,6 +1170,12 @@ async def cancel_request(request, team_id):
             return HttpResponse("Team not found", status=404)
         class_id = team['class_id']
 
+        # Check if teams are frozen and user is not admin
+        class_details = await conn.fetchrow("SELECT * FROM classes WHERE id=$1", class_id)
+        is_admin = await conn.fetchval("SELECT 1 FROM user_classes WHERE user_id=$1 AND class_id=$2 AND role='admin'", user_id, class_id)
+        if class_details and class_details['teams_frozen'] and not is_admin:
+            return HttpResponse("Teams are frozen for this class. Cancelling requests is not allowed.", status=403)
+
         # Delete pending request
         await conn.execute("DELETE FROM group_requests WHERE group_id = $1 AND student_id = $2 AND status = 'pending'", team_id, user_id)
 
@@ -1166,6 +1217,11 @@ async def approve_request(request, request_id):
 
         if team['leader_id'] != user_id and not is_admin:
             return HttpResponse("Forbidden", status=403)
+
+        # Check if teams are frozen and user is not admin
+        class_details = await conn.fetchrow("SELECT * FROM classes WHERE id=$1", class_id)
+        if class_details and class_details['teams_frozen'] and not is_admin:
+            return HttpResponse("Teams are frozen for this class. Approving requests is not allowed.", status=403)
 
         # Check if student is already in a team in this class
         in_team = await conn.fetchval("""
@@ -1232,6 +1288,11 @@ async def decline_request(request, request_id):
 
         if team['leader_id'] != user_id and not is_admin:
             return HttpResponse("Forbidden", status=403)
+
+        # Check if teams are frozen and user is not admin
+        class_details = await conn.fetchrow("SELECT * FROM classes WHERE id=$1", class_id)
+        if class_details and class_details['teams_frozen'] and not is_admin:
+            return HttpResponse("Teams are frozen for this class. Declining requests is not allowed.", status=403)
 
         # Set status to declined
         await conn.execute("UPDATE group_requests SET status = 'declined' WHERE id = $1", request_id)
@@ -1310,5 +1371,40 @@ async def search_explore(request):
     # 5. Return a partial template containing just the <li> elements
     return render(request, 'user_classes/templates/explore_search_results.html', {
         'results': results,
+        'query': query
+    })
+
+
+@csrf_exempt
+async def search_my_classes(request):
+    query = request.GET.get('search_my_classes', '').strip()
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+        
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+        user_id = session['user_id']
+
+        if not query:
+            my_classes = await conn.fetch("""
+                SELECT c.*, uc.role as user_role FROM classes c
+                JOIN user_classes uc ON c.id = uc.class_id
+                WHERE uc.user_id = $1
+            """, user_id)
+        else:
+            search_pattern = f"%{query}%"
+            my_classes = await conn.fetch("""
+                SELECT c.*, uc.role as user_role FROM classes c
+                JOIN user_classes uc ON c.id = uc.class_id
+                WHERE uc.user_id = $1
+                AND (c.course_code ILIKE $2 OR c.course_name ILIKE $2 OR c.section ILIKE $2 OR c.trimester ILIKE $2)
+            """, user_id, search_pattern)
+
+    return render(request, 'user_classes/templates/my_classes_search_results.html', {
+        'my_classes': my_classes,
         'query': query
     })

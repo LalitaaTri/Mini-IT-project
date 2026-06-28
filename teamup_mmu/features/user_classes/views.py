@@ -98,7 +98,8 @@ async def join_by_code(request):
 
 # 11. Return the create class modal HTML when user clicks the + button
 async def create_modal(request):
-    return render(request, 'user_classes/templates/create_class_modal.html')
+    code = request.GET.get('code', '')
+    return render(request, 'user_classes/templates/create_class_modal.html', {'code': code})
 
 
 # 12. Handle the submitted create class form
@@ -109,10 +110,12 @@ async def create_class(request):
     
     course_code = request.POST.get('course_code')
     course_name = request.POST.get('course_name')
+    section = request.POST.get('section')
+    trimester = request.POST.get('trimester')
     description = request.POST.get('description', '')
     token = request.COOKIES.get('access_token')
     
-    if not token or not course_code or not course_name:
+    if not token or not course_code or not course_name or not section or not trimester:
         return render(request, 'user_classes/templates/create_class_modal.html', {'error_message': 'Missing required fields.'})
     
     pool = await Database.get_pool()
@@ -130,8 +133,8 @@ async def create_class(request):
             
             # Create the class
             class_id = await conn.fetchval(
-                "INSERT INTO classes(course_code, course_name, description, join_code) VALUES($1, $2, $3, $4) RETURNING id",
-                course_code, course_name, description, join_code
+                "INSERT INTO classes(course_code, course_name, description, join_code, section, trimester) VALUES($1, $2, $3, $4, $5, $6) RETURNING id",
+                course_code, course_name, description, join_code, section, trimester
             )
             
             # Add the creator to the class as the ADMIN
@@ -1267,3 +1270,45 @@ async def dismiss_declined(request, request_id):
         return await class_tab(request, class_id, 'groups')
 
 
+@csrf_exempt
+async def search_explore(request):
+    # 1. Get the search query from the URL parameters
+    query = request.GET.get('search_query', '').strip()
+
+    # # 2. Verify user is logged in
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+        
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+            
+        user_id = session['user_id']
+
+        # 3. If query is empty, get all unexplored classes (just like index does)
+        if not query:
+            results = await conn.fetch("""
+                SELECT * FROM classes 
+                WHERE id NOT IN (
+                    SELECT class_id FROM user_classes WHERE user_id = $1
+                )
+            """, user_id)
+        else:
+            # 4. If there is a query, search by course_code or course_name
+            search_pattern = f"%{query}%"
+            results = await conn.fetch("""
+                SELECT * FROM classes 
+                WHERE id NOT IN (
+                    SELECT class_id FROM user_classes WHERE user_id = $1
+                )
+                AND (course_code ILIKE $2 OR course_name ILIKE $2)
+            """, user_id, search_pattern)
+            
+    # 5. Return a partial template containing just the <li> elements
+    return render(request, 'user_classes/templates/explore_search_results.html', {
+        'results': results,
+        'query': query
+    })

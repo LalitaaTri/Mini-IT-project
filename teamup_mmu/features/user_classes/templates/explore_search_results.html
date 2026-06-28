@@ -1,0 +1,29 @@
+{% if results %}
+    <ul style="list-style: none; margin: 0; padding: 0;">
+        {% for c in results %}
+        <li style="padding: 15px 20px; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f8f9fa';" onmouseout="this.style.backgroundColor='transparent';">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h4 style="margin: 0 0 5px 0; color: #333; font-size: 16px;">{{ c.course_code }} - {{ c.course_name }}</h4>
+                    <p style="margin: 0; color: #666; font-size: 13px;">{{ c.section }}, {{ c.trimester }}</p>
+                </div>
+                <button class="join-btn" hx-get="/classes/join_modal/" hx-target="#modal-container" hx-swap="innerHTML" style="padding: 6px 15px; font-size: 13px; height: auto;">Join</button>
+            </div>
+        </li>
+        {% endfor %}
+        
+        {% if query %}
+        <li style="padding: 15px 20px; border-bottom: 1px solid #f0f0f0; background-color: #f8f9fa;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="color: #666; font-size: 14px;">Didn't find your class?</div>
+                <button class="create_class_btn" hx-get="/classes/create_modal/?code={{ query }}" hx-target="#modal-container" hx-swap="innerHTML" style="border-radius: 20px; padding: 6px 15px; font-size: 13px; height: auto; width: auto; font-weight: bold; background-color: #001983; color: white; border: none; cursor: pointer;">+ Create class "{{ query }}"</button>
+            </div>
+        </li>
+        {% endif %}
+    </ul>
+{% else %}
+    <div style="padding: 20px; text-align: center;">
+        <p style="color: #666; margin: 0 0 15px 0;">No classes found matching "{{ query }}".</p>
+        <button class="create_class_btn" hx-get="/classes/create_modal/?code={{ query }}" hx-target="#modal-container" hx-swap="innerHTML" style="border-radius: 20px; padding: 8px 20px; font-size: 14px; height: auto; width: auto; font-weight: bold; background-color: #001983; color: white; border: none; cursor: pointer;">+ Create class "{{ query }}"</button>
+    </div>
+{% endif %}

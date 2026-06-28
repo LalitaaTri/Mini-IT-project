@@ -4,22 +4,35 @@
 <style>
     /* Class css */
     h1 , h2 {color: #00186d}
-    .class-list { list-style: none; padding: 0;}
+    .class-list { 
+        list-style: none; 
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 20px;
+    }
     .class-card { 
         cursor: pointer;
-        border: 1px solid #ddd; 
-        padding: 1rem; 
-        border-radius: 8px; 
-        margin-bottom: 1rem; 
-        display: flex; 
+        background: white;
+        border: 1px solid #00198357; 
+        padding: 1.5rem; 
+        border-radius: 12px; 
+        display: flex;
+        flex-direction: column; 
         justify-content: space-between; 
-        align-items: center; 
-        flex-grow: 1; 
+        align-items: flex-start;
+        gap: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s, box-shadow 0.2s;
     }
-    .class-card:hover { background-color: #f2f3f8; }
+    .class-card:hover { 
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
     
-    .class-info h3 { margin: 0 0 0.5rem 0; color: #333; }
-    .class-info p { margin: 0; color: #666; font-size: 0.9rem; }
+    .class-info h3 { margin: 0 0 0.5rem 0; color: #333; line-height: 1.3; }
+    .class-info p { margin: 0; color: #666; font-size: 0.9rem; line-height: 1.4; }
+    .leave_btn { align-self: flex-end; }
     
     /* Join button css */
     .join-btn { 
@@ -76,14 +89,37 @@
 
 </style>
 
-<div style="width: 100%; max-width: 800px; margin: 0 auto; background: white; padding: 2rem; border: 1px solid #00198357; border-radius: 15px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);">
-    <div class="h1_section">
-        <h1>My Classes</h1>
-        <div style="display: flex; gap: 10px;">        
-            <button class="join-btn" hx-get="/classes/join_modal/" hx-target="#modal-container" hx-swap="innerHTML">Join Class By Code</button>
-            <!-- This tells HTMX "when clicked, go fetch the modal HTML from this URL.-->
-            <button class="create_class_btn" hx-get="/classes/create_modal/" hx-target="#modal-container" hx-swap="innerHTML" title="Create Class">+</button>
+
+<!-- Main Page Container -->
+<div style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
+
+    <!-- Top Action Bar (Search + Buttons) -->
+    <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 40px;">
+    <!-- search input wrapper with icon -->
+    <div style="flex-grow: 1; position: relative;">
+        <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; color: #888; pointer-events: none;">🔍</span>
+        <input type="text" 
+            name="search_query" 
+            placeholder="Search for any class to explore..." 
+            hx-get="/classes/search_explore/" 
+            hx-trigger="keyup changed delay:300ms, focus" 
+            hx-target="#explore-list" 
+            style="width: 100%; height: 48px; padding: 0 15px 0 45px; border-radius: 25px; border: 1px solid #00198357; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); font-size: 16px; box-sizing: border-box; outline: none;">
+        
+        <!-- Explore classes list (Dropdown) -->
+        <div id="explore-list" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); margin-top: 10px; max-height: 400px; overflow-y: auto;">
+            <!-- Search results will appear here -->
         </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <button class="join-btn" hx-get="/classes/join_modal/" hx-target="#modal-container" hx-swap="innerHTML" style="height: 48px; font-size: 15px; padding: 0 24px; border-radius: 25px; white-space: nowrap; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); box-sizing: border-box;">Join Class By Code</button>
+    <button class="create_class_btn" hx-get="/classes/create_modal/" hx-target="#modal-container" hx-swap="innerHTML" title="Create Class" style="height: 48px; width: 48px; font-size: 24px; flex-shrink: 0; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); box-sizing: border-box;">+</button>
+</div>
+
+<div>
+    <div class="h1_section">
+        <h1 style="margin-top: 0; margin-bottom: 20px; font-size: 2.5rem;">My Classes</h1>
     </div>
     <!-- Checking if the user has any classes joined -->
     {% if my_classes %}
@@ -112,19 +148,19 @@
         <p style="text-align: center; color: #00198379; background-color: #f5fcff; padding: 10px; border-radius: 10px; border: 1px dashed #00198379;">You haven't joined any classes yet.</p>
     {% endif %}
 
-    <h2>Explore Classes</h2>
-    <ul class="class-list">
-        {% for c in explore_classes %}
-        <li class="class-card">
-            <div class="class-info">
-                <h3>{{ c.course_code }} - {{ c.course_name }}, {{ c.section }}, {{ c.trimester }}</h3>
-                <p>{{ c.description }}</p>
-            </div>
-        </li>
-        {% endfor %}
-    </ul>
-</div>
+</div> <!-- End Main Page Container -->
 <!-- This is where the popup will appear -->
 <div id="modal-container"></div>
+
+<script>
+    // Close the dropdown if the user clicks outside
+    document.addEventListener('click', function(event) {
+        var searchInput = document.querySelector('input[name="search_query"]');
+        var exploreList = document.getElementById('explore-list');
+        if (!searchInput.contains(event.target) && !exploreList.contains(event.target)) {
+            exploreList.innerHTML = ''; // Hide the dropdown by clearing it
+        }
+    });
+</script>
 
 {% endblock %}

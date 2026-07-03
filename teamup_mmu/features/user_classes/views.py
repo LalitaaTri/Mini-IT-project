@@ -111,12 +111,15 @@ async def create_class(request):
     course_code = request.POST.get('course_code')
     course_name = request.POST.get('course_name')
     section = request.POST.get('section')
-    trimester = request.POST.get('trimester')
+    trimester_year = request.POST.get('trimester_year')
+    trimester_num = request.POST.get('trimester_num')
     description = request.POST.get('description', '')
     token = request.COOKIES.get('access_token')
     
-    if not token or not course_code or not course_name or not section or not trimester:
+    if not token or not course_code or not course_name or not section or not trimester_year or not trimester_num:
         return render(request, 'user_classes/templates/create_class_modal.html', {'error_message': 'Missing required fields.'})
+    
+    trimester = f"{trimester_year}-{trimester_num}"
     
     pool = await Database.get_pool()
     async with pool.acquire() as conn:

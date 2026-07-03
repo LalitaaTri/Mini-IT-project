@@ -12,7 +12,7 @@ async def load_modal(request, target_user_id):
     pool = await Database.get_pool()
     async with pool.acquire() as conn:
         # Fetch only groups where the current user is the leader
-        my_admin_groups = await conn.fetch("SELECT id, name FROM groups WHERE leader_id=$1", id)
+        my_admin_groups = await conn.fetch("SELECT id, name FROM groups WHERE leader_id=$1 AND is_general=TRUE", id)
         
     context = {
         'groups': my_admin_groups,
@@ -49,11 +49,14 @@ async def send_invite(request):
                 if not is_admin:
                     continue # Skip this one if they are hacking the form
                     
-                # 2. Check if an invite already exists
-                existing_invite = await conn.fetchval("SELECT 1 FROM group_invites WHERE group_id=$1 AND receiver_id=$2", group_id, target_user_id)
+                # 2. Check if they are already in the group
+                is_member = await conn.fetchval("SELECT 1 FROM group_members WHERE group_id=$1 AND user_id=$2", group_id, target_user_id)
                 
-                if not existing_invite:
-                    # 3. Create the Invite
+                # 3. Check if a pending invite already exists
+                existing_invite = await conn.fetchval("SELECT 1 FROM group_invites WHERE group_id=$1 AND receiver_id=$2 AND status='pending'", group_id, target_user_id)
+                
+                if not is_member and not existing_invite:
+                    # 4. Create the Invite
                     await conn.execute("""
                         INSERT INTO group_invites (group_id, sender_id, receiver_id, status) 
                         VALUES ($1, $2, $3, 'pending')

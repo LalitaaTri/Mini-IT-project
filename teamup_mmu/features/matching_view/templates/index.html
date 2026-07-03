@@ -2,97 +2,177 @@
 {% load static %}
 
 {% block content %}
-    <h2>Welcome to the Matching Page!</h2>
-    <h3>{{status}}</h3>
-    <p>This content only shows up after you login.</p>
+    <div style="text-align: center; margin-bottom: 20px;">
+        <h2 style="color: #001561; margin-bottom: 5px;">Find Teammates</h2>
+        <p style="color: #555; margin-top: 0;">Swipe through MMU students looking for groups.</p>
+    </div>
+
+    <!-- THE FILTER BAR -->
+    <form id="filter-form" 
+          hx-get="/matching/" 
+          hx-target="#user-list" 
+          hx-trigger="change" 
+          style="max-width: 1100px; margin: 0 auto 25px auto; padding: 20px 25px; background: white; border-radius: 15px; border: 2px solid #e5e8ff; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; align-items: center; font-family: 'Inter', sans-serif;">
+        
+        <strong style="color: #001561; font-size: 1.1rem; padding-right: 10px;">Filters</strong>
+
+        <select name="faculty" style="padding: 10px 12px; border-radius: 8px; border: 1px solid #ccc; outline: none; background: #f8f9fa;">
+            <option value="">All Faculties</option>
+            <option value="FCI" {% if context.filters.faculty == 'FCI' %}selected{% endif %}>FCI</option>
+            <option value="FOE" {% if context.filters.faculty == 'FOE' %}selected{% endif %}>FOE</option>
+            <option value="FCM" {% if context.filters.faculty == 'FCM' %}selected{% endif %}>FCM</option>
+            <option value="FOM" {% if context.filters.faculty == 'FOM' %}selected{% endif %}>FOM</option>
+        </select>
+
+        <select name="year" style="padding: 10px 12px; border-radius: 8px; border: 1px solid #ccc; outline: none; background: #f8f9fa;">
+            <option value="">Any Year</option>
+            <option value="1" {% if context.filters.year == '1' %}selected{% endif %}>Year 1</option>
+            <option value="2" {% if context.filters.year == '2' %}selected{% endif %}>Year 2</option>
+            <option value="3" {% if context.filters.year == '3' %}selected{% endif %}>Year 3</option>
+            <option value="4" {% if context.filters.year == '4' %}selected{% endif %}>Year 4</option>
+            <option value="5" {% if context.filters.year == '5' %}selected{% endif %}>Year 5</option>
+        </select>
+
+        <div style="display: flex; align-items: center; gap: 5px; background: #f8f9fa; border: 1px solid #ccc; border-radius: 8px; padding: 0 5px;">
+            <span style="font-size: 0.85rem; color: #555; padding-left: 8px;">CGPA</span>
+            <input type="number" name="min_cgpa" value="{{ context.filters.min_cgpa }}" placeholder="Min" step="0.01" min="0" max="4" style="padding: 10px 8px; border: none; outline: none; width: 60px; background: transparent; text-align: center;">
+            <span style="color: #ccc;">-</span>
+            <input type="number" name="max_cgpa" value="{{ context.filters.max_cgpa }}" placeholder="Max" step="0.01" min="0" max="4" style="padding: 10px 8px; border: none; outline: none; width: 60px; background: transparent; text-align: center;">
+        </div>
+
+        <select name="min_common" style="padding: 10px 12px; border-radius: 8px; border: 1px solid #ccc; outline: none; background: #f8f9fa;">
+            <option value="">Any Interests</option>
+            <option value="1" {% if context.filters.min_common == '1' %}selected{% endif %}>1+ Shared Interest</option>
+            <option value="2" {% if context.filters.min_common == '2' %}selected{% endif %}>2+ Shared Interests</option>
+            <option value="3" {% if context.filters.min_common == '3' %}selected{% endif %}>3+ Shared Interests</option>
+        </select>
+
+        <select name="class_id" style="padding: 10px 12px; border-radius: 8px; border: 1px solid #ccc; outline: none; max-width: 250px; background: #f8f9fa;">
+            <option value="any" {% if context.filters.class_id == 'any' %}selected{% endif %}>Any Class</option>
+            
+            {% if context.my_classes %}
+                <option value="all_my_classes" {% if context.filters.class_id == 'all_my_classes' %}selected{% endif %} style="font-weight: bold;">
+                    ★ Matches ANY of My Classes
+                </option>
+                <optgroup label="My Specific Classes">
+                    {% for c in context.my_classes %}
+                        <option value="{{ c.id }}" {% if context.filters.class_id == c.id|stringformat:"s" %}selected{% endif %}>
+                            {{ c.course_code }} ({{ c.section }})
+                        </option>
+                    {% endfor %}
+                </optgroup>
+            {% endif %}
+        </select>
+        
+        <button type="button" 
+                onclick="window.location.href='/matching/?faculty=&year=&min_cgpa=&max_cgpa=&min_common=&class_id=any'" 
+                style="background: #ffe5e5; border: none; color: #dc3545; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s;">
+            Clear Filters
+        </button>
+    </form>
+
     <style>
-        /* Centers the entire list on the page */
         #user-list {
             display: flex;
             justify-content: center;
-            padding-top: 20px;
-        }
-
-        /* The main card container */
-        .user-card {
-            background-color: #e5e8ff; 
-            padding: 2rem;
-            width: 50%; 
-            margin: 0 auto 20px auto;
-            text-align: center;
-            border-radius: 20px; 
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-            border: 1px solid #c1cefe;
+            align-items: center;
+            padding-top: 10px;
             font-family: 'Inter', sans-serif;
         }
 
-        /* Styling the email/name at the top */
-        .user-card p:first-child {
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: #555;
-            margin-bottom: 1.5rem;
-            word-break: break-all;
+        .user-card {
+            background-color: #ffffff;
+            padding: 3rem 2rem;
+            width: 90vw; /* Scales with screen width */
+            max-width: 1000px; /* Prevents extreme stretching */
+            min-height: 75vh; /* Scales with screen height */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-radius: 20px; 
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            border: 2px solid #e5e8ff;
+            position: relative;
         }
 
-        /* The profile image */
+        .user-card h2 { color: #001561; margin: 10px 0 0 0; font-size: 1.8rem; }
+        
         .user-card img {
+            width: 140px;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid #e5e8ff;
+            margin-bottom: 1rem;
+        }
+
+        .user-card p { font-size: 1rem; color: #333; line-height: 1.5; margin: 8px 0; }
+
+        .interests-grid {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 20px 0; max-width: 800px;
+        }
+        .interest-pill {
+            background: #e5e8ff; color: #001561; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 600;
+        }
+
+        /* BUTTON LAYOUT FIX: Powered by CSS Grid */
+        .actions-wrapper {
             width: 100%;
-            max-width: 250px;
-            background: white;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
-            border: 1px solid #f0f0f0;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
         }
 
-        /* About and details text */
-        .user-card p {
-            font-size: 0.9rem;
-            color: #333;
-            line-height: 1.4;
-            margin: 8px 0;
+        .action-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Forces exactly two equal columns */
+            gap: 12px;
+            width: 100%;
         }
 
-        /* Status text (e.g., "Not liked yet") */
-        #like-status {
-            font-weight: 600;
-            color: #001561;
-            margin: 1.5rem 0;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .action-row form {
+            margin: 0;
+            display: block; /* Resets form weirdness */
+            width: 100%;
+            height: 100%;
         }
 
-        /* The Buttons */
-        .user-card button {
-            width: 120px;
-            padding: 10px;
-            margin: 5px;
-            border-radius: 25px; /* Pill-shaped to match your Nav Bar */
+        .action-btn {
+            width: 100%;
+            height: 100%; /* Forces button to fill the grid cell perfectly */
+            padding: 12px;
+            border-radius: 25px;
             border: none;
-            font-weight: 600;
+            font-weight: bold;
+            font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
         }
+        
+        .action-btn:hover { transform: translateY(-2px); }
+        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        
+        /* Semantic Colors */
+        .btn-like { background-color: #001561; color: white; }
+        .btn-like:hover { background-color: #002299; }
+        .btn-next { background-color: #e4e6eb; color: #333; }
+        .btn-next:hover { background-color: #d0d3d9; }
+        .btn-invite { background-color: #5b73df; color: white; }
+        .btn-invite:hover { background-color: #4a62c9; }
+        .btn-request { background-color: #28a745; color: white; }
+        .btn-request:hover { background-color: #218838; }
 
-        /* Like Button - Using your Navy Blue theme */
-        button[hx-post*="like"] {
-            background-color: #001561;
-            color: white;
-        }
-
-        /* Next Button - Lighter grey to distinguish it */
-        button[hx-get*="matching_with_iter"] {
-            background-color: #e4e6eb;
-            color: #050505;
-        }
-
-        /* Hover effects */
-        .user-card button:hover {
-            transform: translateY(-2px);
-            opacity: 0.9;
-        }
     </style>
+
     <div id="user-list">
         {% include 'matching_view/templates/card.html' %}
     </div>

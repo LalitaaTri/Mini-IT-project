@@ -51,12 +51,22 @@ async def send_invite(request):
         async with pool.acquire() as conn:
             for gid in group_ids:
                 group_id = int(gid)
+                
+                # 1. Security Check
                 is_admin = await conn.fetchval("SELECT 1 FROM groups WHERE id=$1 AND leader_id=$2", group_id, id)
                 if not is_admin: continue 
                     
-                existing = await conn.fetchval("SELECT 1 FROM group_invites WHERE group_id=$1 AND receiver_id=$2", group_id, target_user_id)
-                if not existing:
-                    await conn.execute("INSERT INTO group_invites (group_id, sender_id, receiver_id, status) VALUES ($1, $2, $3, 'pending')", group_id, id, target_user_id)
+                # 2. Check if they are already in the group
+                is_member = await conn.fetchval("SELECT 1 FROM group_members WHERE group_id=$1 AND user_id=$2", group_id, target_user_id)
+                
+                if not is_member:
+                    # 3. Create or Reset the Invite using ON CONFLICT Upsert
+                    await conn.execute("""
+                        INSERT INTO group_invites (group_id, sender_id, receiver_id, status) 
+                        VALUES ($1, $2, $3, 'pending')
+                        ON CONFLICT (group_id, receiver_id) 
+                        DO UPDATE SET status = 'pending', sender_id = EXCLUDED.sender_id, created_at = CURRENT_TIMESTAMP
+                    """, group_id, id, target_user_id)
                     
             if group_ids:
                 already_liked = await conn.fetchval("SELECT 1 FROM likes WHERE user_id=$1 AND liked_user_id=$2", id, target_user_id)
@@ -80,10 +90,15 @@ async def send_request(request):
             for gid in group_ids:
                 group_id = int(gid)
                 admin_id = await conn.fetchval("SELECT leader_id FROM groups WHERE id=$1", group_id)
+                
                 if admin_id:
-                    existing_req = await conn.fetchval("SELECT 1 FROM group_requests WHERE group_id=$1 AND sender_id=$2", group_id, id)
-                    if not existing_req:
-                        await conn.execute("INSERT INTO group_requests (group_id, sender_id, admin_id, status) VALUES ($1, $2, $3, 'pending')", group_id, id, admin_id)
+                    # Create or Reset the Request using ON CONFLICT Upsert
+                    await conn.execute("""
+                        INSERT INTO group_requests (group_id, sender_id, admin_id, status) 
+                        VALUES ($1, $2, $3, 'pending')
+                        ON CONFLICT (group_id, sender_id)
+                        DO UPDATE SET status = 'pending', admin_id = EXCLUDED.admin_id, created_at = CURRENT_TIMESTAMP
+                    """, group_id, id, admin_id)
                     
             if group_ids:
                 already_liked = await conn.fetchval("SELECT 1 FROM likes WHERE user_id=$1 AND liked_user_id=$2", id, target_user_id)

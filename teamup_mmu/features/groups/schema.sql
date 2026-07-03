@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS groups (
     whatsapp_link VARCHAR(255),
     is_general BOOLEAN DEFAULT FALSE,
     class_name VARCHAR(255),
+    class_id INTEGER REFERENCES classes(id) ON DELETE CASCADE,
     max_members INTEGER DEFAULT 20,
     leader_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
     created_by INTEGER REFERENCES users(id) ON DELETE CASCADE,

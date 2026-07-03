@@ -62,7 +62,13 @@
     }
 
     .tag.general { background-color: #e5e8ff; color: #001561; }
-    .tag.class { background-color: #ffe5e5; color: #8b0000; }
+    .tag.class { background-color: #e0f2fe; color: #0369a1; }
+
+    .group-card.class-team-card {
+        background-color: #f0f9ff;
+        border: 1px solid #bae6fd;
+        box-shadow: 0 4px 6px rgba(3, 105, 161, 0.05);
+    }
 
     .wa-link {
         display: inline-block;
@@ -111,7 +117,7 @@
     <!-- MAIN GROUPS GRID -->
     <div class="group-grid">
         {% for group in context.my_groups %}
-            <div class="group-card">
+            <div class="group-card {% if not group.is_general %}class-team-card{% endif %}">
                 
                 <!-- Group Name and Join Code Header -->
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
@@ -125,7 +131,7 @@
                 {% if group.is_general %}
                     <span class="tag general">General Group</span>
                 {% else %}
-                    <span class="tag class">Class: {{ group.class_name }}</span>
+                    <span class="tag class">Class Team: {{ group.class_name }}</span>
                 {% endif %}
     
                 <!-- Description -->

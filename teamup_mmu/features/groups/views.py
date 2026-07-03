@@ -137,6 +137,9 @@ async def group_leave(request, group_id):
             else:
                 # 3. They are a normal member. Just remove them from the group_members table.
                 await conn.execute("DELETE FROM group_members WHERE group_id=$1 AND user_id=$2", group_id, id)
+                
+                # Delete any existing invites for this user to this group so they can be freshly re-invited later
+                await conn.execute("DELETE FROM group_invites WHERE group_id=$1 AND receiver_id=$2", group_id, id)
 
         # Tell HTMX to instantly refresh the page to update the group list
         response = HttpResponse("Left successfully")

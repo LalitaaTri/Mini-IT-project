@@ -59,5 +59,6 @@ async def receive(request):
         return HttpResponse("Email must be a valid MMU email address.")
 
 async def index(request):
+    email = request.GET.get('email', '')
     # This should now render JUST the signup form
-    return render(request, 'user_signup/templates/index.html')
+    return render(request, 'user_signup/templates/index.html', {'email': email})

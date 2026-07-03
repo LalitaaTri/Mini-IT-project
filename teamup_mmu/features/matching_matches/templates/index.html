@@ -2,89 +2,86 @@
 {% load static %}
 
 {% block content %}
-    <h2>Welcome to the Your Matches Page!</h2>
-    <h3>{{status}}</h3>
-    <p>This content only shows up after you login.</p>
+    <div style="text-align: center; margin-bottom: 20px;">
+        <h2 style="color: #001561; margin-bottom: 5px;">Your Matches</h2>
+        <p style="color: #555; margin-top: 0;">People who liked you back. Start a conversation!</p>
+    </div>
     
     <style>
-        /* Centers the entire list on the page */
         #user-list {
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding-top: 20px;
-        }
-
-        /* The main card container */
-        .user-card {
-            background-color: #e5e8ff; 
-            padding: 2rem;
-            width: 50%; 
-            margin: 0 auto 20px auto;
-            text-align: center;
-            border-radius: 20px; 
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-            border: 1px solid #c1cefe;
+            align-items: center;
+            padding-top: 10px;
             font-family: 'Inter', sans-serif;
         }
 
-        /* Styling the email/name at the top */
-        .user-card p:first-child {
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: #555;
-            margin-bottom: 1.5rem;
-            word-break: break-all;
+        .user-card {
+            background-color: #ffffff;
+            padding: 3rem 2rem;
+            width: 90vw; /* Scales with screen width */
+            max-width: 1000px; /* Stops it from getting too wide on huge monitors */
+            min-height: 75vh; /* Scales with screen height */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 25px auto;
+            text-align: center;
+            border-radius: 20px; 
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            border: 2px solid #e5e8ff;
         }
 
-        /* The profile image */
+        .user-card h2 { color: #001561; margin: 10px 0 0 0; font-size: 1.8rem; }
+
         .user-card img {
-            width: 100%;
-            max-width: 250px;
+            width: 140px;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid #e5e8ff;
+            margin-bottom: 1rem;
             background: white;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
-            border: 1px solid #f0f0f0;
         }
 
-        /* About and details text */
-        .user-card p {
-            font-size: 0.9rem;
-            color: #333;
-            line-height: 1.4;
-            margin: 8px 0;
+        .user-card p { font-size: 1rem; color: #333; line-height: 1.5; margin: 8px 0; }
+
+        .interests-grid {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 20px 0;
+            max-width: 800px; /* Keeps text/tags from stretching too far */
+        }
+        .interest-pill {
+            background: #e5e8ff; color: #001561; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 600;
         }
 
-        /* The Buttons */
-        .user-card button {
-            width: 120px;
-            padding: 10px;
-            margin: 5px;
+        /* Locks the button width independent of the card width */
+        .btn-wrapper {
+            width: 100%;
+            max-width: 350px;
+            margin-top: 20px;
+        }
+
+        .btn-primary {
+            background-color: #001561;
+            color: white;
+            width: 100%;
+            padding: 14px;
             border-radius: 25px;
             border: none;
-            font-weight: 600;
+            font-weight: bold;
+            font-size: 1.05rem;
             cursor: pointer;
             transition: all 0.3s ease;
-            background-color: #e4e6eb;
-            color: #050505;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
-
-        .user-card button:hover {
-            transform: translateY(-2px);
-            opacity: 0.9;
-        }
+        .btn-primary:hover { transform: translateY(-2px); background-color: #002299; }
     </style>
     
     <div id="user-list">
         {% for user in context.matches %}
             <div class="user-card">
-                <!-- Username -->
-                <h2>{{ user.username|default:user.email }}</h2>
-                
-                <!-- Explicitly show the email per your request -->
-                <p style="color: #001561; font-weight: 600; margin-top: -10px; font-size: 0.95rem;">
-                    ✉️ {{ user.email }}
-                </p>
                 
                 <img src="{% static 'teamup_mmu/profile.png' %}" 
                      alt="Profile Picture"
@@ -94,31 +91,40 @@
                      style="cursor: pointer; transition: transform 0.2s;"
                      onmouseover="this.style.transform='scale(1.05)'"
                      onmouseout="this.style.transform='scale(1)'">
+
+                <h2>{{ user.username|default:user.email }}</h2>
+                <p style="color: #666; font-weight: 600; margin-top: 5px; font-size: 0.95rem;">
+                    {{ user.email }}
+                </p>
                 
-                <!-- Injected Profile Data -->
-                <p><strong>About:</strong> {{ user.descriptions }}</p>
-                <p><strong>Year:</strong> {{ user.year_of_study }}</p>
-                <p><strong>Program:</strong> {{ user.program }} ({{ user.faculty }})</p>
-                <p><strong>cGPA:</strong> {{ user.cgpa }}</p>
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0; width: 100%; max-width: 600px;">
                 
-                <!-- Display Interests -->
-                <div class="interests-list" style="margin: 15px 0;">
+                <div style="max-width: 800px;">
+                    <p><strong>About:</strong> <span style="color: #555;">{{ user.descriptions }}</span></p>
+                    <p><strong>Program:</strong> {{ user.program }} ({{ user.faculty }})</p>
+                    <p><strong>Year:</strong> {{ user.year_of_study }} &nbsp;|&nbsp; <strong>cGPA:</strong> {{ user.cgpa }}</p>
+                </div>
+                
+                <div class="interests-grid">
                     {% for interest in user.interests %}
-                        <span style="display:inline-block; padding:4px 10px; margin:3px; background:#e4e6eb; border-radius:12px; font-size: 0.85em; color: #333;">
-                            {{ interest }}
-                        </span>
+                        <span class="interest-pill">{{ interest }}</span>
                     {% endfor %}
                 </div>
                 
-                <!-- Message Button -->
-                <button hx-get="{% url 'user_message_index_view' user.id %}"
-                hx-target="#user-list"
-                hx-swap="innerHTML">Message</button>
+                <div class="btn-wrapper">
+                    <button class="btn-primary" 
+                            hx-get="{% url 'user_message_index_view' user.id %}"
+                            hx-target="#user-list"
+                            hx-swap="innerHTML">
+                        💬 Message
+                    </button>
+                </div>
             </div>
         {% empty %}
             <div class="user-card" style="padding: 3rem;">
-                <h3 style="color: #555;">No matches yet.</h3>
-                <p>Keep browsing the Matching page to find potential teammates!</p>
+                <div style="font-size: 3rem; margin-bottom: 10px;">🔍</div>
+                <h3 style="color: #001561;">No matches yet.</h3>
+                <p style="color: #555;">Keep browsing the Matching page to find potential teammates!</p>
             </div>
         {% endfor %}
     </div>

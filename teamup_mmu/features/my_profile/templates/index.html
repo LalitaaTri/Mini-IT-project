@@ -3,83 +3,219 @@
 
 {% block content %}
 <style>
-    /* Add your squircle CSS here or link your profile_setup_2.css */
-    .interest-label input[type="checkbox"] { display: none; }
-    .interest-label span { display: inline-block; padding: 8px 15px; margin: 5px; background: #f0f0f0; border-radius: 15px; cursor: pointer; }
-    .interest-label input[type="checkbox"]:checked + span { background: #001561; color: white; }
+    .profile-edit-container { 
+        max-width: 650px; 
+        margin: 40px auto; 
+        padding: 40px; 
+        background: white; 
+        border-radius: 15px; 
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08); 
+        font-family: 'Inter', sans-serif;
+    }
     
-    .profile-edit-container { max-width: 600px; margin: 40px auto; padding: 30px; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-    .profile-edit-container input[type="text"], .profile-edit-container input[type="number"], .profile-edit-container select, .profile-edit-container textarea { width: 100%; padding: 10px; margin: 8px 0 20px 0; border: 1px solid #ccc; border-radius: 8px; }
-    .profile-edit-container button { background: #001561; color: white; padding: 12px 25px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; width: 100%; }
+    /* Perfecting the Labels and Inputs */
+    .form-group {
+        text-align: left;
+        margin-bottom: 20px;
+    }
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #001561;
+        font-size: 0.95rem;
+    }
+    .profile-edit-container input[type="text"], 
+    .profile-edit-container input[type="number"], 
+    .profile-edit-container select, 
+    .profile-edit-container textarea { 
+        width: 100%; 
+        padding: 12px; 
+        border: 1px solid #ccc; 
+        border-radius: 8px; 
+        box-sizing: border-box;
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Interest Pills */
+    .interests-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px; /* Spaces them out perfectly */
+    }
+    .interest-label {
+        display: inline-block !important; /* This stops them from stacking vertically! */
+        margin: 0 !important;
+    }
+    .interest-label input[type="checkbox"] { display: none; }
+    .interest-label span { 
+        display: inline-block; 
+        padding: 6px 14px; 
+        background: #f0f0f0; 
+        border-radius: 20px; 
+        cursor: pointer; 
+        font-size: 0.85rem;
+        transition: 0.2s;
+        border: 1px solid transparent;
+    }
+    .interest-label input[type="checkbox"]:checked + span { 
+        background: #e5e8ff; 
+        color: #001561; 
+        font-weight: bold;
+        border: 1px solid #001561;
+    }
+    
+    .profile-edit-container button[type="submit"] { 
+        background: #001561; 
+        color: white; 
+        padding: 15px; 
+        border: none; 
+        border-radius: 25px; 
+        cursor: pointer; 
+        font-weight: bold; 
+        width: 100%; 
+        font-size: 1rem;
+        margin-top: 20px;
+        transition: background 0.3s;
+    }
+    .profile-edit-container button[type="submit"]:hover {
+        background: #002299;
+    }
+
+    /* Scrollable Box for Classes */
+    .classes-scrollbox {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 15px;
+        background: #fafafa;
+    }
 </style>
 
 <div class="profile-edit-container">
-    <div style="text-align: center; margin-bottom: 20px;">
-        <img src="{% static 'teamup_mmu/profile.png' %}" alt="Profile" style="width: 120px; border-radius: 50%;">
-        <h2>Edit My Profile</h2>
-        <p>{{ context.email }}</p>
+    <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 30px;">
+        <img src="{% static 'teamup_mmu/profile.png' %}" alt="Profile" style="width: 120px; border-radius: 50%; border: 3px solid #e5e8ff; margin-bottom: 15px;">
+        <h2 style="margin: 0; color: #001561;">Edit My Profile</h2>
+        <p style="color: #666; margin-top: 5px;">{{ context.email }}</p>
     </div>
 
-    <!-- HTMX form targeting the status div below -->
     <form hx-post="/my_profile/edit/" hx-target="#edit-status" hx-swap="innerHTML">
         {% csrf_token %}
 
-        <label>Username</label>
-        <input type="text" name="username" value="{{ context.profile.username }}" required>
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" name="username" value="{{ context.profile.username }}" required>
+        </div>
 
-        <label>Headline (Introduction)</label>
-        <input type="text" name="introduction" value="{{ context.profile.introduction }}" required>
+        <div class="form-group">
+            <label>Headline (Short Introduction)</label>
+            <input type="text" name="introduction" value="{{ context.profile.introduction }}" required>
+        </div>
 
-        <label>About Me</label>
-        <textarea name="descriptions" required rows="4">{{ context.profile.descriptions }}</textarea>
-
-        <label>Faculty</label>
-        <select name="faculty" required>
-            <option value="FCI" {% if context.profile.faculty == 'FCI' %}selected{% endif %}>FCI</option>
-            <option value="FOE" {% if context.profile.faculty == 'FOE' %}selected{% endif %}>FOE</option>
-            <option value="FCM" {% if context.profile.faculty == 'FCM' %}selected{% endif %}>FCM</option>
-            <option value="FOM" {% if context.profile.faculty == 'FOM' %}selected{% endif %}>FOM</option>
-        </select>
-
-        <label>Program</label>
-        <input type="text" name="program" value="{{ context.profile.program }}" required>
+        <div class="form-group">
+            <label>About Me</label>
+            <textarea name="descriptions" required rows="4">{{ context.profile.descriptions }}</textarea>
+        </div>
 
         <div style="display: flex; gap: 20px;">
-            <div style="flex: 1;">
+            <div class="form-group" style="flex: 1;">
+                <label>Faculty</label>
+                <select name="faculty" required>
+                    <option value="FCI" {% if context.profile.faculty == 'FCI' %}selected{% endif %}>FCI</option>
+                    <option value="FOE" {% if context.profile.faculty == 'FOE' %}selected{% endif %}>FOE</option>
+                    <option value="FCM" {% if context.profile.faculty == 'FCM' %}selected{% endif %}>FCM</option>
+                    <option value="FOM" {% if context.profile.faculty == 'FOM' %}selected{% endif %}>FOM</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex: 2;">
+                <label>Program</label>
+                <input type="text" name="program" value="{{ context.profile.program }}" required>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 20px;">
+            <div class="form-group" style="flex: 1;">
                 <label>Year of Study</label>
                 <input type="number" name="year_of_study" value="{{ context.profile.year_of_study }}" min="1" max="5" required>
             </div>
-            <div style="flex: 1;">
+            <div class="form-group" style="flex: 1;">
                 <label>cGPA</label>
                 <input type="number" name="cgpa" step="0.01" min="0.00" max="4.00" value="{{ context.profile.cgpa }}" required>
             </div>
         </div>
 
-        <h3>Interests (Select 2 to 5)</h3>
-        {% for category_name, interests in context.categories.items %}
-            <div style="margin-bottom: 15px;">
-                <h4 style="margin-bottom: 5px; color: #555;">{{ category_name }}</h4>
-                {% for interest in interests %}
-                    <label class="interest-label">
-                        <input type="checkbox" name="interests" value="{{ interest }}"
-                            {% if interest in context.selected_interests %}checked{% endif %}>
-                        <span>{{ interest }}</span>
+        <div class="form-group" style="margin-top: 10px;">
+            <label style="font-size: 1.1rem; border-bottom: 2px solid #e5e8ff; padding-bottom: 5px;">Interests (Select 2 to 5)</label>
+            {% for category_name, interests in context.categories.items %}
+                <div style="margin: 15px 0;">
+                    <h4 style="margin-bottom: 8px; color: #555; font-size: 0.9rem;">{{ category_name }}</h4>
+                    <div class="interests-grid">
+                        {% for interest in interests %}
+                            <label class="interest-label">
+                                <input type="checkbox" name="interests" value="{{ interest }}" {% if interest in context.selected_interests %}checked{% endif %}>
+                                <span>{{ interest }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            <label style="font-size: 1.1rem; border-bottom: 2px solid #e5e8ff; padding-bottom: 5px; margin-bottom: 15px;">Your Classes</label>
+            <div class="classes-scrollbox">
+                {% for class_id, class_code, class_section, class_trimester in context.zipped_classes %}
+                    <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-weight: normal; color: #333; cursor: pointer;">
+                        <input type="checkbox" name="classes_ids" value="{{ class_id }}" {% if class_id in selected_classes %}checked{% endif %}>
+                        <span><strong>{{ class_code }}</strong> (Sec: {{ class_section }}) - {{ class_trimester }}</span>
                     </label>
                 {% endfor %}
             </div>
-        {% endfor %}
-        Form
-        {% for class_id, class_code, class_section, class_trimester in context.zipped_classes %}
-        <label style="display: block; margin: 5px 0;">
-            <input type="checkbox" name="classes_ids" value="{{ class_id }}" 
-                {% if class_id in selected_classes %}checked{% endif %}>
-            Class Code: {{ class_code }} - Section: {{ class_section }} - Trimester: {{ class_trimester }} <br>
-        </label>
-        {% endfor %}
+        </div>
 
         <div id="edit-status" style="text-align: center; margin: 15px 0; font-weight: bold; color: red;"></div>
         
         <button type="submit">Save Changes</button>
     </form>
-</div>
+<!-- NEW: Danger Zone -->
+    <div style="margin-top: 40px; padding-top: 30px; border-top: 2px dashed #ffcccc;">
+        
+        <div id="delete-container" style="background: #fff5f5; padding: 25px; border-radius: 15px; border: 1px solid #ffcccc; text-align: left; position: relative; z-index: 10;">
+            <h4 style="margin: 0 0 10px 0; color: #cc0000;">Delete Account</h4>
+            <p style="color: #555; font-size: 0.9rem; margin-bottom: 20px;">
+                Permanently delete your account, matches, and group data. This action cannot be undone.
+            </p>
+            
+            <form id="delete-send" style="margin-bottom: 15px;">
+                {% csrf_token %}
+                <input type="hidden" name="email" value="{{ context.email }}">
+                <button hx-post="/user_delete_account/send/" 
+                        type="submit" 
+                        style="background: white; color: #dc3545; border: 2px solid #dc3545; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: background 0.2s;">
+                    Send Verification Code
+                </button>
+            </form>
+            
+            <form id="delete-form" 
+                  hx-post="/user_delete_account/receive/"
+                  hx-target="#delete-container"
+                  hx-swap="innerHTML"
+                  style="margin: 0; width: 100%;">
+                {% csrf_token %} 
+                <input type="hidden" name="email" value="{{ context.email }}">
+                
+                <label style="display: block; font-size: 0.85rem; font-weight: bold; color: #cc0000; margin-bottom: 5px;">Verification Code</label>
+                
+                <input type="text" name="code" placeholder="Enter the code sent to your email" required 
+                       style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ffb3b3; margin-bottom: 10px; box-sizing: border-box; font-size: 1rem; background: white; position: relative; z-index: 20;">
+                
+                <button type="submit" style="background: #dc3545; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: opacity 0.2s;">
+                    Delete Forever
+                </button>
+            </form>
+        </div>
+    </div>
+
+</div> <!-- End of .profile-edit-container -->
 {% endblock %}

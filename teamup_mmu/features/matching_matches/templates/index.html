@@ -2,7 +2,10 @@
 {% load static %}
 
 {% block content %}
-    <h2 style="color: #00186d; font-weight: 700; margin-top: 1rem;">Your Matches</h2>
+<div style="max-width: 1200px; margin: 0 auto; padding: 1.5rem 2rem;">
+    <div style="margin-bottom: 35px; padding-bottom: 25px; border-bottom: 2px solid rgba(0, 24, 109, 0.15);">
+        <h1 style="margin: 0; font-size: 2.5rem; color: #00186d; font-weight: 700;">Your Matches</h1>
+    </div>
     
     <style>
         /* Displays matches in a responsive grid */
@@ -11,8 +14,7 @@
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 24px;
             padding: 20px 0;
-            max-width: 1200px;
-            margin: 0 auto;
+            width: 100%;
         }
 
         /* The main card container */
@@ -107,7 +109,7 @@
                 <!-- Display Interests -->
                 <div class="interests-list" style="margin: 15px 0;">
                     {% for interest in user.interests %}
-                        <span style="display:inline-block; padding:4px 10px; margin:3px; background:#e4e6eb; border-radius:12px; font-size: 0.85em; color: #333;">
+                        <span style="display:inline-block; padding:4px 10px; margin:3px; background:#ffffff; border-radius:12px; border: 1px solid #062877e0; font-size: 0.85em; color: #333;">
                             {{ interest }}
                         </span>
                     {% endfor %}
@@ -119,10 +121,11 @@
                 </a>
             </div>
         {% empty %}
-            <div class="user-card" style="padding: 3rem;">
-                <h3 style="color: #555;">No matches yet.</h3>
-                <p>Keep browsing the Matching page to find potential teammates!</p>
+            <div style="grid-column: 1 / -1; padding: 60px 40px; text-align: center; color: #00198379; background-color: #f8fafc; border-radius: 16px; border: 1.5px dashed #00198357;">
+                <h3 style="margin: 0 0 10px 0; font-size: 1.4rem; color: #00186d;">No matches yet.</h3>
+                <p style="margin: 0; font-size: 1rem; color: #64748b;">Keep browsing the Matching page to find potential teammates!</p>
             </div>
         {% endfor %}
     </div>
+</div>
 {% endblock %}

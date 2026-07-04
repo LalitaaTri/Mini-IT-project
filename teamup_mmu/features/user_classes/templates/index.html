@@ -107,7 +107,7 @@
                 hx-get="/classes/search_explore/" 
                 hx-trigger="keyup changed delay:300ms, focus" 
                 hx-target="#explore-list" 
-                style="width: 100%; height: 48px; padding: 0 15px 0 45px; border-radius: 25px; border: 1px solid #00198357; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); font-size: 16px; box-sizing: border-box; outline: none;">
+                style="width: 100%; height: 48px; padding: 0 15px 0 45px; border-radius: 15px; border: 1.5px solid #0019838c; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); font-size: 16px; box-sizing: border-box; outline: none;">
             
             <!-- Explore classes list (Dropdown) -->
             <div id="explore-list" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; background: white; border-radius: 14px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); margin-top: 5px; max-height: 400px; overflow-y: auto;">
@@ -117,14 +117,14 @@
 
         <!-- Action Buttons Grouped on the Right -->
         <div style="display: flex; gap: 12px; align-items: center;">
-            <button class="join-btn" hx-get="/classes/join_modal/" hx-target="#modal-container" hx-swap="innerHTML" style="height: 48px; font-size: 15px; font-weight: 600; padding: 0 22px; border-radius: 25px; background: white; color: #00186d; border: 1.5px solid #00186d; white-space: nowrap; box-shadow: 0 4px 12px rgba(0, 24, 109, 0.08); cursor: pointer; transition: all 0.2s;">🔗 Join Class By Code</button>
-            <button class="create_class_btn" hx-get="/classes/create_modal/" hx-target="#modal-container" hx-swap="innerHTML" style="height: 48px; font-size: 15px; font-weight: 600; padding: 0 24px; border-radius: 25px; background: #00186d; color: white; border: none; white-space: nowrap; box-shadow: 0 4px 15px rgba(0, 24, 109, 0.2); cursor: pointer; transition: all 0.2s;">✨ Create Class</button>
+            <button class="join-btn" hx-get="/classes/join_modal/" hx-target="#modal-container" hx-swap="innerHTML" style="height: 48px; font-size: 15px; font-weight: 600; padding: 0 22px; border-radius: 15px; background: white; color: #00186d; border: 1.5px solid #00186d; white-space: nowrap; box-shadow: 0 4px 12px rgba(0, 24, 109, 0.08); cursor: pointer; transition: all 0.2s;">🔗 Join Class By Code</button>
+            <button class="create_class_btn" hx-get="/classes/create_modal/" hx-target="#modal-container" hx-swap="innerHTML" style="height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; font-weight: 600; padding: 0 24px; border-radius: 15px; background: #00186d; color: white; border: none; white-space: nowrap; box-shadow: 0 4px 15px rgba(0, 24, 109, 0.2); cursor: pointer; transition: all 0.2s;"><svg xmlns="http://www.w3.org/2000/svg" height="22px" viewBox="0 -960 960 960" width="22px" fill="#ffffff" style="flex-shrink: 0;"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>Create Class</button>
         </div>
 
     </div>
 
 
-<div style="max-width: 1300px; margin: 0 auto; padding: 2rem; background-color: white; border-radius: 20px; border: 1px solid #00198357; ">
+<div style="max-width: 1300px; margin: 0 auto; padding: 2rem; background-color: white; border-radius: 20px; border: 1px solid #0019838c; ">
     <div class="h1_section" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 35px; padding-bottom: 30px; border-bottom: 2px solid rgba(0, 24, 109, 0.15);">
         <h1 style="margin: 0; font-size: 2.5rem;">My Classes</h1>
         

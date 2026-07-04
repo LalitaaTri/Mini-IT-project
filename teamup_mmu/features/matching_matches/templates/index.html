@@ -2,103 +2,111 @@
 {% load static %}
 
 {% block content %}
-    <h2 style="color: #00186d; font-weight: 700; margin-top: 1rem;">Your Matches</h2>
+<div style="max-width: 1200px; margin: 0 auto; padding: 1.5rem 2rem;">
+    <div style="margin-bottom: 35px; padding-bottom: 25px; border-bottom: 2px solid rgba(0, 24, 109, 0.15);">
+        <h1 style="margin: 0; font-size: 2.5rem; color: #00186d; font-weight: 700;">Your Matches</h1>
+    </div>
     
     <style>
-        /* Displays matches in a responsive grid */
+        /* 1. Responsive Grid: Automatically fits up to 3 cards per row */
         #user-list {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 24px;
             padding: 20px 0;
-            max-width: 1200px;
-            margin: 0 auto;
+            width: 100%;
         }
 
-        /* The main card container */
+        /* 2. Fixed Card Container */
         .user-card {
-            background-color: #e5e8ff; 
-            padding: 2rem;
+            background-color: #ffffff; 
+            padding: 2.5rem 1.5rem;
             width: 100%;
+            height: 100%; /* Forces all cards in a row to be the same height */
             box-sizing: border-box;
             margin: 0;
             text-align: center;
             border-radius: 20px; 
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-            border: 1px solid #c1cefe;
+            border: 2px solid #e5e8ff;
             font-family: 'Inter', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
         }
 
-        .user-card {
-            background-color: #ffffff;
-            padding: 3rem 2rem;
-            width: 90vw;
-            max-width: 1000px;
-            min-height: 75vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto 25px auto;
-            text-align: center;
-            border-radius: 20px; 
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-            border: 2px solid #e5e8ff;
-        }
-
-        .user-card h2 { color: #001561; margin: 10px 0 0 0; font-size: 1.8rem; }
+        .user-card h2 { color: #001561; margin: 10px 0 0 0; font-size: 1.6rem; }
 
         .user-card img {
-            width: 100%;
-            max-width: 180px;
-            height: 180px;
+            width: 130px;
+            height: 130px;
             object-fit: cover;
             background: white;
             border-radius: 50%;
-            margin-bottom: 1.5rem;
-            border: 4px solid white;
+            margin-bottom: 1rem;
+            border: 4px solid #e5e8ff;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
 
-        /* About and details text */
         .user-card p {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: #333;
             line-height: 1.4;
             margin: 6px 0;
         }
 
-        /* The Buttons */
-        .user-card button {
-            width: 140px;
-            padding: 10px 16px;
-            margin-top: 15px;
+        .interests-grid {
+            display: flex; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            gap: 6px; 
+            margin: 15px 0; 
+            width: 100%;
+        }
+
+        /* 3. Button Layout (Grid within Grid) */
+        .actions-wrapper {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: auto; /* Magically pushes the buttons to the very bottom of the card */
+            padding-top: 20px;
+        }
+
+        .action-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+        }
+        
+        .action-row.full-width {
+            grid-template-columns: 1fr;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 12px;
             border-radius: 25px;
             border: none;
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 0.95rem;
             cursor: pointer;
-            transition: all 0.3s ease;
-            background-color: #00186d;
-            color: white;
-            box-shadow: 0 4px 10px rgba(0, 24, 109, 0.2);
-        }
-
-        .user-card button:hover {
-            transform: translateY(-2px);
-            background-color: #002299;
-            box-shadow: 0 6px 15px rgba(0, 24, 109, 0.3);
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            text-decoration: none; 
         }
         
         .action-btn:hover { transform: translateY(-2px); }
         
         /* Semantic Colors */
-        .btn-primary { background-color: #001561; color: white; }
-        .btn-primary:hover { background-color: #002299; }
+        .btn-primary { background-color: #00186d; color: white; }
+        .btn-primary:hover { background-color: #002299; box-shadow: 0 6px 15px rgba(0, 24, 109, 0.3); }
         .btn-invite { background-color: #5b73df; color: white; }
         .btn-invite:hover { background-color: #4a62c9; }
         .btn-request { background-color: #28a745; color: white; }
@@ -109,17 +117,16 @@
         {% for user in context.matches %}
             <div class="user-card">
                 
-                <!-- FIXED: Pure static image, no HTMX, no hover scale -->
                 <img src="{% static 'teamup_mmu/profile.png' %}" alt="Profile Picture">
 
                 <h2>{{ user.username|default:user.email }}</h2>
-                <p style="color: #666; font-weight: 600; margin-top: 5px; font-size: 0.95rem;">
+                <p style="color: #666; font-weight: 600; margin-top: 5px; font-size: 0.9rem;">
                     {{ user.email }}
                 </p>
                 
-                <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0; width: 100%; max-width: 600px;">
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0; width: 100%;">
                 
-                <div style="max-width: 800px;">
+                <div style="width: 100%;">
                     <p><strong>About:</strong> <span style="color: #555;">{{ user.descriptions }}</span></p>
                     <p><strong>Program:</strong> {{ user.program }} ({{ user.faculty }})</p>
                     <p><strong>Year:</strong> {{ user.year_of_study }} &nbsp;|&nbsp; <strong>cGPA:</strong> {{ user.cgpa }}</p>
@@ -127,24 +134,46 @@
                 
                 <div class="interests-grid">
                     {% for interest in user.interests %}
-                        <span class="interest-pill">{{ interest }}</span>
+                        <span style="display:inline-block; padding:4px 10px; background:#ffffff; border-radius:12px; border: 1px solid #062877e0; font-size: 0.85em; color: #333; font-weight: 600;">
+                            {{ interest }}
+                        </span>
                     {% endfor %}
                 </div>
                 
-                <!-- Message Button -->
-                <a href="/inbox/?chat={{ user.id }}" style="text-decoration: none;">
-                    <button type="button">Message</button>
-                </a>
+                <!-- The 3 Action Buttons -->
+                <div class="actions-wrapper">
+                    <div class="action-row full-width">
+                        <a href="/inbox/?chat_with={{ user.id }}" class="action-btn btn-primary">
+                            💬 Message
+                        </a>
+                    </div>
+                    <div class="action-row">
+                        <button class="action-btn btn-invite"
+                                hx-get="/connect_modal/invite/{{ user.id }}/" 
+                                hx-target="#modal-container" 
+                                hx-swap="innerHTML">
+                            Invite
+                        </button>
+                        
+                        <button class="action-btn btn-request"
+                                hx-get="/connect_modal/request/{{ user.id }}/" 
+                                hx-target="#modal-container" 
+                                hx-swap="innerHTML">
+                            Request
+                        </button>
+                    </div>
+                </div>
+
             </div>
         {% empty %}
-            <div class="user-card" style="padding: 3rem; min-height: auto;">
-                <div style="font-size: 3rem; margin-bottom: 10px;">🔍</div>
-                <h3 style="color: #001561;">No matches yet.</h3>
-                <p style="color: #555;">Keep browsing the Matching page to find potential teammates!</p>
+            <div style="grid-column: 1 / -1; padding: 60px 40px; text-align: center; color: #00198379; background-color: #f8fafc; border-radius: 16px; border: 1.5px dashed #00198357;">
+                <h3 style="margin: 0 0 10px 0; font-size: 1.4rem; color: #00186d;">No matches yet.</h3>
+                <p style="margin: 0; font-size: 1rem; color: #64748b;">Keep browsing the Matching page to find potential teammates!</p>
             </div>
         {% endfor %}
     </div>
 
-    <!-- Container for HTMX group modals -->
+    <!-- Required container for the HTMX modals to pop up in -->
     <div id="modal-container"></div>
+</div>
 {% endblock %}

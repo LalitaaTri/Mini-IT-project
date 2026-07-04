@@ -22,7 +22,7 @@
                     <h4 style="margin: 0 0 5px 0; color: #333; font-size: 16px;">{{ c.course_code }} - {{ c.course_name }}</h4>
                     <p style="margin: 0; color: #666; font-size: 13px;">{{ c.section }}, {{ c.trimester }}</p>
                 </div>
-                <button class="join-btn" hx-get="/classes/join_modal/" hx-target="#modal-container" hx-swap="innerHTML" style="padding: 6px 15px; font-size: 13px; height: auto;">Join</button>
+                <button class="join-btn" hx-post="/classes/join_by_code/" hx-vals='{"class_code": "{{ c.join_code }}"}' hx-target="#modal-container" hx-swap="innerHTML" style="padding: 6px 15px; font-size: 13px; height: auto;">Join</button>
             </div>
         </li>
         {% endfor %}

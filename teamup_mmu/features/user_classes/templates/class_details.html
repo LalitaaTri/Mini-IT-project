@@ -179,14 +179,11 @@
 
                 <!-- The dropdown menu content -->
                 <div class="settings-menu">
-                    <a href="#" class="settings-item" hx-get="/classes/share_code_modal/{{ class_details.id }}/" hx-target="#modal-container" hx-swap="innerHTML">
-                       Share Join Code
-                    </a>
+                    <a href="#" class="settings-item" hx-get="/classes/share_code_modal/{{ class_details.id }}/" hx-target="#modal-container" hx-swap="innerHTML">Share Join Code</a>
                     <a href="#" class="settings-item" hx-get="/classes/add_students_modal/{{ class_details.id }}/" hx-target="#modal-container" hx-swap="innerHTML">Add Students</a>
                     <a href="#" class="settings-item" hx-get="/classes/teams_settings_modal/{{ class_details.id }}/" hx-target="#modal-container" hx-swap="innerHTML">Teams Settings</a>
-                    <a href="#" class="settings-item danger" hx-get="/classes/delete_class_modal/{{ class_details.id }}/" hx-target="#modal-container" hx-swap="innerHTML">
-                        Delete Class
-                    </a>
+                    <a href="#" class="settings-item" hx-get="/classes/handover/{{ class_details.id }}/" hx-target="#modal-container" hx-swap="innerHTML">Transfer Ownership</a>
+                    <a href="#" class="settings-item danger" hx-get="/classes/delete_class_modal/{{ class_details.id }}/" hx-target="#modal-container" hx-swap="innerHTML">Delete Class</a>
                 </div>
             </details>
 

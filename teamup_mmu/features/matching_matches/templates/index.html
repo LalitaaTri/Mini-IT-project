@@ -20,9 +20,9 @@
         .user-card {
             background-color: #ffffff;
             padding: 3rem 2rem;
-            width: 90vw; /* Scales with screen width */
-            max-width: 1000px; /* Stops it from getting too wide on huge monitors */
-            min-height: 75vh; /* Scales with screen height */
+            width: 90vw;
+            max-width: 1000px;
+            min-height: 75vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -49,48 +49,69 @@
         .user-card p { font-size: 1rem; color: #333; line-height: 1.5; margin: 8px 0; }
 
         .interests-grid {
-            display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 20px 0;
-            max-width: 800px; /* Keeps text/tags from stretching too far */
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 20px 0; max-width: 800px;
         }
+        
         .interest-pill {
             background: #e5e8ff; color: #001561; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 600;
         }
 
-        /* Locks the button width independent of the card width */
-        .btn-wrapper {
+        /* Unified Button Layout */
+        .actions-wrapper {
             width: 100%;
-            max-width: 350px;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
             margin-top: 20px;
         }
 
-        .btn-primary {
-            background-color: #001561;
-            color: white;
+        .action-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
             width: 100%;
-            padding: 14px;
+        }
+        
+        .action-row.full-width {
+            grid-template-columns: 1fr;
+        }
+
+        .action-btn {
+            width: 100%;
+            height: 100%;
+            padding: 12px;
             border-radius: 25px;
             border: none;
             font-weight: bold;
-            font-size: 1.05rem;
+            font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            text-decoration: none; /* Prevents underline on the anchor tag */
         }
-        .btn-primary:hover { transform: translateY(-2px); background-color: #002299; }
+        
+        .action-btn:hover { transform: translateY(-2px); }
+        
+        /* Semantic Colors */
+        .btn-primary { background-color: #001561; color: white; }
+        .btn-primary:hover { background-color: #002299; }
+        .btn-invite { background-color: #5b73df; color: white; }
+        .btn-invite:hover { background-color: #4a62c9; }
+        .btn-request { background-color: #28a745; color: white; }
+        .btn-request:hover { background-color: #218838; }
     </style>
     
     <div id="user-list">
         {% for user in context.matches %}
             <div class="user-card">
                 
-                <img src="{% static 'teamup_mmu/profile.png' %}" 
-                     alt="Profile Picture"
-                     hx-get="/user_profile/{{ user.id }}/" 
-                     hx-target="#profile-modal-container" 
-                     hx-swap="innerHTML" 
-                     style="cursor: pointer; transition: transform 0.2s;"
-                     onmouseover="this.style.transform='scale(1.05)'"
-                     onmouseout="this.style.transform='scale(1)'">
+                <!-- FIXED: Pure static image, no HTMX, no hover scale -->
+                <img src="{% static 'teamup_mmu/profile.png' %}" alt="Profile Picture">
 
                 <h2>{{ user.username|default:user.email }}</h2>
                 <p style="color: #666; font-weight: 600; margin-top: 5px; font-size: 0.95rem;">
@@ -111,21 +132,42 @@
                     {% endfor %}
                 </div>
                 
-                <div class="btn-wrapper">
-                    <button class="btn-primary" 
-                            hx-get="{% url 'user_message_index_view' user.id %}"
-                            hx-target="#user-list"
-                            hx-swap="innerHTML">
-                        💬 Message
-                    </button>
+                <div class="actions-wrapper">
+                    <!-- Row 1: Message (Redirects to Inbox) -->
+                    <div class="action-row full-width">
+                        <a href="/inbox/?chat_with={{ user.id }}" class="action-btn btn-primary">
+                            💬 Message
+                        </a>
+                    </div>
+
+                    <!-- Row 2: Groups & Requests -->
+                    <div class="action-row">
+                        <button class="action-btn btn-invite"
+                                hx-get="/connect_modal/invite/{{ user.id }}/" 
+                                hx-target="#modal-container" 
+                                hx-swap="innerHTML">
+                            Invite to Group
+                        </button>
+                        
+                        <button class="action-btn btn-request"
+                                hx-get="/connect_modal/request/{{ user.id }}/" 
+                                hx-target="#modal-container" 
+                                hx-swap="innerHTML">
+                            Request to Join
+                        </button>
+                    </div>
                 </div>
+                
             </div>
         {% empty %}
-            <div class="user-card" style="padding: 3rem;">
+            <div class="user-card" style="padding: 3rem; min-height: auto;">
                 <div style="font-size: 3rem; margin-bottom: 10px;">🔍</div>
                 <h3 style="color: #001561;">No matches yet.</h3>
                 <p style="color: #555;">Keep browsing the Matching page to find potential teammates!</p>
             </div>
         {% endfor %}
     </div>
+
+    <!-- Container for HTMX group modals -->
+    <div id="modal-container"></div>
 {% endblock %}

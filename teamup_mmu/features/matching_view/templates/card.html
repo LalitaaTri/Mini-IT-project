@@ -2,14 +2,8 @@
 {% if context.user_obj %}
     <div class="user-card">
         
-        <img src="{% static 'teamup_mmu/profile.png' %}" 
-             alt="Profile Picture"
-             hx-get="/user_profile/{{ context.user_obj.id }}/" 
-             hx-target="#profile-modal-container" 
-             hx-swap="innerHTML" 
-             style="cursor: pointer; transition: transform 0.2s;"
-             onmouseover="this.style.transform='scale(1.05)'"
-             onmouseout="this.style.transform='scale(1)'">
+        <!-- FIXED: Pure static image, no hover effects, no HTMX -->
+        <img src="{% static 'teamup_mmu/profile.png' %}" alt="Profile Picture">
 
         <h2>{{ context.user_obj.username|default:context.user_obj.email }}</h2>
         
@@ -32,7 +26,7 @@
         </div>
         
         <div class="actions-wrapper">
-            
+            <!-- ACTION BAR 1: Like & Next -->
             <div class="action-row">
                 <form id="like-form" hx-post="/matching/like/" hx-target="#like-status" hx-swap="innerHTML">
                     {% csrf_token %}
@@ -51,6 +45,7 @@
                 </button>
             </div>
 
+            <!-- ACTION BAR 2: Groups & Requests -->
             <div class="action-row">
                 <button class="action-btn btn-invite"
                         hx-get="/connect_modal/invite/{{ context.user_obj.id }}/" 
@@ -66,9 +61,7 @@
                     Request to Join
                 </button>
             </div>
-            
         </div>
-        
     </div>
     
     <div id="modal-container"></div>

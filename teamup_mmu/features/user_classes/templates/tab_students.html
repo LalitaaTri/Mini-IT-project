@@ -21,18 +21,22 @@
     </div>
 {% else %}
     <!-- Regular Student Card -->
-    <div {% if student.user_id == current_user_id %}
-            style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.2rem; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+    <div data-student-card
+         {% if student.user_id == current_user_id %}
+            style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.2rem; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; transition: all 0.2s;"
          {% else %}
-            style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.2rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+            style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.2rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; transition: all 0.2s;"
          {% endif %}
         onmouseover="this.style.borderColor='#00186d'; this.style.boxShadow='0 4px 12px rgba(0,24,109,0.08)'"
-        onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'" title="Click for more info"
-        hx-get="/profile/modal/{{ student.user_id }}/"
-        hx-target="#modal-container"
-        hx-swap="innerHTML">
+        onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
 
-        <div style="display: flex; flex-direction: column; gap: 0.2rem;">
+        <!-- Clickable info area (profile modal trigger) -->
+        
+        <div style="display: flex; flex-direction: column; gap: 0.2rem; cursor: pointer; flex-grow: 1;"
+            hx-get="/profile/modal/{{ student.user_id }}/"
+            hx-target="#modal-container"
+            hx-swap="innerHTML"
+            title="Click for more info">
             <div style="display: flex; align-items: center; gap: 8px;">
                 <span style="font-weight: 600; color: #2a2e34;">{{ student.username|default:"Invited Student" }}</span>
                 {% if student.user_id == current_user_id %}
@@ -45,17 +49,15 @@
             <span style="font-size: 0.85rem; color: #7f8a9c;">{{ student.email|default:"studentemail@mmu.edu.my"}}</span>
         </div>
 
-
         {% if is_admin %}
-        <!-- Remove Student Button (Admin Only) -->
-        <button onclick="event.stopPropagation();"
+        <!-- Remove Student Button (Admin Only) — sibling of info area, NOT nested inside hx-get -->
+        <button
             {% if student.user_id == current_user_id %}
             disabled title="You cannot remove yourself from the class."
-            style="background: none; border: none; font-size: 1.4rem; cursor: not-allowed; color: #e2e8f0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%;"
+            style="background: none; border: none; font-size: 1.4rem; cursor: not-allowed; color: #e2e8f0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0;"
             {% else %}
-            hx-post="/classes/remove_student/{{ class_details.id }}/{{ student.user_id }}/"
-            hx-confirm="Are you sure you want to remove this student?" hx-target="closest div" hx-swap="outerHTML"
-            style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #cbd5e1; transition: all 0.2s; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%;"
+            onclick="if(confirm('Remove this student from the class?')) { const card = this.closest('[data-student-card]'); fetch('/classes/remove_student/{{ class_details.id }}/{{ student.user_id }}/', {method:'POST'}).then(r=>{ if(r.ok){ card.style.opacity='0'; card.style.transition='opacity 0.3s'; setTimeout(()=>card.remove(), 300); r.text().then(html=>{ const tmp=document.createElement('div'); tmp.innerHTML=html; const span=tmp.querySelector('#num_students'); if(span){ const existing=document.getElementById('num_students'); if(existing) existing.textContent=span.textContent; } }); } else { alert('Failed to remove student. Please try again.'); } }); }"
+            style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #cbd5e1; transition: all 0.2s; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0;"
             onmouseover="this.style.color='#ef4444'; this.style.background='#fee2e2'"
             onmouseout="this.style.color='#cbd5e1'; this.style.background='none'" title="Remove student"
             {% endif %}>

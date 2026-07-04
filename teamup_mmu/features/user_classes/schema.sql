@@ -8,11 +8,12 @@ CREATE TABLE IF NOT EXISTS classes (
     course_name VARCHAR(100) NOT NULL,
     description TEXT,
     join_code TEXT UNIQUE NOT NULL,
-    trimester VARCHAR(20) NOT NULL DEFAULT 'Trimester 1',
+    trimester VARCHAR(20) NOT NULL DEFAULT '0000',
     section VARCHAR(20) NOT NULL DEFAULT 'TC1L',
     groups_enabled BOOLEAN DEFAULT FALSE,
     max_groups INTEGER DEFAULT 10,
-    max_members_per_group INTEGER DEFAULT 5
+    max_members_per_group INTEGER DEFAULT 5,
+    teams_frozen BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE IF NOT EXISTS user_classes (

@@ -1,10 +1,15 @@
 <div id="team-settings-modal" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.25s ease;">
-    <div style="background: white; border-radius: 12px; width: 100%; max-width: 440px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); overflow: hidden; animation: modalEnter 0.25s ease-out;">
+    <div style="background: white; border-radius: 16px; width: 100%; max-width: 440px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); overflow: hidden; border: 1px solid #e2e8f0; margin: 16px; animation: modalEnter 0.25s ease-out;">
         
-        <!-- Modal Header -->
-        <div style="background: #00186d; padding: 1.25rem 1.5rem; color: white; display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 600;">Team Settings</h3>
-            <button onclick="document.getElementById('team-settings-modal').remove()" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
+        <!-- Header -->
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between;">
+            <h3 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: #00186d;">⚙️ Team Settings</h3>
+            <button 
+                onclick="document.getElementById('team-settings-modal').remove()" 
+                style="background: none; border: none; font-size: 1.5rem; color: #94a3b8; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; transition: background-color 0.2s;"
+                onmouseover="this.style.backgroundColor='#f1f5f9'; this.style.color='#64748b'"
+                onmouseout="this.style.backgroundColor='transparent'; this.style.color='#94a3b8'"
+                title="Close">&times;</button>
         </div>
 
         <!-- Form -->
@@ -34,6 +39,18 @@
                 <div style="display: flex; flex-direction: column; gap: 0.4rem;">
                     <label style="font-weight: 600; color: #475569; font-size: 0.88rem;">Maximum Members per Team</label>
                     <input type="number" name="max_members" value="{{ class_details.max_members_per_group |default:5 }}" min="1" max="20" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; outline: none;">
+                </div>
+
+                <!-- Freeze Teams Toggle -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; border-top: 1px solid #f1f5f9; padding-top: 1rem;">
+                    <span style="font-weight: 600; color: #475569; font-size: 0.88rem;">Freeze Teams (Prevent Changes)</span>
+                    <label style="position: relative; display: inline-block; width: 44px; height: 22px;">
+                        <input type="checkbox" name="teams_frozen" {% if class_details.teams_frozen %}checked{% endif %} style="opacity: 0; width: 0; height: 0;" id="toggle-freeze-checkbox" onchange="toggleFreeze(this.checked)">
+                        <span id="freeze-slider" class="{% if class_details.teams_frozen %}bg-red{% else %}bg-slate{% endif %}" style="position: absolute; cursor: pointer; inset: 0; border-radius: 34px; transition: 0.2s;">
+                            <span id="freeze-knob" class="{% if class_details.teams_frozen %}knob-on{% else %}knob-off{% endif %}" style="position: absolute; content: ''; height: 16px; width: 16px; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.2s;"></span>
+                        </span>
+                    </label>
+                    
                 </div>
             </div>
 
@@ -65,10 +82,23 @@
             knob.style.left = '4px';
         }
     }
+
+    function toggleFreeze(frozen) {
+        const slider = document.getElementById('freeze-slider');
+        const knob = document.getElementById('freeze-knob');
+        if (frozen) {
+            slider.style.backgroundColor = '#ef4444';
+            knob.style.left = '24px';
+        } else {
+            slider.style.backgroundColor = '#cbd5e1';
+            knob.style.left = '4px';
+        }
+    }
 </script>
 
 <style>
     .bg-emerald { background-color: #10b981; }
+    .bg-red { background-color: #ef4444; }
     .bg-slate { background-color: #cbd5e1; }
     .knob-on { left: 24px; }
     .knob-off { left: 4px; }

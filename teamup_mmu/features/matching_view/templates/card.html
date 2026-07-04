@@ -5,7 +5,7 @@
 
         <h2>{{ context.user_obj.username|default:context.user_obj.email }}</h2>
         
-        <hr style="border: 0; border-top: 1px solid #eee; margin: 8px 0; width: 100%; max-width: 500px;">
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 14px 0; width: 100%; max-width: 500px;">
         
         <div style="max-width: 600px;">
             <p><strong>Headline:</strong> <span style="color: #555;">{{ context.user_obj.introduction }}</span></p>
@@ -19,7 +19,7 @@
             {% endfor %}
         </div>
         
-        <div id="like-status" style="font-weight: 600; color: #001561; margin: 4px 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; min-height: 18px;">
+        <div id="like-status" style="font-weight: 600; color: #001561; margin: 8px 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; min-height: 18px;">
             {{ context.like_status }}
         </div>
         

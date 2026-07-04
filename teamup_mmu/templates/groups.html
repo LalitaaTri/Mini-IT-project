@@ -3,182 +3,273 @@
 
 {% block content %}
 <style>
-    .groups-container {
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 20px;
+    /* Buttons styled like My Classes buttons */
+    .join-input {
+        height: 48px;
+        padding: 0 20px;
+        border-radius: 25px;
+        border: 1.5px solid #00186d;
+        font-size: 14px;
+        outline: none;
+        box-sizing: border-box;
+        text-transform: uppercase;
+        color: #00186d;
+        font-weight: 600;
+        background: #f8fafe;
+        transition: border-color 0.2s, background 0.2s;
     }
-    
-    .header-action {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
+
+    .join-input:focus {
+        background: white;
+        border-color: #001561;
+        box-shadow: 0 0 0 3px rgba(0, 24, 109, 0.1);
+    }
+
+    .join-btn {
+        height: 48px;
+        padding: 0 24px;
+        border-radius: 25px;
+        background: white;
+        color: #00186d;
+        border: 1.5px solid #00186d;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 4px 12px rgba(0, 24, 109, 0.08);
+        white-space: nowrap;
+    }
+
+    .join-btn:hover {
+        background: #f0f4ff;
     }
 
     .create-btn {
-        background-color: #001561;
+        height: 48px;
+        padding: 0 24px;
+        border-radius: 25px;
+        background: #00186d;
         color: white;
-        padding: 10px 20px;
-        border-radius: 20px;
-        text-decoration: none;
-        font-weight: bold;
-        transition: 0.2s;
         border: none;
+        font-size: 15px;
+        font-weight: 600;
         cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 4px 15px rgba(0, 24, 109, 0.2);
+        white-space: nowrap;
     }
 
     .create-btn:hover {
-        background-color: #002299;
+        background: #002299;
+        transform: translateY(-1px);
     }
 
+    /* Grid and Cards matching My Classes */
     .group-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 20px;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 25px;
     }
 
     .group-card {
-        background-color: #f8f9fa;
-        border: 1px solid #e0e0e0;
-        border-radius: 15px;
-        padding: 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        background-color: white;
+        border: 1px solid #00198357;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .group-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
 
     .group-card h3 {
-        margin-top: 0;
-        color: #001561;
-        margin-bottom: 5px;
+        margin: 0 0 5px 0;
+        color: #00186d;
+        font-size: 1.25rem;
     }
 
     .tag {
         display: inline-block;
-        padding: 3px 8px;
-        border-radius: 10px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        margin-bottom: 10px;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-bottom: 12px;
     }
 
-    .tag.general { background-color: #e5e8ff; color: #001561; }
-    .tag.class { background-color: #e0f2fe; color: #0369a1; }
+    .tag.general {
+        background: hsl(273, 100%, 94%);
+        color: #5d4769;
+    }
+
+    .tag.class {
+        background: #ffea97;
+        color: #695147;
+    }
 
     .group-card.class-team-card {
-        background-color: #f0f9ff;
-        border: 1px solid #bae6fd;
-        box-shadow: 0 4px 6px rgba(3, 105, 161, 0.05);
+        border-color: #cbd5e1;
     }
 
     .wa-link {
         display: inline-block;
         margin-top: 15px;
-        background-color: #25D366; /* WhatsApp Green */
+        background-color: #25D366;
         color: white;
-        padding: 8px 15px;
-        border-radius: 15px;
+        padding: 8px 16px;
+        border-radius: 20px;
         text-decoration: none;
-        font-weight: bold;
-        font-size: 0.9rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: background-color 0.2s;
+        align-self: flex-start;
     }
-    
+
     .wa-link:hover {
         background-color: #20b858;
     }
+
+    .action-pill-btn {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+    }
 </style>
 
-<div class="groups-container">
-    
-    <!-- HEADER AREA -->
-    <div class="header-action">
-        <h2>Your Groups</h2>
-        
-        <!-- Right side of header: Join Form & Create Button -->
-        <div style="display: flex; flex-direction: column; align-items: flex-end;">
-            <div style="display: flex; gap: 15px; align-items: center;">
-                <form hx-post="/groups/join_by_code/" hx-target="#join-error" hx-swap="innerHTML" style="display: flex; gap: 5px; margin: 0;">
+<!-- Main Page Container-->
+<div style="max-width: 1300px; margin: 0 auto; padding: 2rem;">
+
+    <!-- Top Action Bar-->
+    <div
+        style="display: flex; justify-content: flex-end; gap: 15px; align-items: center; margin-bottom: 24px; padding-bottom: 40px;">
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <div style="position: relative;">
+                <form hx-post="/groups/join_by_code/" hx-target="#join-error" hx-swap="innerHTML" style="display: flex; gap: 0; margin: 0; align-items: center; box-shadow: 0 4px 12px rgba(0, 24, 109, 0.08); border-radius: 15px;">
                     {% csrf_token %}
-                    <input type="text" name="join_code" placeholder="Group Code" maxlength="8" required style="padding: 8px; border-radius: 8px; border: 1px solid #ccc; text-transform: uppercase;">
-                    <button type="submit" style="background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold;">Join</button>
+                    <input type="text" name="join_code" placeholder="GROUP CODE" maxlength="8" required class="join-input" style="height: 48px; padding: 0 20px; border-radius: 15px 0 0 15px; border: 1.5px solid #00186d; border-right: none; font-size: 14px; outline: none; box-sizing: border-box; text-transform: uppercase; color: #00186d; font-weight: 600; background: white; width: 160px; transition: all 0.2s;">
+                    <button type="submit" class="join-btn" style="height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; font-weight: 600; padding: 0 24px; border-radius: 0 15px 15px 0; background: #00186d; color: white; border: 1.5px solid #00186d; white-space: nowrap; cursor: pointer; transition: all 0.2s;">🔗 Join Group By Code</button>
                 </form>
-                
-                <button class="create-btn" hx-get="/groups/create/" hx-target="#create-form-area" hx-swap="innerHTML">
-                    + Create New Group
-                </button>
+                <div id="join-error" style="position: absolute; top: 100%; left: 15px; margin-top: 6px; color: #dc2626; font-weight: bold; font-size: 0.85rem; white-space: nowrap;"></div>
             </div>
-            <!-- Error message container for the join form -->
-            <div id="join-error" style="color: red; font-weight: bold; margin-top: 5px; font-size: 0.85rem;"></div>
+            
+            <button class="create-btn" hx-get="/groups/create/" hx-target="#create-form-area" hx-swap="innerHTML" style="height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; font-weight: 600; padding: 0 24px; border-radius: 15px; background: #00186d; color: white; border: none; white-space: nowrap; box-shadow: 0 4px 15px rgba(0, 24, 109, 0.2); cursor: pointer; transition: all 0.2s;"><svg xmlns="http://www.w3.org/2000/svg" height="22px" viewBox="0 -960 960 960" width="22px" fill="#ffffff" style="flex-shrink: 0;"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>Create Group</button>
         </div>
     </div>
-    
-    <!-- This empty div is where our HTMX "Create Group" form will appear -->
-    <div id="create-form-area" style="margin-bottom: 20px;"></div>
 
-    <!-- MAIN GROUPS GRID -->
-    <div class="group-grid">
-        {% for group in context.my_groups %}
+    <!-- White Container Card-->
+    <div
+        style="max-width: 1300px; margin: 0 auto; padding: 2rem; background-color: white; border-radius: 20px; border: 1px solid #0019838c;">
+
+        <!-- Header row inside white box with title and search box -->
+        <div class="h1_section"
+            style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 35px; padding-bottom: 30px; border-bottom: 2px solid rgba(0, 24, 109, 0.15);">
+            <h1 style="margin: 0; font-size: 2.5rem; color: #00186d;">Your Groups</h1>
+
+            {% if context.my_groups %}
+            <div style="position: relative; width: 300px;">
+                <span
+                    style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1rem; color: #888; pointer-events: none;">🔍</span>
+                <input type="text" id="my-groups-search" placeholder="Search my groups..."
+                    style="width: 100%; height: 42px; padding: 0 15px 0 40px; border-radius: 21px; border: 1px solid #00198357; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); font-size: 14px; box-sizing: border-box; outline: none; transition: border-color 0.2s;"
+                    onfocus="this.style.borderColor='#001561'" onblur="this.style.borderColor='#00198357'"
+                    oninput="const q=this.value.toLowerCase(); document.querySelectorAll('.group-grid .group-card').forEach(c => c.style.display = c.innerText.toLowerCase().includes(q) ? 'flex' : 'none');">
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- This empty div is where our HTMX "Create Group" form will appear -->
+        <div id="create-form-area" style="margin-bottom: 25px;"></div>
+
+        <!-- MAIN GROUPS GRID -->
+        <div class="group-grid">
+            {% for group in context.my_groups %}
             <div class="group-card {% if not group.is_general %}class-team-card{% endif %}">
-                
-                <!-- Group Name and Join Code Header -->
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <h3>{{ group.name }}</h3>
-                    <span style="background: #eee; padding: 4px 8px; border-radius: 6px; font-family: monospace; font-weight: bold; letter-spacing: 1px; font-size: 0.8rem; color: #333;">
-                        Code: {{ group.join_code|default:"N/A" }}
-                    </span>
-                </div>
-    
-                <!-- Tags -->
-                {% if group.is_general %}
+
+                <div>
+                    <!-- Group Name and Join Code Header -->
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px;">
+                        <h3>{{ group.name }}</h3>
+                        <span
+                            style="background: #f1f5f9; padding: 4px 10px; border-radius: 12px; font-family: monospace; font-weight: 700; font-size: 0.8rem; color: #475569; border: 1px solid #e2e8f0; white-space: nowrap;">
+                            Code: {{ group.join_code|default:"N/A" }}
+                        </span>
+                    </div>
+
+                    <!-- Tags -->
+                    {% if group.is_general %}
                     <span class="tag general">General Group</span>
-                {% else %}
+                    {% else %}
                     <span class="tag class">Class Team: {{ group.class_name }}</span>
-                {% endif %}
-    
-                <!-- Description -->
-                <p style="font-size: 0.9rem; color: #555;">{{ group.description }}</p>
-    
-                <!-- WhatsApp Link -->
-                {% if group.whatsapp_link %}
-                    <a href="{{ group.whatsapp_link }}" target="_blank" class="wa-link">📱 Join WhatsApp</a>
-                {% else %}
-                    <p style="font-size: 0.85rem; color: gray; margin-top: 15px;">No WhatsApp link provided.</p>
-                {% endif %}
-    
+                    {% endif %}
+
+                    <!-- Description -->
+                    <p style="font-size: 0.9rem; color: #475569; line-height: 1.5; margin: 10px 0;">{{ group.description}}</p>
+
+                    <!-- WhatsApp Link -->
+                    {% if group.whatsapp_link %}
+                    <div>
+                        <a href="{{ group.whatsapp_link }}" target="_blank" class="wa-link">📱 Join WhatsApp</a>
+                    </div>
+                    {% else %}
+                    <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 15px; font-style: italic;">No WhatsApp
+                        link provided.</p>
+                    {% endif %}
+                </div>
+
                 <!-- Bottom Actions (Leave & Members) -->
-                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
-                    
-                    <div style="display: flex; gap: 10px;">
+                <div
+                    style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 10px;">
+
+                    <div
+                        style="display: flex; gap: 10px; justify-content: space-between; align-items: center; flex-wrap: wrap;">
                         <!-- View Members Button -->
-                        <button hx-get="/groups/{{ group.id }}/members/" 
-                                hx-target="#members-area-{{ group.id }}" 
-                                hx-swap="innerHTML"
-                                style="background: #e5e8ff; color: #001561; border: none; padding: 6px 12px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.8rem;">
+                        <button hx-get="/groups/{{ group.id }}/members/" hx-target="#members-area-{{ group.id }}"
+                            hx-swap="innerHTML" class="action-pill-btn" style="background: #e5e8ff; color: #00186d;"
+                            onmouseover="this.style.background='#d8dfff'" onmouseout="this.style.background='#e5e8ff'">
                             👥 View Members
                         </button>
 
                         <!-- Leave Group Form -->
-                        <form hx-post="/groups/leave/{{ group.id }}/" 
-                              hx-confirm="Are you sure you want to leave {{ group.name }}?" 
-                              hx-target="#leave-msg-{{ group.id }}" 
-                              hx-swap="innerHTML"
-                              style="margin: 0;">
+                        <form hx-post="/groups/leave/{{ group.id }}/"
+                            hx-confirm="Are you sure you want to leave {{ group.name }}?"
+                            hx-target="#leave-msg-{{ group.id }}" hx-swap="innerHTML" style="margin: 0;">
                             {% csrf_token %}
-                            <button type="submit" style="background-color: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 0.8rem;">
+                            <button type="submit" class="action-pill-btn"
+                                style="background-color: #cc0000; color: white;"
+                                onmouseover="this.style.background='#b91c1c'"
+                                onmouseout="this.style.background='#cc0000'">
                                 Leave Group
                             </button>
                         </form>
                     </div>
 
                     <!-- Containers for HTMX messages -->
-                    <div id="leave-msg-{{ group.id }}" style="margin-top: 10px; font-weight: bold;"></div>
+                    <div id="leave-msg-{{ group.id }}" style="margin-top: 5px; font-weight: bold; font-size: 0.85rem;">
+                    </div>
                     <div id="members-area-{{ group.id }}"></div>
-                    
+
                 </div>
             </div>
-            
-        {% empty %}
-            <p style="color: gray; grid-column: 1 / -1; text-align: center; padding: 40px;">You are not in any groups yet. Match with some people and create one!</p>
-        {% endfor %}
+
+            {% empty %}
+            <div
+                style="grid-column: 1 / -1; padding: 40px; text-align: center; color: #00198379; background-color: #f5fcff; border-radius: 16px; border: 1px dashed #00198379;">
+                <p style="margin: 0; font-size: 1rem; font-weight: 500;">You are not in any groups yet. Match with some
+                    teammates and create one!</p>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 </div>
 {% endblock %}

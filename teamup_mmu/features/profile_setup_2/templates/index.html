@@ -1,3 +1,17 @@
+<style>
+    /* Forces the wrapper loading this form to expand */
+    div[hx-get="/profile_setup_2/"] {
+        max-width: 800px !important;
+        width: 100% !important;
+    }
+    
+    /* Forces the form itself to expand */
+    #profile_setup_2 {
+        max-width: 800px !important;
+        width: 100% !important;
+    }
+</style>
+
 <form id="profile_setup_2" hx-post="/profile_setup_2/receive/" hx-target="#message" hx-swap="innerHTML">
     {% csrf_token %}
     <h2>Select Your Interests (Choose 2 to 5)</h2>

@@ -1,22 +1,17 @@
-<!-- Lalitaa made this -->
-
 <div id="profile-modal-overlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px);" onclick="closeProfileModal(event)">
     
-    <div id="profile-modal-content" style="background: white; border-radius: 16px; padding: 2rem; width: 90%; max-width: 500px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: popIn 0.3s ease-out; position: relative;">
+    <div id="profile-modal-content" style="background: white; border-radius: 16px; padding: 2.5rem; width: 90%; max-width: 500px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: popIn 0.3s ease-out; position: relative; font-family: 'Inter', sans-serif;">
         
-        <!-- Close Button -->
         <button onclick="document.getElementById('profile-modal-overlay').remove()" style="position: absolute; top: 1rem; right: 1.5rem; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #7f8a9c; transition: color 0.2s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#7f8a9c'">&times;</button>
 
-        <!-- Header: Initial, Name, and Email -->
-        <div style="text-align: center; margin-bottom: 1.5rem;">
-            <div style="width: 80px; height: 80px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin: 0 auto 1rem auto; color: #00186d; font-weight: bold;">
+        <div style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 1.5rem;">
+            <div style="width: 80px; height: 80px; background: #e5e8ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin-bottom: 1rem; color: #001561; font-weight: bold; border: 2px solid #c1cefe;">
                 {{ context.profile.username|slice:":1"|upper }}
             </div>
-            <h2 style="margin: 0; color: #2a2e34; font-size: 1.5rem;">{{ context.profile.username }}</h2>
+            <h2 style="margin: 0; color: #001561; font-size: 1.5rem;">{{ context.profile.username }}</h2>
             <p style="margin: 0.2rem 0 0 0; color: #7f8a9c; font-size: 0.9rem;">{{ context.profile.email }}</p>
         </div>
 
-        <!-- Details Grid -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; background: #f8fafc; padding: 1.5rem; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 1.5rem;">
             <div>
                 <p style="margin: 0; font-size: 0.8rem; color: #7f8a9c; text-transform: uppercase; font-weight: 600;">Faculty</p>
@@ -36,7 +31,6 @@
             </div>
         </div>
 
-        <!-- Description / Intro -->
         {% if context.profile.introduction %}
         <div style="margin-bottom: 1.5rem;">
             <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem; color: #7f8a9c; font-weight: 600;">About Me</p>
@@ -46,21 +40,21 @@
         </div>
         {% endif %}
 
-        <!-- Interests (If available) -->
         {% if context.profile.interests %}
         <div>
             <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem; color: #7f8a9c; font-weight: 600;">Interests</p>
             <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
                 {% for interest in context.profile.interests %}
-                <span style="background: #e0e7ff; color: #3730a3; padding: 0.3rem 0.8rem; border-radius: 9999px; font-size: 0.85rem; font-weight: 500;">
+                <span style="background: #e5e8ff; color: #001561; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
                     {{ interest }}
                 </span>
                 {% endfor %}
             </div>
         </div>
         {% endif %}
+        
         {% if context.user_id != context.my_id %}
-        <div style="text-align: right; margin-top: 1rem;">
+        <div style="display: flex; justify-content: center; margin-top: 1.5rem;">
             <button class="invite-to-group-btn"
                     hx-get="/invite_modal/{{ context.user_id }}/" 
                     hx-target="#modal-container" 
@@ -80,40 +74,34 @@
     }
 
     .invite-to-group-btn {
-        background: #1d4ed8;
+        background: #001561;
         color: white;
         padding: 0.75rem 1.75rem;
-        border-radius: 15px;
+        border-radius: 25px;
         border: none;
         font-weight: 600;
-        font-size: 0.80rem;
+        font-size: 0.90rem;
         letter-spacing: 0.5px;
         cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 12px rgba(71, 129, 255, 0.3);
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 21, 97, 0.2);
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        width: 100%;
     }
 
     .invite-to-group-btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(71, 129, 255, 0.4);
-        background: #122f96;
-    }
-
-    .invite-to-group-btn:active {
-        transform: translateY(1px);
-        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        box-shadow: 0 6px 16px rgba(0, 21, 97, 0.3);
+        background: #002299;
     }
 </style>
 
 <script>
-    // This allows closing the modal by clicking the dark background overlay
     function closeProfileModal(event) {
         if (event.target.id === 'profile-modal-overlay') {
             document.getElementById('profile-modal-overlay').remove();
         }
     }
 </script>
-

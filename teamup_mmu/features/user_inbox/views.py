@@ -11,6 +11,17 @@ async def index(request):
         
     if request.method == "GET":
         pool = await Database.get_pool()
+        
+        chat_with = request.GET.get('chat_with')
+        open_chat_id = None
+        try:
+            if request.GET.get('chat'):
+                open_chat_id = int(request.GET.get('chat'))
+            if chat_with:
+                open_chat_id = int(chat_with)
+        except ValueError:
+            pass
+        
         async with pool.acquire() as conn:
             # 1. FETCH GROUP INVITES
             invites_records = await conn.fetch("""
@@ -31,7 +42,6 @@ async def index(request):
                 WHERE gi.receiver_id = $1 AND gi.status = 'pending'
                 ORDER BY gi.created_at DESC
             """, id)
-            
             invites_l = [dict(record) for record in invites_records]
 
             # 2. FETCH JOIN REQUESTS (For groups where user is leader)
@@ -53,7 +63,6 @@ async def index(request):
                 WHERE g.leader_id = $1 AND gr.status = 'pending'
                 ORDER BY gr.created_at DESC
             """, id)
-            
             requests_l = [dict(record) for record in requests_records]
 
             # 3. FETCH OUTGOING INVITES (Sent by me to someone else)
@@ -98,48 +107,52 @@ async def index(request):
             """, id)
             outgoing_requests_l = [dict(record) for record in outgoing_requests_records]
 
-            # 5. FETCH CHATS & MUTUAL MATCHES
-            l = await conn.fetch("SELECT * FROM users WHERE id!=$1 AND inactive=False", id)
+            # 5. OPTIMIZED FETCH FOR CHATS & MUTUAL MATCHES
+            # Fetches users who you have a chat with, are mutual matches with, or is the chat_with injection target
+            target_id = int(chat_with) if chat_with and chat_with.isdigit() else -1
             
-            matched_ids_records = await conn.fetch("""
-                SELECT liked_user_id as uid FROM likes WHERE user_id = $1
-                INTERSECT
-                SELECT user_id as uid FROM likes WHERE liked_user_id = $1
-            """, id)
-            matched_ids = {r['uid'] for r in matched_ids_records}
-
-            open_chat_id = None
-            if request.GET.get('chat'):
-                try:
-                    open_chat_id = int(request.GET.get('chat'))
-                except ValueError:
-                    open_chat_id = None
-
+            target_users = await conn.fetch("""
+                WITH mutual_matches AS (
+                    SELECT liked_user_id as uid FROM likes WHERE user_id = $1
+                    INTERSECT
+                    SELECT user_id as uid FROM likes WHERE liked_user_id = $1
+                )
+                SELECT 
+                    u.id as another_user_id, 
+                    u.email as another_user_email,
+                    c.id as chat_id
+                FROM users u
+                LEFT JOIN chats c ON (c.user_x_id = $1 AND c.user_y_id = u.id) OR (c.user_x_id = u.id AND c.user_y_id = $1)
+                WHERE u.id != $1 AND u.inactive = False
+                AND (
+                    c.id IS NOT NULL 
+                    OR u.id IN (SELECT uid FROM mutual_matches)
+                    OR u.id = $2
+                )
+            """, id, target_id)
+            
             chats_l = []
-            for another_user in l:
-                another_user_id = another_user['id']
-                user_x = min(id, another_user_id)
-                user_y = max(id, another_user_id)
-                
-                chats = await conn.fetch("SELECT * FROM chats WHERE user_x_id=$1 AND user_y_id=$2", user_x, user_y)
-                last_message = {}
-                
-                if len(chats) or (another_user_id in matched_ids) or (another_user_id == open_chat_id):
-                    if len(chats):
-                        messages = await conn.fetch("SELECT * FROM messages WHERE chat_id=$1", chats[0]['id'])
-                        for message in messages:
-                            if last_message == {} or last_message['created_at'] < message['created_at']:
-                                last_message = {
-                                    'sender_id': 'You' if message['sender_id'] == id else await conn.fetchval("SELECT email FROM users WHERE id=$1", message['sender_id']),
-                                    'content': message['content'],
-                                    'created_at': message['created_at']
-                                }
-                    chats_l.append({
-                        'chat_id': chats[0]['id'] if len(chats) else None,
-                        'another_user_id': another_user_id,
-                        'another_user_email': another_user['email'],
-                        'last_message': last_message
-                    })
+            for row in target_users:
+                last_message = None
+                if row['chat_id']:
+                    # Get the absolute latest message for this chat
+                    last_msg = await conn.fetchrow("SELECT sender_id, content, created_at FROM messages WHERE chat_id=$1 ORDER BY created_at DESC LIMIT 1", row['chat_id'])
+                    if last_msg:
+                        last_message = {
+                            'sender_id': 'You' if last_msg['sender_id'] == id else row['another_user_email'],
+                            'content': last_msg['content'],
+                            'created_at': last_msg['created_at']
+                        }
+                        
+                chats_l.append({
+                    'chat_id': row['chat_id'],
+                    'another_user_id': row['another_user_id'],
+                    'another_user_email': row['another_user_email'],
+                    'last_message': last_message
+                })
+
+            # Sort chats by most recent message, putting new un-messaged users (like injected matches) at the top
+            chats_l.sort(key=lambda x: (1, 0) if not x['last_message'] else (0, x['last_message']['created_at'].timestamp() if hasattr(x['last_message']['created_at'], 'timestamp') else 0), reverse=True)
 
             # 6. PASS TO CONTEXT
             context = {
@@ -148,7 +161,8 @@ async def index(request):
                 'outgoing_invites_l': outgoing_invites_l,
                 'outgoing_requests_l': outgoing_requests_l,
                 'chats_l': chats_l,
-                'open_chat_id': open_chat_id
+                'open_chat_id': open_chat_id,
+                'chat_with': chat_with
             }
             return render(request, 'user_inbox/templates/index.html', {'context': context})
             

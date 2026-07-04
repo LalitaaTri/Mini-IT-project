@@ -11,7 +11,7 @@ async def index(request):
     # 1. Check if the browser sent an access_token cookie
     token = request.COOKIES.get('access_token')
     if not token:
-        return redirect('/user_login/')
+        return redirect('/login/')
 
     # 2. Connect to the database
     pool = await Database.get_pool()
@@ -20,7 +20,7 @@ async def index(request):
         # 3. Verify the token actually exists in the database and hasn't expired
         session = await conn.fetchrow("SELECT * FROM sessions WHERE token=$1 AND is_active=True", token)
         if not session or session['created_at'] + timedelta(hours=1) < datetime.now():
-            return redirect('/user_login/')
+            return redirect('/login/')
 
         # 4. Save the user's ID for the next step
         user_id = session['user_id']

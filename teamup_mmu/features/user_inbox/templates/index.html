@@ -257,4 +257,23 @@
         element.classList.add('active-chat');
     }
 </script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Automatically open the chat if we were redirected from the Matches page
+        {% if context.chat_with %}
+            var chatWithId = "{{ context.chat_with }}";
+            
+            // Find the chat item in the sidebar and trigger its HTMX request
+            var chatItem = document.querySelector('.chat-item[hx-get*="' + chatWithId + '"]');
+            if (chatItem) {
+                // Set the active visual state
+                setActiveChat(chatItem);
+                
+                // Fire HTMX to load the chat into the right pane
+                htmx.trigger(chatItem, 'click');
+            }
+        {% endif %}
+    });
+</script>
 {% endblock %}

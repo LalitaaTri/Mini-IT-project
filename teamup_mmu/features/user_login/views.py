@@ -45,6 +45,10 @@ async def receive(request):
                 # Return the verification module directly into the login page
                 response = render(request, 'user_email_verification/templates/verify_module.html', {'email': email})
                 response.set_cookie('access_token', token, max_age=3600, httponly=True)
+                
+                # THE MAGIC FIX: Tell HTMX to override the target and replace the whole card!
+                response['HX-Retarget'] = '#auth-box' 
+                
                 return response
                 
             elif not profile or not profile['username']:

@@ -1,89 +1,73 @@
 {% load static %}
 {% if context.user_obj %}
     <div class="user-card">
-        <!-- Photo & Banner Header Section (Solid Navy Color) -->
-        <div style="background: #00186d; padding: 45px 20px 35px 20px; position: relative; text-align: center;">
-            <img src="{% static 'teamup_mmu/profile.png' %}" alt="Profile Picture" style="width: 160px; height: 160px; border-radius: 50%; border: 5px solid white; object-fit: cover; box-shadow: 0 10px 25px rgba(0,0,0,0.25); background: white; margin: 0 auto; display: block;">
+        <img src="{% static 'teamup_mmu/profile.png' %}" alt="Profile Picture">
+
+        <h2>{{ context.user_obj.username|default:context.user_obj.email }}</h2>
+        
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 8px 0; width: 100%; max-width: 500px;">
+        
+        <div style="max-width: 600px;">
+            <p><strong>Headline:</strong> <span style="color: #555;">{{ context.user_obj.introduction }}</span></p>
+            <p><strong>Program:</strong> {{ context.user_obj.program }} ({{ context.user_obj.faculty }})</p>
+            <p><strong>Year:</strong> {{ context.user_obj.year_of_study }}</p>
         </div>
         
-        <!-- Card Body Content -->
-        <div style="padding: 35px 40px 40px 40px; text-align: center;">
-            <!-- Name & Year -->
-            <h2 style="margin: 0 0 10px 0; font-size: 2.1rem; color: #0f172a; font-weight: 800; letter-spacing: -0.3px;">
-                {{ context.user_obj.username|default:context.user_obj.email }} <span style="font-weight: 500; font-size: 1.45rem; color: #64748b;">• Year {{ context.user_obj.year_of_study }}</span>
-            </h2>
-            
-            <!-- Program & Faculty (No Emoji) -->
-            <p style="margin: 0 0 30px 0; color: #2563eb; font-weight: 600; font-size: 1.05rem;">
-                {{ context.user_obj.program }} ({{ context.user_obj.faculty }})
-            </p>
-            
-            <!-- Headline / About Quote Box -->
-            {% if context.user_obj.introduction %}
-            <div style="background: #f8fafc; border-radius: 18px; padding: 22px 26px; margin-bottom: 35px; border: 1px solid #e2e8f0; text-align: left;">
-                <p style="margin: 0; font-size: 1.05rem; color: #334155; font-style: italic; line-height: 1.6;">
-                    "{{ context.user_obj.introduction }}"
-                </p>
-            </div>
-            {% endif %}
-            
-            <!-- Interests Pill Tags (No Emoji) -->
-            {% if context.user_obj.interests %}
-            <div style="margin-bottom: 35px; text-align: center;">
-                <div style="font-size: 0.8rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 14px;">Interests</div>
-                <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
-                    {% for interest in context.user_obj.interests %}
-                        <span style="display: inline-block; padding: 8px 18px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 22px; font-size: 0.95rem; font-weight: 600; color: #1e293b;">
-                            {{ interest }}
-                        </span>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-            
-            <!-- Like Status Badge (No Emoji) -->
-            {% if context.like_status == 'Liked' %}
-                <div id="like-status" style="margin-bottom: 30px; display: inline-block; background: #dcfce7; color: #15803d; font-weight: 700; font-size: 0.9rem; padding: 8px 20px; border-radius: 22px; border: 1px solid #86efac;">
-                    You liked this profile
-                </div>
-            {% else %}
-                <div id="like-status" style="display: none;">{{ context.like_status }}</div>
-            {% endif %}
-            
-            <!-- Tinder-Style Action Bar (3 Pill Buttons - Emojis Kept) -->
-            <div style="display: flex; justify-content: center; gap: 14px; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 35px; margin-top: 10px;">
-                <!-- Pass / Next Button -->
-                <button hx-get="{% url 'matching_with_iter' context.next_iter %}"
-                        hx-target="#user-list"
-                        hx-swap="innerHTML"
-                        style="flex: 1; height: 52px; background: #f1f5f9; color: #475569; border: 1.5px solid #cbd5e1; border-radius: 26px; font-weight: 700; font-size: 1.05rem; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
-                    ⏭️ Pass
-                </button>
-                
-                <!-- Invite Button -->
-                <button hx-get="/invite_modal/{{ context.user_obj.id }}/" 
-                        hx-target="#modal-container" 
-                        hx-swap="innerHTML"
-                        style="flex: 1.1; height: 52px; background: #3b82f6; color: white; border: none; border-radius: 26px; font-weight: 700; font-size: 1.05rem; cursor: pointer; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.28); transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
-                    👥 Invite
-                </button>
-                
-                <!-- Like Button -->
-                <form id="like-form" hx-post="/matching/like/" hx-target="#like-status" hx-swap="innerHTML" style="flex: 1; margin: 0; display: flex;">
+        <div class="interests-grid">
+            {% for interest in context.user_obj.interests %}
+                <span class="interest-pill">{{ interest }}</span>
+            {% endfor %}
+        </div>
+        
+        <div id="like-status" style="font-weight: 600; color: #001561; margin: 4px 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; min-height: 18px;">
+            {{ context.like_status }}
+        </div>
+        
+        <div class="actions-wrapper">
+            <!-- ACTION BAR 1: Like & Next -->
+            <div class="action-row">
+                <form id="like-form" hx-post="/matching/like/" hx-target="#like-status" hx-swap="innerHTML">
                     {% csrf_token %}
                     <input type="hidden" name="liked_user_id" value="{{ context.user_obj.id }}">
-                    <button type="submit" {% if context.like_status == 'Liked' %}disabled{% endif %}
-                            style="width: 100%; height: 52px; background: {% if context.like_status == 'Liked' %}#94a3b8{% else %}#00186d{% endif %}; color: white; border: none; border-radius: 26px; font-weight: 700; font-size: 1.05rem; cursor: {% if context.like_status == 'Liked' %}default{% else %}pointer{% endif %}; box-shadow: 0 4px 14px rgba(0, 24, 109, 0.28); transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
-                        {% if context.like_status == 'Liked' %}Liked{% else %}❤️ Like{% endif %}
+                    <button type="submit" class="action-btn btn-like" {% if context.like_status == 'Liked' %}disabled{% endif %}>
+                        ❤️ Like
                     </button>
                 </form>
+                
+                <button class="action-btn btn-next" 
+                        hx-get="{% url 'matching_with_iter' context.next_iter %}"
+                        hx-include="#filter-form"
+                        hx-target="#user-list"
+                        hx-swap="innerHTML">
+                    Next ⏭️
+                </button>
+            </div>
+
+            <!-- ACTION BAR 2: Groups & Requests -->
+            <div class="action-row">
+                <button class="action-btn btn-invite"
+                        hx-get="/connect_modal/invite/{{ context.user_obj.id }}/" 
+                        hx-target="#modal-container" 
+                        hx-swap="innerHTML">
+                    Invite to Group
+                </button>
+                
+                <button class="action-btn btn-request"
+                        hx-get="/connect_modal/request/{{ context.user_obj.id }}/" 
+                        hx-target="#modal-container" 
+                        hx-swap="innerHTML">
+                    Request to Join
+                </button>
             </div>
         </div>
     </div>
-<div id="modal-container"></div>
+    
+    <div id="modal-container"></div>
+    
 {% else %}
-    <div class="user-card" style="padding: 60px 30px; text-align: center; max-width: 680px;">
-        <h3 style="margin: 0 0 10px 0; font-size: 1.6rem; color: #00186d; font-weight: 800;">No more profiles!</h3>
-        <p style="margin: 0; color: #64748b; font-size: 1rem; line-height: 1.5;">You've browsed everyone for now. Check back later or head over to **Your Matches** to chat with your teammates!</p>
+    <div class="user-card">
+        <div style="font-size: 4rem; margin-bottom: 15px;">🔍</div>
+        <h3 style="color: #001561; font-size: 2rem; margin: 0;">No teammates found.</h3>
+        <p style="color: #555; font-size: 1.1rem; margin-top: 10px;">You've browsed everyone for now. Try adjusting your filters or check back later!</p>
     </div>
 {% endif %}

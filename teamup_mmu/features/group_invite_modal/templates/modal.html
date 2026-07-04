@@ -1,33 +1,51 @@
 <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;">
-    <div style="background: white; padding: 2rem; border-radius: 15px; width: 300px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
-        <h3 style="margin-top: 0; color: #001561;">Invite to Group(s)</h3>
+    <div style="background: white; padding: 2rem; border-radius: 15px; width: 320px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
         
-        {% if context.groups %}
-            <form hx-post="/invite_modal/send/" hx-target="#modal-container" hx-swap="innerHTML">
-                {% csrf_token %}
-                <input type="hidden" name="target_user_id" value="{{ context.target_user_id }}">
-                
-                <label style="display: block; margin-bottom: 10px; font-size: 0.9rem; font-weight: 600;">Select Groups:</label>
-                
-                <!-- NEW: Scrollable Checkbox List -->
-                <div style="max-height: 150px; overflow-y: auto; margin-bottom: 20px; border: 1px solid #ddd; padding: 10px; border-radius: 8px;">
-                    {% for group in context.groups %}
-                        <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer; font-size: 0.9rem;">
-                            <!-- Name is now "group_ids" (plural) -->
-                            <input type="checkbox" name="group_ids" value="{{ group.id }}">
-                            {{ group.name }}
-                        </label>
-                    {% endfor %}
-                </div>
-                
-                <div style="display: flex; gap: 10px; justify-content: space-between;">
-                    <button type="button" onclick="document.getElementById('modal-container').innerHTML=''" style="background: #e4e6eb; color: #333; padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; flex: 1;">Cancel</button>
-                    <button type="submit" style="background: #001561; color: white; padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; flex: 1;">Send</button>
-                </div>
-            </form>
+        {% if context.mode == 'invite' %}
+            <h3 style="margin-top: 0; text-align: center; color: #001561;">Invite to Your Group</h3>
+            <form hx-post="/connect_modal/send_invite/" hx-target="#modal-container" hx-swap="innerHTML">
         {% else %}
-            <p style="color: #555; font-size: 0.9rem;">You are not the Admin of any groups yet.</p>
-            <button onclick="document.getElementById('modal-container').innerHTML=''" style="background: #e4e6eb; color: #333; padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; width: 100%;">Close</button>
+            <h3 style="margin-top: 0; text-align: center; color: #28a745;">Request to Join</h3>
+            <form hx-post="/connect_modal/send_request/" hx-target="#modal-container" hx-swap="innerHTML">
         {% endif %}
+
+            {% csrf_token %}
+            <input type="hidden" name="target_user_id" value="{{ context.target_user_id }}">
+            
+            <div style="max-height: 250px; overflow-y: auto; margin-bottom: 20px; padding-right: 5px;">
+                {% if context.groups %}
+                    <label style="display: block; margin-bottom: 10px; font-size: 0.9rem; font-weight: 600;">Select Group(s):</label>
+                    <div style="border: 1px solid #ddd; padding: 10px; border-radius: 8px;">
+                        {% for group in context.groups %}
+                            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer; font-size: 0.9rem;">
+                                <input type="checkbox" name="group_ids" value="{{ group.id }}">
+                                {{ group.name }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p style="color: #777; font-size: 0.9rem; text-align: center;">
+                        {% if context.mode == 'invite' %}
+                            You are not the Admin of any groups.
+                        {% else %}
+                            This user is not in any available groups.
+                        {% endif %}
+                    </p>
+                {% endif %}
+            </div>
+            
+            <div style="display: flex; gap: 10px; justify-content: space-between;">
+                <button type="button" onclick="document.getElementById('modal-container').innerHTML=''" style="background: #e4e6eb; color: #333; padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; flex: 1;">Cancel</button>
+                
+                {% if context.groups %}
+                    {% if context.mode == 'invite' %}
+                        <button type="submit" style="background: #001561; color: white; padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; flex: 1;">Send</button>
+                    {% else %}
+                        <button type="submit" style="background: #28a745; color: white; padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; flex: 1;">Send</button>
+                    {% endif %}
+                {% endif %}
+            </div>
+            
+        </form>
     </div>
 </div>

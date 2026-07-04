@@ -5,9 +5,43 @@ from ..user_access_check.views import *
 
 # Same categories as Profile Setup 2
 INTEREST_CATEGORIES = {
-    "💻 Tech & Skills": ["Web Development", "Game Development", "Machine Learning", "Cybersecurity", "Blockchain Technology", "Data Science"],
-    "🎮 Gaming": ["FPS Games", "RPGs", "Tabletop & Board Games", "Valorant", "Roblox", "Minecraft"],
-    "🌱 Life & Hobbies": ["Music Production", "Sports & Fitness", "Anime & Manga", "Arts and Crafts", "Cooking", "Traveling"]
+    "💻 Computing & IT": [
+        "Web Development", "Game Development", "AI & Machine Learning", 
+        "Cybersecurity", "Data Science", "Software Engineering", 
+        "Cloud Computing", "Algorithms & Logic"
+    ],
+    "⚙️ Engineering & Hardware": [
+        "Robotics & Automation", "IoT & Microcontrollers", "Telecommunications", 
+        "Hardware Architecture", "Sustainable Tech"
+    ],
+    "🎨 Creative Multimedia & Design": [
+        "UI/UX Design", "3D Animation & Modeling", "Character Design", 
+        "VFX & Motion Graphics", "Digital Illustration", "Sound Design"
+    ],
+    "🎬 Film & Media Arts": [
+        "Filmmaking & Directing", "Photography", "Screenwriting", 
+        "Video Editing", "Digital Journalism", "Public Relations"
+    ],
+    "💼 Business & Management": [
+        "Entrepreneurship", "Digital Marketing", "Finance & Investing", 
+        "E-Commerce", "Project Management", "Human Resources"
+    ],
+    "⚖️ Law & Humanities": [
+        "Debate & Public Speaking", "Legal Research", "Human Rights Advocacy", 
+        "Corporate Law", "Philosophy & Ethics"
+    ],
+    "🎮 Gaming & Esports": [
+        "Competitive Esports (FPS/MOBA)", "Sandbox & Logic Games", 
+        "Tabletop RPGs & Board Games", "MMORPGs", "Game Modding", "Rhythm Games"
+    ],
+    "🌱 Lifestyle & Wellness": [
+        "Sports & Athletics", "Gym & Fitness", "Mental Health & Mindfulness", 
+        "Culinary Arts & Baking", "Traveling & Exploration"
+    ],
+    "🌍 Culture & Hobbies": [
+        "Music & Audio Production", "Anime & Cosplay", "Language Learning", 
+        "Creative Writing", "Fashion & Thrifting", "Arts & Crafts"
+    ]
 }
 
 async def index(request):

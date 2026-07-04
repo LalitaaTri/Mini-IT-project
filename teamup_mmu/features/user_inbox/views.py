@@ -137,7 +137,8 @@ async def index(request):
                     'last_message': last_message
                 })
 
-            chats_l.sort(key=lambda x: x['last_message']['created_at'] if x['last_message'] else '9999', reverse=True)
+            # Sort chats by most recent message, putting new un-messaged users (like injected matches) at the top
+            chats_l.sort(key=lambda x: (1, 0) if not x['last_message'] else (0, x['last_message']['created_at'].timestamp() if hasattr(x['last_message']['created_at'], 'timestamp') else 0), reverse=True)
 
             context = {
                 'invites_l': invites_l,

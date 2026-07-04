@@ -10,7 +10,11 @@
         </div>
 
         <!-- Form -->
+        {% if is_new %}
+        <form hx-post="/classes/create_new_team/{{ class_id }}/{{ team_number }}/" hx-target="#save-team-status" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;">
+        {% else %}
         <form hx-post="/classes/save_team_info/{{ team.id }}/" hx-target="#save-team-status" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;">
+        {% endif %}
             {% csrf_token %}
             
             <!-- Team Name (Read Only) -->

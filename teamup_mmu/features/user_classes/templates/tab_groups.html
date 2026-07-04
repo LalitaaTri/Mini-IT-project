@@ -255,12 +255,21 @@
                                 Teams Frozen
                             </button>
                         {% else %}
+                            {% if t.id %}
                             <button hx-get="/classes/lead_team_modal/{{ t.id }}/" hx-target="#modal-container" style="width: 100%; padding: 8px; background: #00186d; border: none; color: white; font-weight: 600; border-radius: 6px; font-size: 0.85rem; cursor: pointer; box-shadow: 0 4px 8px rgba(0, 24, 109, 0.15); display: flex; align-items: center; justify-content: center; gap: 0.4rem; transition: background 0.2s;" onmouseover="this.style.background='#00104a'" onmouseout="this.style.background='#00186d'">
                                 <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor">
                                     <path d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H600v-240H360v240H160Zm320-350Z"/>
                                 </svg>
                                 Claim / Lead Team
                             </button>
+                            {% else %}
+                            <button hx-get="/classes/claim_new_team_modal/{{ class_details.id }}/{{ t.team_number }}/" hx-target="#modal-container" style="width: 100%; padding: 8px; background: #00186d; border: none; color: white; font-weight: 600; border-radius: 6px; font-size: 0.85rem; cursor: pointer; box-shadow: 0 4px 8px rgba(0, 24, 109, 0.15); display: flex; align-items: center; justify-content: center; gap: 0.4rem; transition: background 0.2s;" onmouseover="this.style.background='#00104a'" onmouseout="this.style.background='#00186d'">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor">
+                                    <path d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H600v-240H360v240H160Zm320-350Z"/>
+                                </svg>
+                                Claim / Lead Team
+                            </button>
+                            {% endif %}
                         {% endif %}
                     {% endif %}
                 </div>

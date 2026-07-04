@@ -119,7 +119,7 @@ async def create_class(request):
     if not token or not course_code or not course_name or not section or not trimester_year or not trimester_num:
         return render(request, 'user_classes/templates/create_class_modal.html', {'error_message': 'Missing required fields.'})
     
-    trimester = f"{trimester_year}-{trimester_num}"
+    trimester = f"{int(trimester_year) % 100:02d}{trimester_num}"
     
     pool = await Database.get_pool()
     async with pool.acquire() as conn:
@@ -824,7 +824,7 @@ async def teams_settings_modal(request, class_id):
 
     return render(request, 'user_classes/templates/teams_settings_modal.html', {
         'class_id': class_id,
-        'class_details': target_class
+        'class_details': target_class,
     })
 # when they save the teams settings
 @csrf_exempt
@@ -904,6 +904,80 @@ async def save_group_settings(request, class_id):
         "</script>"
     )
     return HttpResponse(response_html)
+
+@csrf_exempt
+async def handover_class(request, class_id):
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+        user_id = session['user_id']
+
+        user_role = await conn.fetchval("SELECT role FROM user_classes WHERE user_id=$1 AND class_id=$2", user_id, class_id)
+        if user_role != 'admin':
+            return HttpResponse("Forbidden: Only class admins can transfer ownership", status=403)
+
+        # --- HANDLE GET REQUEST: OPEN THE MODAL ---
+        if request.method == 'GET':
+            target_class = await conn.fetchrow("SELECT * FROM classes WHERE id=$1", class_id)
+            if not target_class:
+                return HttpResponse("Class not found", status=404)
+
+            class_students = await conn.fetch("""
+                SELECT u.id as user_id, u.email, p.username
+                FROM users u
+                JOIN user_classes uc ON u.id = uc.user_id
+                LEFT JOIN profiles p ON u.id = p.id
+                WHERE uc.class_id = $1 AND uc.role = 'student'
+                ORDER BY LOWER(COALESCE(p.username, u.email)) ASC
+            """, class_id)
+
+            return render(request, 'user_classes/templates/handover_modal.html', {
+                'class_id': class_id,
+                'class_details': target_class,
+                'class_students': class_students
+            })
+
+        # --- HANDLE POST REQUEST: PROCESS THE HANDOVER ---
+        elif request.method == 'POST':
+            new_admin_id = request.POST.get('new_admin_id')
+            if not new_admin_id:
+                return HttpResponse("<span style='color: red;'>Please select a user to promote.</span>")
+
+            try:
+                new_admin_id = int(new_admin_id)
+            except ValueError:
+                return HttpResponse("<span style='color: red;'>Invalid user ID.</span>")
+
+            if user_id == new_admin_id:
+                return HttpResponse("<span style='color: red;'>You cannot hand over the class to yourself.</span>")
+
+            target_role = await conn.fetchval("SELECT role FROM user_classes WHERE user_id=$1 AND class_id=$2", new_admin_id, class_id)
+            if target_role != 'student':
+                return HttpResponse("<span style='color: red;'>Target user is not a student in this class.</span>")
+
+            # Promote the selected student to admin
+            await conn.execute("UPDATE user_classes SET role='admin' WHERE user_id=$1 AND class_id=$2", new_admin_id, class_id)
+            
+            # Demote current admin to student
+            await conn.execute("UPDATE user_classes SET role='student' WHERE user_id=$1 AND class_id=$2", user_id, class_id)
+
+            # Return success message and redirect after 1 second
+            response_html = (
+                "<span style='color: green; font-weight: bold;'>Ownership transferred! Redirecting...</span>"
+                "<script>"
+                f"setTimeout(() => {{ window.location.href = '/classes/class_details/{class_id}/'; }}, 1000);"
+                "</script>"
+            )
+            return HttpResponse(response_html)
+
+        return HttpResponse("Invalid method", status=400)
+
 
 
 @csrf_exempt

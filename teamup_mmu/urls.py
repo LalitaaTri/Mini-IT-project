@@ -36,9 +36,10 @@ from .features.user_classes.views import search_explore, search_my_classes
 
 
 from .features.user_classes.views import teams_settings_modal
-from .features.user_classes.views import save_group_settings
 from .features.user_classes.views import lead_team_modal, edit_team_modal, save_team_info
 from .features.user_classes.views import join_team, leave_team, cancel_request, approve_request, decline_request, dismiss_declined
+from .features.user_classes.views import save_group_settings, handover_class
+
 
 from .features.my_profile.views import profile_modal as user_profile_modal
 
@@ -133,7 +134,9 @@ urlpatterns = [
     path('classes/upload_csv/<int:class_id>/', upload_csv, name='upload_csv'),
     path('classes/search_explore/', search_explore, name='search_explore'),
     path('classes/search_my_classes/', search_my_classes, name='search_my_classes'),
-
+    
+    path('classes/teams_settings_modal/<int:class_id>/', teams_settings_modal, name='teams_settings_modal'),
+    path('classes/handover/<int:class_id>/', handover_class, name='handover_class'),
 
     path('classes/teams_settings_modal/<int:class_id>/', teams_settings_modal, name='teams_settings_modal'),
     path('classes/teams_settings/<int:class_id>/save/', save_group_settings, name='save_group_settings'),

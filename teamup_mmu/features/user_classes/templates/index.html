@@ -94,28 +94,31 @@
 <div style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
 
     <!-- Top Action Bar (Search + Buttons) -->
-    <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 24px; padding-bottom: 40px; border-bottom: 2px solid rgba(0, 24, 109, 0.15);">
-    <!-- search input wrapper with icon -->
-    <div style="flex-grow: 1; position: relative;">
-        <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; color: #888; pointer-events: none;">🔍</span>
-        <input type="text" 
-            name="search_query" 
-            placeholder="Search for any class to explore..." 
-            hx-get="/classes/search_explore/" 
-            hx-trigger="keyup changed delay:300ms, focus" 
-            hx-target="#explore-list" 
-            style="width: 100%; height: 48px; padding: 0 15px 0 45px; border-radius: 25px; border: 1px solid #00198357; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); font-size: 16px; box-sizing: border-box; outline: none;">
-        
-        <!-- Explore classes list (Dropdown) -->
-        <div id="explore-list" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); margin-top: 10px; max-height: 400px; overflow-y: auto;">
-            <!-- Search results will appear here -->
+    <div style="display: flex; justify-content: space-between; gap: 15px; align-items: center; margin-bottom: 24px; padding-bottom: 40px; border-bottom: 2px solid rgba(0, 24, 109, 0.15);">
+        <!-- search input wrapper with icon -->
+        <div style="width: 380px; max-width: 100%; position: relative;">
+            <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; color: #888; pointer-events: none;">🔍</span>
+            <input type="text" 
+                name="search_query" 
+                placeholder="Search for any class to explore..." 
+                hx-get="/classes/search_explore/" 
+                hx-trigger="keyup changed delay:300ms, focus" 
+                hx-target="#explore-list" 
+                style="width: 100%; height: 48px; padding: 0 15px 0 45px; border-radius: 25px; border: 1px solid #00198357; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); font-size: 16px; box-sizing: border-box; outline: none;">
+            
+            <!-- Explore classes list (Dropdown) -->
+            <div id="explore-list" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); margin-top: 10px; max-height: 400px; overflow-y: auto;">
+                <!-- Search results will appear here -->
+            </div>
+        </div>
+
+        <!-- Action Buttons Grouped on the Right -->
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <button class="join-btn" hx-get="/classes/join_modal/" hx-target="#modal-container" hx-swap="innerHTML" style="height: 48px; font-size: 15px; padding: 0 24px; border-radius: 25px; white-space: nowrap; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); box-sizing: border-box;">Join Class By Code</button>
+            <button class="create_class_btn" hx-get="/classes/create_modal/" hx-target="#modal-container" hx-swap="innerHTML" title="Create Class" style="height: 48px; width: 48px; font-size: 24px; flex-shrink: 0; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); box-sizing: border-box;">+</button>
         </div>
     </div>
 
-    <!-- Action Buttons -->
-    <button class="join-btn" hx-get="/classes/join_modal/" hx-target="#modal-container" hx-swap="innerHTML" style="height: 48px; font-size: 15px; padding: 0 24px; border-radius: 25px; white-space: nowrap; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); box-sizing: border-box;">Join Class By Code</button>
-    <button class="create_class_btn" hx-get="/classes/create_modal/" hx-target="#modal-container" hx-swap="innerHTML" title="Create Class" style="height: 48px; width: 48px; font-size: 24px; flex-shrink: 0; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); box-sizing: border-box;">+</button>
-</div>
 
 <div style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
     <div class="h1_section" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 50px;">
@@ -144,7 +147,11 @@
                 
                 <!-- Left side of the card -->
                 <div class="class-info">
-                    <h3 id="title-{{ c.id }}">{{ c.course_code }} - {{ c.course_name }}, {{ c.section }}, {{ c.trimester }}</h3>
+                    <h3 id="title-{{ c.id }}">{{ c.course_code }} - {{ c.course_name }}</h3>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <span style="background: #ffea97; color: #695147; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 12px;">{{ c.section }}</span>
+                        <span style="background: hsl(273, 100%, 94%); color: #5d4769; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 12px;">{{ c.trimester }}</span>
+                    </div>
                     <p id="desc-{{ c.id }}">{{ c.description }}</p>
                 </div>
 

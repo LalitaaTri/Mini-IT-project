@@ -742,7 +742,6 @@ async def upload_csv(request, class_id):
                 username_exists = await conn.fetchval("SELECT 1 FROM profiles WHERE username=$1", username)
                 final_username = username
                 if username_exists:
-                    import random
                     final_username = f"{username}_{random.randint(100, 999)}"
                 
                 # Create a profile matching their new user id
@@ -759,7 +758,6 @@ async def upload_csv(request, class_id):
                     username_exists = await conn.fetchval("SELECT 1 FROM profiles WHERE username=$1", username)
                     final_username = username
                     if username_exists:
-                        import random
                         final_username = f"{username}_{random.randint(100, 999)}"
                     await conn.execute("INSERT INTO profiles (id, username) VALUES ($1, $2)", student_id, final_username)
                 else:
@@ -769,7 +767,6 @@ async def upload_csv(request, class_id):
                         username_exists = await conn.fetchval("SELECT 1 FROM profiles WHERE username=$1 AND id!=$2", username, student_id)
                         final_username = username
                         if username_exists:
-                            import random
                             final_username = f"{username}_{random.randint(100, 999)}"
                         await conn.execute("UPDATE profiles SET username=$1 WHERE id=$2", final_username, student_id)
 

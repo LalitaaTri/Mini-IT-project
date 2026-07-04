@@ -134,8 +134,7 @@ urlpatterns = [
     path('classes/upload_csv/<int:class_id>/', upload_csv, name='upload_csv'),
     path('classes/search_explore/', search_explore, name='search_explore'),
     path('classes/search_my_classes/', search_my_classes, name='search_my_classes'),
-    
-    path('classes/teams_settings_modal/<int:class_id>/', teams_settings_modal, name='teams_settings_modal'),
+
     path('classes/handover/<int:class_id>/', handover_class, name='handover_class'),
 
     path('classes/teams_settings_modal/<int:class_id>/', teams_settings_modal, name='teams_settings_modal'),

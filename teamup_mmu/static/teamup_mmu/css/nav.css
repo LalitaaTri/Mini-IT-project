@@ -89,6 +89,28 @@ nav {
     cursor: pointer;
 }
 
+/* --- NAV RIGHT ICONS (SVG) --- */
+/* You can change icon colors, sizes, and hover effects right here! */
+.nav-icon-link {
+    color: #c2e1ff; /* Default icon color (matches nav text) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.nav-icon-link:hover {
+    color: #ffffff; /* Icon color when hovering */
+    transform: scale(1.15); /* Slightly enlarge on hover */
+}
+
+.nav-icon-link svg, .nav-icon {
+    width: 26px;  /* Icon width */
+    height: 26px; /* Icon height */
+    fill: currentColor; /* Inherits color (#c2e1ff or #ffffff) from .nav-icon-link */
+    transition: fill 0.2s ease;
+}
+
 .container {
     padding: 2rem;
 }

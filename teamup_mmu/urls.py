@@ -36,7 +36,7 @@ from .features.user_classes.views import search_explore, search_my_classes
 
 
 from .features.user_classes.views import teams_settings_modal
-from .features.user_classes.views import lead_team_modal, edit_team_modal, save_team_info
+from .features.user_classes.views import lead_team_modal, edit_team_modal, save_team_info, claim_new_team_modal, create_new_team
 from .features.user_classes.views import join_team, leave_team, cancel_request, approve_request, decline_request, dismiss_declined
 from .features.user_classes.views import save_group_settings, handover_class
 
@@ -144,8 +144,10 @@ urlpatterns = [
     path('classes/teams_settings_modal/<int:class_id>/', teams_settings_modal, name='teams_settings_modal'),
     path('classes/teams_settings/<int:class_id>/save/', save_group_settings, name='save_group_settings'),
     path('classes/lead_team_modal/<int:team_id>/', lead_team_modal, name='lead_team_modal'),
+    path('classes/claim_new_team_modal/<int:class_id>/<int:team_number>/', claim_new_team_modal, name='claim_new_team_modal'),
     path('classes/edit_team_modal/<int:team_id>/', edit_team_modal, name='edit_team_modal'),
     path('classes/save_team_info/<int:team_id>/', save_team_info, name='save_team_info'),
+    path('classes/create_new_team/<int:class_id>/<int:team_number>/', create_new_team, name='create_new_team'),
     path('classes/join_team/<int:team_id>/', join_team, name='join_team'),
     path('classes/leave_team/<int:team_id>/', leave_team, name='leave_team'),
     path('classes/cancel_request/<int:team_id>/', cancel_request, name='cancel_request'),

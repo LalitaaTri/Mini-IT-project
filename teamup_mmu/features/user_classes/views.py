@@ -390,6 +390,9 @@ async def class_tab(request, class_id, tab_name):
             """, class_id)
             context['class_students'] = class_students
         elif tab_name == 'groups':
+            # Clean up any empty groups in DB that shouldn't be there
+            await conn.execute("DELETE FROM groups WHERE class_id = $1 AND leader_id IS NULL", class_id)
+
             # 1. Query all coursework Teams that belong to this class by class_id
             class_groups = await conn.fetch("""
                 SELECT g.id, g.name, g.description, g.whatsapp_link, g.max_members, g.join_code, g.leader_id,
@@ -453,6 +456,38 @@ async def class_tab(request, class_id, tab_name):
                                 })
                 g_dict['pending_requests'] = g_requests
                 class_groups_list.append(g_dict)
+
+            # Generate virtual / placeholder team dicts for unclaimed team numbers up to max_groups
+            existing_names = {g['name'] for g in class_groups_list}
+            max_groups_limit = class_details['max_groups'] or 10
+            max_members_limit = class_details['max_members_per_group'] or 5
+            for i in range(1, max_groups_limit + 1):
+                t_name = f"Team {i}"
+                if t_name not in existing_names:
+                    class_groups_list.append({
+                        'id': None,
+                        'team_number': i,
+                        'name': t_name,
+                        'description': None,
+                        'whatsapp_link': None,
+                        'max_members': max_members_limit,
+                        'join_code': None,
+                        'leader_id': None,
+                        'leader_username': None,
+                        'current_members_count': 0,
+                        'members': [],
+                        'pending_requests': []
+                    })
+
+            def get_team_num(item):
+                name = item.get('name', '')
+                if name.startswith('Team '):
+                    try:
+                        return int(name.split('Team ')[1])
+                    except ValueError:
+                        return 9999
+                return 9999
+            class_groups_list.sort(key=get_team_num)
 
             # 5. Check if the logged-in user is already in a team in this class
             user_group_row = await conn.fetchrow("""
@@ -871,18 +906,8 @@ async def save_group_settings(request, class_id):
         """, groups_enabled, max_groups, max_members, teams_frozen, class_id)
 
         if groups_enabled:
-            # Pre-create Teams named "Team 1" to "Team N" if they don't exist yet
-            existing_groups = await conn.fetch("SELECT name FROM groups WHERE class_id = $1", class_id)
-            existing_names = {row['name'] for row in existing_groups}
-            
-            for i in range(1, max_groups + 1):
-                team_name = f"Team {i}"
-                if team_name not in existing_names:
-                    join_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
-                    await conn.execute("""
-                        INSERT INTO groups (name, description, whatsapp_link, is_general, class_name, class_id, leader_id, created_by, max_members, join_code)
-                        VALUES ($1, $2, NULL, FALSE, $3, $4, NULL, $5, $6, $7)
-                    """, team_name, f"Assignment team {i} for {target_class['course_code']}", target_class['course_name'], class_id, user_id, max_members, join_code)
+            # Clean up any existing empty/unclaimed groups in the DB so they don't clutter the table
+            await conn.execute("DELETE FROM groups WHERE class_id = $1 AND leader_id IS NULL", class_id)
         else:
             # Delete ALL teams for this class when team formation is disabled
             # CASCADE handles group_members and group_requests automatically
@@ -1101,6 +1126,118 @@ async def save_team_info(request, team_id):
     # It closes the modal after 1s and tells HTMX to refresh the teams tab view
     response_html = (
         "<span style='color: green;'>Team info saved successfully!</span>"
+        "<script>"
+        "setTimeout(() => { document.getElementById('lead-team-modal').remove(); }, 1000);"
+        "htmx.ajax('GET', '/classes/class_details/" + str(class_id) + "/tab/groups/', '#tabs-section');"
+        "</script>"
+    )
+    return HttpResponse(response_html)
+
+
+@csrf_exempt
+async def claim_new_team_modal(request, class_id, team_number):
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+        user_id = session['user_id']
+
+        target_class = await conn.fetchrow("SELECT * FROM classes WHERE id = $1", class_id)
+        if not target_class:
+            return HttpResponse("Class not found", status=404)
+
+        # Check if user is already in a team in this class
+        in_team = await conn.fetchval("""
+            SELECT COUNT(*) FROM group_members gm
+            JOIN groups g ON gm.group_id = g.id
+            WHERE gm.user_id = $1 AND g.class_id = $2
+        """, user_id, class_id)
+        if in_team > 0:
+            return HttpResponse("<div style='padding:20px; background:white; border-radius:12px; color:red; text-align:center;'>You are already in a team in this class! Leave your team first.</div>", status=400)
+
+        team_name = f"Team {team_number}"
+        # Check if this team name was already created by someone else
+        existing_team = await conn.fetchrow("SELECT * FROM groups WHERE class_id = $1 AND name = $2", class_id, team_name)
+        if existing_team:
+            return HttpResponse("<div style='padding:20px; background:white; border-radius:12px; color:red; text-align:center;'>This team was just claimed by someone else!</div>", status=400)
+
+        virtual_team = {
+            'id': 0,
+            'name': team_name,
+            'description': f"Assignment team {team_number} for {target_class['course_code']}",
+            'whatsapp_link': ''
+        }
+
+    return render(request, 'user_classes/templates/lead_team_modal.html', {
+        'team': virtual_team,
+        'is_edit': False,
+        'is_new': True,
+        'class_id': class_id,
+        'team_number': team_number
+    })
+
+
+@csrf_exempt
+async def create_new_team(request, class_id, team_number):
+    if request.method != 'POST':
+        return HttpResponse("Invalid method", status=400)
+
+    token = request.COOKIES.get('access_token')
+    if not token:
+        return HttpResponse("Unauthorized", status=401)
+
+    description = request.POST.get('description', '').strip()
+    whatsapp_link = request.POST.get('whatsapp_link', '').strip()
+
+    if whatsapp_link and not (whatsapp_link.startswith('http://') or whatsapp_link.startswith('https://')):
+        return HttpResponse("<span style='color: red;'>WhatsApp link must be a valid URL starting with http:// or https://</span>", status=400)
+
+    pool = await Database.get_pool()
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow("SELECT user_id FROM sessions WHERE token=$1 AND is_active=True", token)
+        if not session:
+            return HttpResponse("Unauthorized", status=401)
+        user_id = session['user_id']
+
+        target_class = await conn.fetchrow("SELECT * FROM classes WHERE id = $1", class_id)
+        if not target_class:
+            return HttpResponse("Class not found", status=404)
+
+        if target_class['teams_frozen']:
+            return HttpResponse("<span style='color: red;'>Teams are frozen for this class. Changes are not allowed.</span>", status=403)
+
+        in_team = await conn.fetchval("""
+            SELECT COUNT(*) FROM group_members gm
+            JOIN groups g ON gm.group_id = g.id
+            WHERE gm.user_id = $1 AND g.class_id = $2
+        """, user_id, class_id)
+        if in_team > 0:
+            return HttpResponse("<span style='color: red;'>You are already a member of a team in this class! Leave your team first.</span>", status=400)
+
+        team_name = f"Team {team_number}"
+        existing_team = await conn.fetchrow("SELECT * FROM groups WHERE class_id = $1 AND name = $2", class_id, team_name)
+        if existing_team:
+            return HttpResponse("<span style='color: red;'>This team was just claimed by someone else!</span>", status=400)
+
+        join_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        new_group_id = await conn.fetchval("""
+            INSERT INTO groups (name, description, whatsapp_link, is_general, class_name, class_id, leader_id, created_by, max_members, join_code)
+            VALUES ($1, $2, $3, FALSE, $4, $5, $6, $6, $7, $8)
+            RETURNING id
+        """, team_name, description, whatsapp_link or None, target_class['course_name'], class_id, user_id, target_class['max_members_per_group'], join_code)
+
+        await conn.execute("""
+            INSERT INTO group_members (group_id, user_id, joined_at)
+            VALUES ($1, $2, CURRENT_TIMESTAMP)
+        """, new_group_id, user_id)
+
+    response_html = (
+        "<span style='color: green;'>Team claimed and created successfully!</span>"
         "<script>"
         "setTimeout(() => { document.getElementById('lead-team-modal').remove(); }, 1000);"
         "htmx.ajax('GET', '/classes/class_details/" + str(class_id) + "/tab/groups/', '#tabs-section');"

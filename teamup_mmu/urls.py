@@ -47,7 +47,7 @@ from .features.my_profile.views import profile_modal as user_profile_modal
 from .features.matching_matches.views import index as matching_matches_view
 from .features.user_message.views import message as user_message_view
 from .features.user_message.views import index as user_message_index_view
-from .features.user_inbox.views import index as user_inbox_index_view
+from .features.user_inbox.views import index as user_inbox_index_view, inbox_approve_request, inbox_decline_request, cancel_outgoing_invite, cancel_outgoing_request
 from .features.user_forgot_password.views import index as user_forgot_password_index_view
 from .features.user_forgot_password.views import send as user_forgot_password_send
 from .features.user_forgot_password.views import receive as user_forgot_password_receive
@@ -119,7 +119,14 @@ urlpatterns = [
     path('message/', user_message_view, name='user_message'),
     path('chat/<int:another_user_id>/', user_message_index_view, name='user_message_index_view'),
     path('inbox/', user_inbox_index_view, name='user_inbox_index_view'),
+<<<<<<< HEAD
 
+=======
+    path('inbox/approve_request/<int:request_id>/', inbox_approve_request, name='inbox_approve_request'),
+    path('inbox/decline_request/<int:request_id>/', inbox_decline_request, name='inbox_decline_request'),
+    path('inbox/cancel_invite/<int:invite_id>/', cancel_outgoing_invite, name='cancel_outgoing_invite'),
+    path('inbox/cancel_request/<int:request_id>/', cancel_outgoing_request, name='cancel_outgoing_request'),
+>>>>>>> 46f236b42da56b1fdfcf1ddff289edeaa0d1e58b
     path('profile_setup/', views.profile_setup, name='profile_setup'),
     path('profile_setup_1/', profile_setup_1, name='profile_setup_1'),
     path('profile_setup_1/receive/', profile_setup_1_receive, name='profile_setup_1_receive'),

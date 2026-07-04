@@ -4,6 +4,8 @@ from teamup_mmu.db import Database
 from datetime import timedelta, datetime
 
 async def access_check(request):
+    request.user_initial = 'U'
+    request.user_email = None
     token = request.COOKIES.get('access_token')
     if not token:
         return False, "No token", None, None
@@ -22,11 +24,20 @@ async def access_check(request):
                     if user['email_verified']:
                         # Check if profile is setup (assuming empty username means incomplete)
                         profile = await conn.fetchrow("SELECT username FROM profiles WHERE id=$1", value['user_id'])
+                        
+                        initial = user['email'][0].upper() if user['email'] else 'U'
+                        if profile and profile['username']:
+                            initial = profile['username'][0].upper()
+                        request.user_initial = initial
+                        request.user_email = user['email']
+                        
                         if not profile or not profile['username']:
                             return False, "incomplete_profile", user['email'], value['user_id']
                         
                         return True, "valid", user['email'], value['user_id']
                     else:
+                        request.user_initial = user['email'][0].upper() if user['email'] else 'U'
+                        request.user_email = user['email']
                         return False, "unverified_email", user['email'], value['user_id']
         else:
             # Session expired - invalidate it in the database

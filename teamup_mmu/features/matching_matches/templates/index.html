@@ -3,73 +3,76 @@
 
 {% block content %}
     <div style="text-align: center; margin-bottom: 20px;">
-        <h2 style="color: #001561; margin-bottom: 5px;">Your Matches</h2>
+        <h2 style="color: #00186d; font-weight: 700; margin-top: 1rem; margin-bottom: 5px;">Your Matches</h2>
         <p style="color: #555; margin-top: 0;">People who liked you back. Start a conversation!</p>
     </div>
     
     <style>
+        /* Displays matches in a responsive grid */
         #user-list {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding-top: 10px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+            padding: 20px 0;
+            max-width: 1200px;
+            margin: 0 auto;
             font-family: 'Inter', sans-serif;
         }
 
+        /* The main card container */
         .user-card {
-            background-color: #ffffff;
-            padding: 3rem 2rem;
-            width: 90vw;
-            max-width: 1000px;
-            min-height: 75vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto 25px auto;
+            background-color: #ffffff; 
+            padding: 2rem 1.5rem;
+            width: 100%;
+            box-sizing: border-box;
+            margin: 0;
             text-align: center;
             border-radius: 20px; 
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
             border: 2px solid #e5e8ff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
         }
 
-        .user-card h2 { color: #001561; margin: 10px 0 0 0; font-size: 1.8rem; }
+        .user-card h2 { color: #001561; margin: 10px 0 0 0; font-size: 1.5rem; }
 
         .user-card img {
-            width: 140px;
-            height: 140px;
+            width: 120px;
+            height: 120px;
             object-fit: cover;
             border-radius: 50%;
             border: 4px solid #e5e8ff;
             margin-bottom: 1rem;
             background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
 
-        .user-card p { font-size: 1rem; color: #333; line-height: 1.5; margin: 8px 0; }
+        .user-card p { font-size: 0.95rem; color: #333; line-height: 1.5; margin: 6px 0; }
 
         .interests-grid {
-            display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 20px 0; max-width: 800px;
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 15px 0; width: 100%;
         }
         
         .interest-pill {
-            background: #e5e8ff; color: #001561; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 600;
+            background: #e5e8ff; color: #001561; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;
         }
 
         /* Unified Button Layout */
         .actions-wrapper {
             width: 100%;
-            max-width: 400px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            margin-top: 20px;
+            gap: 10px;
+            margin-top: auto; /* Pushes buttons to the bottom of the card */
+            padding-top: 15px;
         }
 
         .action-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 10px;
             width: 100%;
         }
         
@@ -79,12 +82,11 @@
 
         .action-btn {
             width: 100%;
-            height: 100%;
-            padding: 12px;
+            padding: 10px;
             border-radius: 25px;
             border: none;
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 0.95rem;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
@@ -92,14 +94,14 @@
             align-items: center;
             justify-content: center;
             box-sizing: border-box;
-            text-decoration: none; /* Prevents underline on the anchor tag */
+            text-decoration: none; 
         }
         
         .action-btn:hover { transform: translateY(-2px); }
         
         /* Semantic Colors */
-        .btn-primary { background-color: #001561; color: white; }
-        .btn-primary:hover { background-color: #002299; }
+        .btn-primary { background-color: #00186d; color: white; }
+        .btn-primary:hover { background-color: #002299; box-shadow: 0 6px 15px rgba(0, 24, 109, 0.3); }
         .btn-invite { background-color: #5b73df; color: white; }
         .btn-invite:hover { background-color: #4a62c9; }
         .btn-request { background-color: #28a745; color: white; }
@@ -110,17 +112,17 @@
         {% for user in context.matches %}
             <div class="user-card">
                 
-                <!-- FIXED: Pure static image, no HTMX, no hover scale -->
+                <!-- Pure static image, no HTMX, no hover scale -->
                 <img src="{% static 'teamup_mmu/profile.png' %}" alt="Profile Picture">
 
                 <h2>{{ user.username|default:user.email }}</h2>
-                <p style="color: #666; font-weight: 600; margin-top: 5px; font-size: 0.95rem;">
+                <p style="color: #666; font-weight: 600; margin-top: 2px; font-size: 0.85rem;">
                     {{ user.email }}
                 </p>
                 
-                <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0; width: 100%; max-width: 600px;">
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0; width: 100%;">
                 
-                <div style="max-width: 800px;">
+                <div style="width: 100%;">
                     <p><strong>About:</strong> <span style="color: #555;">{{ user.descriptions }}</span></p>
                     <p><strong>Program:</strong> {{ user.program }} ({{ user.faculty }})</p>
                     <p><strong>Year:</strong> {{ user.year_of_study }} &nbsp;|&nbsp; <strong>cGPA:</strong> {{ user.cgpa }}</p>
@@ -135,7 +137,7 @@
                 <div class="actions-wrapper">
                     <!-- Row 1: Message (Redirects to Inbox) -->
                     <div class="action-row full-width">
-                        <a href="/inbox/?chat_with={{ user.id }}" class="action-btn btn-primary">
+                        <a href="/user_inbox/?chat_with={{ user.id }}" class="action-btn btn-primary">
                             💬 Message
                         </a>
                     </div>
@@ -146,21 +148,21 @@
                                 hx-get="/connect_modal/invite/{{ user.id }}/" 
                                 hx-target="#modal-container" 
                                 hx-swap="innerHTML">
-                            Invite to Group
+                            Invite
                         </button>
                         
                         <button class="action-btn btn-request"
                                 hx-get="/connect_modal/request/{{ user.id }}/" 
                                 hx-target="#modal-container" 
                                 hx-swap="innerHTML">
-                            Request to Join
+                            Request
                         </button>
                     </div>
                 </div>
                 
             </div>
         {% empty %}
-            <div class="user-card" style="padding: 3rem; min-height: auto;">
+            <div class="user-card" style="grid-column: 1 / -1; padding: 4rem; min-height: auto;">
                 <div style="font-size: 3rem; margin-bottom: 10px;">🔍</div>
                 <h3 style="color: #001561;">No matches yet.</h3>
                 <p style="color: #555;">Keep browsing the Matching page to find potential teammates!</p>

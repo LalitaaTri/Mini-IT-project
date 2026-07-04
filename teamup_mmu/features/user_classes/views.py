@@ -1426,14 +1426,14 @@ async def search_explore(request):
             
         user_id = session['user_id']
 
-        # 3. If query is empty, get all unexplored classes (just like index does)
+        # 3. If query is empty, show guidance instead of querying all classes
         if not query:
-            results = await conn.fetch("""
-                SELECT * FROM classes 
-                WHERE id NOT IN (
-                    SELECT class_id FROM user_classes WHERE user_id = $1
-                )
-            """, user_id)
+            return render(request, 'user_classes/templates/explore_search_results.html', {
+                'results': [],
+                'query': '',
+                'show_guide': True
+            })
+
         else:
             # 4. If there is a query, search by course_code or course_name
             search_pattern = f"%{query}%"

@@ -53,22 +53,25 @@
         justify-content: space-between; 
         align-items: center;
     }
-    .create_class_btn { 
-        background-color: #008b20; 
+        .create_class_btn { 
+        background-color: #00186d; 
         color: white; 
         border: none; 
-        width: 45px;
-        height: 45px;
-        border-radius: 50%; 
-        font-size: 24px;
-        font-weight: bold; 
+        width: auto;
+        height: 48px;
+        padding: 0 24px;
+        border-radius: 25px; 
+        font-size: 15px;
+        font-weight: 600; 
         cursor: pointer; 
-        transition: 0.3s; 
+        transition: all 0.2s ease; 
         display: flex;
         align-items: center;
         justify-content: center;
+        white-space: nowrap;
+        box-shadow: 0 4px 15px rgba(0, 24, 109, 0.2);
     }
-    .create_class_btn:hover { background-color: #4cb262; }
+    .create_class_btn:hover { background-color: #1a3294; transform: translateY(-1px); }
 
     .leave_btn { 
         background-color: #bc0000; 
@@ -91,38 +94,40 @@
 
 
 <!-- Main Page Container -->
-<div style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
+<div style="max-width: 1300px; margin: 0 auto; padding: 2rem;">
 
     <!-- Top Action Bar (Search + Buttons) -->
-    <div style="display: flex; justify-content: space-between; gap: 15px; align-items: center; margin-bottom: 24px; padding-bottom: 40px; border-bottom: 2px solid rgba(0, 24, 109, 0.15);">
+    <div style="display: flex; justify-content: space-between; gap: 15px; align-items: center; margin-bottom: 24px; padding-bottom: 40px;">
         <!-- search input wrapper with icon -->
-        <div style="width: 380px; max-width: 100%; position: relative;">
+        <div style="width: 650px; max-width: 100%; position: relative;">
             <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; color: #888; pointer-events: none;">🔍</span>
             <input type="text" 
                 name="search_query" 
-                placeholder="Search for any class to explore..." 
+                placeholder="Search classes to enroll..." 
                 hx-get="/classes/search_explore/" 
                 hx-trigger="keyup changed delay:300ms, focus" 
                 hx-target="#explore-list" 
                 style="width: 100%; height: 48px; padding: 0 15px 0 45px; border-radius: 25px; border: 1px solid #00198357; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); font-size: 16px; box-sizing: border-box; outline: none;">
             
             <!-- Explore classes list (Dropdown) -->
-            <div id="explore-list" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); margin-top: 10px; max-height: 400px; overflow-y: auto;">
+            <div id="explore-list" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; background: white; border-radius: 14px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); margin-top: 5px; max-height: 400px; overflow-y: auto;">
                 <!-- Search results will appear here -->
             </div>
         </div>
 
         <!-- Action Buttons Grouped on the Right -->
-        <div style="display: flex; gap: 15px; align-items: center;">
-            <button class="join-btn" hx-get="/classes/join_modal/" hx-target="#modal-container" hx-swap="innerHTML" style="height: 48px; font-size: 15px; padding: 0 24px; border-radius: 25px; white-space: nowrap; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); box-sizing: border-box;">Join Class By Code</button>
-            <button class="create_class_btn" hx-get="/classes/create_modal/" hx-target="#modal-container" hx-swap="innerHTML" title="Create Class" style="height: 48px; width: 48px; font-size: 24px; flex-shrink: 0; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); box-sizing: border-box;">+</button>
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <button class="join-btn" hx-get="/classes/join_modal/" hx-target="#modal-container" hx-swap="innerHTML" style="height: 48px; font-size: 15px; font-weight: 600; padding: 0 22px; border-radius: 25px; background: white; color: #00186d; border: 1.5px solid #00186d; white-space: nowrap; box-shadow: 0 4px 12px rgba(0, 24, 109, 0.08); cursor: pointer; transition: all 0.2s;">🔗 Join Class By Code</button>
+            <button class="create_class_btn" hx-get="/classes/create_modal/" hx-target="#modal-container" hx-swap="innerHTML" style="height: 48px; font-size: 15px; font-weight: 600; padding: 0 24px; border-radius: 25px; background: #00186d; color: white; border: none; white-space: nowrap; box-shadow: 0 4px 15px rgba(0, 24, 109, 0.2); cursor: pointer; transition: all 0.2s;">✨ Create Class</button>
         </div>
+
     </div>
 
 
-<div style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
-    <div class="h1_section" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 50px;">
+<div style="max-width: 1300px; margin: 0 auto; padding: 2rem; background-color: white; border-radius: 20px; border: 1px solid #00198357; ">
+    <div class="h1_section" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 35px; padding-bottom: 30px; border-bottom: 2px solid rgba(0, 24, 109, 0.15);">
         <h1 style="margin: 0; font-size: 2.5rem;">My Classes</h1>
+        
         {% if my_classes %}
         <div style="position: relative; width: 300px;">
             <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1rem; color: #888; pointer-events: none;">🔍</span>

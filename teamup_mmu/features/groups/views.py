@@ -278,14 +278,19 @@ async def request_accept(request, req_id):
     if request.method == 'POST':
         pool = await Database.get_pool()
         async with pool.acquire() as conn:
-            # 1. Verify the request exists and this user is the admin
-            join_req = await conn.fetchrow("SELECT group_id, sender_id FROM group_requests WHERE id=$1 AND admin_id=$2 AND status='pending'", req_id, id)
+            # 1. Verify the request exists and this user is the leader
+            join_req = await conn.fetchrow("""
+                SELECT gr.group_id, gr.student_id 
+                FROM group_requests gr 
+                JOIN groups g ON gr.group_id = g.id 
+                WHERE gr.id=$1 AND g.leader_id=$2 AND gr.status='pending'
+            """, req_id, id)
             
             if not join_req:
                 return HttpResponse("<p style='color: red; text-align: center;'>Request not found.</p>")
             
             group_id = join_req['group_id']
-            sender_id = join_req['sender_id']
+            student_id = join_req['student_id']
 
             # 2. Check Capacity
             group = await conn.fetchrow("SELECT max_members FROM groups WHERE id=$1", group_id)
@@ -296,9 +301,9 @@ async def request_accept(request, req_id):
                 return HttpResponse("<div style='background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 10px; text-align: center;'>Your group is full.</div>")
 
             # 3. Add them to the group
-            already_in = await conn.fetchval("SELECT 1 FROM group_members WHERE group_id=$1 AND user_id=$2", group_id, sender_id)
+            already_in = await conn.fetchval("SELECT 1 FROM group_members WHERE group_id=$1 AND user_id=$2", group_id, student_id)
             if not already_in:
-                await conn.execute("INSERT INTO group_members (group_id, user_id) VALUES ($1, $2)", group_id, sender_id)
+                await conn.execute("INSERT INTO group_members (group_id, user_id) VALUES ($1, $2)", group_id, student_id)
 
             # 4. Mark as Accepted
             await conn.execute("UPDATE group_requests SET status='accepted' WHERE id=$1", req_id)
@@ -318,7 +323,7 @@ async def request_decline(request, req_id):
     if request.method == 'POST':
         pool = await Database.get_pool()
         async with pool.acquire() as conn:
-            await conn.execute("UPDATE group_requests SET status='declined' WHERE id=$1 AND admin_id=$2", req_id, id)
+            await conn.execute("UPDATE group_requests SET status='declined' WHERE id=$1 AND group_id IN (SELECT id FROM groups WHERE leader_id=$2)", req_id, id)
 
         # Deletes the card from the screen
         return HttpResponse("")

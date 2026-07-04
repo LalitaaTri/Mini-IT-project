@@ -94,11 +94,12 @@ async def send_request(request):
                 if admin_id:
                     # Create or Reset the Request using ON CONFLICT Upsert
                     await conn.execute("""
-                        INSERT INTO group_requests (group_id, sender_id, admin_id, status) 
-                        VALUES ($1, $2, $3, 'pending')
-                        ON CONFLICT (group_id, sender_id)
-                        DO UPDATE SET status = 'pending', admin_id = EXCLUDED.admin_id, created_at = CURRENT_TIMESTAMP
-                    """, group_id, id, admin_id)
+                        INSERT INTO group_requests (group_id, student_id, status) 
+                        VALUES ($1, $2, 'pending')
+                        ON CONFLICT (group_id, student_id)
+                        DO UPDATE SET status = 'pending', created_at = CURRENT_TIMESTAMP
+                    """, group_id, id)
+
                     
             if group_ids:
                 already_liked = await conn.fetchval("SELECT 1 FROM likes WHERE user_id=$1 AND liked_user_id=$2", id, target_user_id)

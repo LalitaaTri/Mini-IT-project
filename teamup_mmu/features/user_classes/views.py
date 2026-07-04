@@ -459,8 +459,9 @@ async def class_tab(request, class_id, tab_name):
 
             # Generate virtual / placeholder team dicts for unclaimed team numbers up to max_groups
             existing_names = {g['name'] for g in class_groups_list}
-            max_groups_limit = class_details['max_groups'] or 10
-            max_members_limit = class_details['max_members_per_group'] or 5
+            max_groups_limit = target_class['max_groups'] or 10
+            max_members_limit = target_class['max_members_per_group'] or 5
+
             for i in range(1, max_groups_limit + 1):
                 t_name = f"Team {i}"
                 if t_name not in existing_names:

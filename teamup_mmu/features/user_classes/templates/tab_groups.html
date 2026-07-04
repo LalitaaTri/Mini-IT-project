@@ -31,6 +31,16 @@
 <!-- TEAMS ENABLED VIEW -->
 <div style="display: flex; flex-direction: column; gap: 1.25rem;">
     
+    {% if class_details.teams_frozen %}
+    <!-- TEAMS FROZEN WARNING BANNER -->
+    <div style="display: flex; align-items: center; gap: 0.75rem; background: #fff1f2; border: 1px solid #fecdd3; padding: 0.9rem 1.25rem; border-radius: 10px; color: #e11d48; font-size: 0.95rem; font-weight: 600; box-shadow: 0 4px 6px -1px rgba(225, 29, 72, 0.05);">
+        <svg xmlns="http://www.w3.org/2000/svg" height="22px" viewBox="0 -960 960 960" width="22px" fill="currentColor">
+            <path d="M480-120q-75 0-140.5-28.5t-114-77q-48.5-48.5-77-114T120-480q0-75 28.5-140.5t77-114q48.5-48.5 114-77T480-840q75 0 140.5 28.5t114 77q48.5 48.5 77 114T880-480q0 75-28.5 140.5t-77 114q-48.5 48.5-114 77T480-120Zm0-80q116 0 198-82t82-198q0-116-82-198t-198-82q-116 0-198 82t-82 198q0 116 82 198t198 82Zm-40-120h80v-240h-80v240Zm0-320h80v-80h-80v80Z"/>
+        </svg>
+        <span>Coursework teams have been frozen by the lecturer. No further changes to teams are allowed.</span>
+    </div>
+    {% endif %}
+    
     <!-- Top Action / Info Bar -->
     <div style="display: flex; align-items: center; gap: 1.5rem; background: #f8fafc; border: 1px solid #e2e8f0; padding: 0.85rem 1.25rem; border-radius: 10px;">
         <div style="font-size: 0.88rem; color: #475569; display: flex; align-items: center; gap: 0.4rem;">
@@ -54,9 +64,15 @@
                     </svg>
                     <span>You are currently in team <strong>{{ user_team_name }}</strong>.</span>
                 </div>
+                {% if class_details.teams_frozen %}
+                <button disabled style="background: #e2e8f0; color: #94a3b8; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: not-allowed;" title="Teams are frozen">
+                    Leave Team
+                </button>
+                {% else %}
                 <button hx-post="/classes/leave_team/{{ user_team_id }}/" hx-confirm="Are you sure you want to leave this team?" hx-target="#tabs-section" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2); transition: all 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">
                     Leave Team
                 </button>
+                {% endif %}
             </div>
         {% elif user_pending_request_team_id %}
             <!-- User Has Pending Request -->
@@ -67,9 +83,11 @@
                     </svg>
                     <span>Request to join team <strong>{{ user_pending_request_team_name }}</strong> is pending leader approval.</span>
                 </div>
+                {% if not class_details.teams_frozen %}
                 <button hx-post="/classes/cancel_request/{{ user_pending_request_team_id }}/" hx-target="#tabs-section" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
                     Cancel Request
                 </button>
+                {% endif %}
             </div>
         {% elif user_declined_request_id %}
             <!-- User request declined alert -->
@@ -158,6 +176,7 @@
                                     {% for req in t.pending_requests %}
                                         <div style="display: flex; justify-content: space-between; align-items: center; background: white; border: 1px solid #e2e8f0; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem;">
                                             <span style="font-weight: 500; color: #1e293b;">{{ req.username }}</span>
+                                            {% if not class_details.teams_frozen %}
                                             <div style="display: flex; gap: 0.3rem;">
                                                 <!-- Approve button -->
                                                 <button hx-post="/classes/approve_request/{{ req.request_id }}/" hx-target="#tabs-section" style="background: #10b981; border: none; color: white; border-radius: 4px; padding: 3px 6px; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Approve Request">
@@ -168,18 +187,25 @@
                                                     ✖
                                                 </button>
                                             </div>
+                                            {% endif %}
                                         </div>
                                     {% endfor %}
                                 </div>
                             {% endif %}
                             
                             <!-- Edit Team details button -->
+                            {% if class_details.teams_frozen %}
+                            <button disabled style="width: 100%; border: 1px solid #cbd5e1; background: #f1f5f9; padding: 7px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; color: #94a3b8; cursor: not-allowed; display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
+                                Teams Frozen
+                            </button>
+                            {% else %}
                             <button hx-get="/classes/edit_team_modal/{{ t.id }}/" hx-target="#modal-container" style="width: 100%; border: 1px solid #cbd5e1; background: white; padding: 7px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
                                 <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor">
                                     <path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/>
                                 </svg>
                                 Edit Team Info
                             </button>
+                            {% endif %}
                         {% elif not is_admin %}
                             <!-- Student action -->
                             {% if not user_team_id %}
@@ -194,9 +220,15 @@
                                             Team Full
                                         </button>
                                     {% else %}
-                                        <button hx-post="/classes/join_team/{{ t.id }}/" hx-target="#tabs-section" style="width: 100%; padding: 8px; background: #e0f2fe; border: 1px solid #bae6fd; color: #0369a1; font-weight: 600; border-radius: 6px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#bae6fd'" onmouseout="this.style.background='#e0f2fe'">
-                                            Request to Join
-                                        </button>
+                                        {% if class_details.teams_frozen %}
+                                            <button disabled style="width: 100%; padding: 8px; background: #f1f5f9; border: 1px solid #e2e8f0; color: #94a3b8; font-weight: 600; border-radius: 6px; font-size: 0.85rem; cursor: not-allowed;">
+                                                Teams Frozen
+                                            </button>
+                                        {% else %}
+                                            <button hx-post="/classes/join_team/{{ t.id }}/" hx-target="#tabs-section" style="width: 100%; padding: 8px; background: #e0f2fe; border: 1px solid #bae6fd; color: #0369a1; font-weight: 600; border-radius: 6px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#bae6fd'" onmouseout="this.style.background='#e0f2fe'">
+                                                Request to Join
+                                            </button>
+                                        {% endif %}
                                     {% endif %}
                                 {% endif %}
                             {% endif %}
@@ -218,12 +250,18 @@
                     
                     {% if not is_admin and not user_team_id and not user_pending_request_team_id %}
                         <!-- Claim Team action -->
-                        <button hx-get="/classes/lead_team_modal/{{ t.id }}/" hx-target="#modal-container" style="width: 100%; padding: 8px; background: #00186d; border: none; color: white; font-weight: 600; border-radius: 6px; font-size: 0.85rem; cursor: pointer; box-shadow: 0 4px 8px rgba(0, 24, 109, 0.15); display: flex; align-items: center; justify-content: center; gap: 0.4rem; transition: background 0.2s;" onmouseover="this.style.background='#00104a'" onmouseout="this.style.background='#00186d'">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor">
-                                <path d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H600v-240H360v240H160Zm320-350Z"/>
-                            </svg>
-                            Claim / Lead Team
-                        </button>
+                        {% if class_details.teams_frozen %}
+                            <button disabled style="width: 100%; padding: 8px; background: #f1f5f9; border: 1px solid #cbd5e1; color: #94a3b8; font-weight: 600; border-radius: 6px; font-size: 0.85rem; cursor: not-allowed; display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
+                                Teams Frozen
+                            </button>
+                        {% else %}
+                            <button hx-get="/classes/lead_team_modal/{{ t.id }}/" hx-target="#modal-container" style="width: 100%; padding: 8px; background: #00186d; border: none; color: white; font-weight: 600; border-radius: 6px; font-size: 0.85rem; cursor: pointer; box-shadow: 0 4px 8px rgba(0, 24, 109, 0.15); display: flex; align-items: center; justify-content: center; gap: 0.4rem; transition: background 0.2s;" onmouseover="this.style.background='#00104a'" onmouseout="this.style.background='#00186d'">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor">
+                                    <path d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H600v-240H360v240H160Zm320-350Z"/>
+                                </svg>
+                                Claim / Lead Team
+                            </button>
+                        {% endif %}
                     {% endif %}
                 </div>
             {% endif %}

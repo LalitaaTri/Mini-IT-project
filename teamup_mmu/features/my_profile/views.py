@@ -103,6 +103,21 @@ async def profile_modal(request, user_id):
             WHERE p.id=$1
         """, user_id)
 
+        if not profile:
+            user_email = await conn.fetchval("SELECT email FROM users WHERE id=$1", user_id)
+            if not user_email:
+                return HttpResponse("User not found", status=404)
+            # Create a blank profile on-the-fly
+            default_username = user_email.split('@')[0]
+            await conn.execute("INSERT INTO profiles (id, username) VALUES ($1, $2)", user_id, default_username)
+            # Fetch again
+            profile = await conn.fetchrow("""
+                SELECT p.username, p.introduction, p.descriptions, p.year_of_study, p.faculty, p.program, p.cgpa, p.interests, u.email
+                FROM profiles p
+                JOIN users u ON p.id = u.id
+                WHERE p.id=$1
+            """, user_id)
+
     if not profile:
         return HttpResponse("User not found", status=404)
 

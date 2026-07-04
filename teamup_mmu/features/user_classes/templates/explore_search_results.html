@@ -1,0 +1,44 @@
+{% if show_guide %}
+    <div style="padding: 1rem; color: #334155; text-align: center; line-height: 1.6;">
+        <div style="background-color: #f2f5ff; border-radius: 10px; padding: 25px; border-style: dashed; border-width: 1.8px; border-color: #00177dcd;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" style="width: 40px; height: 40px; fill: #00186d;">
+                <path d="M40-160v-160q0-34 23.5-57t56.5-23h131q20 0 38 10t29 27q29 39 71.5 61t90.5 22q49 0 91.5-22t70.5-61q13-17 30.5-27t36.5-10h131q34 0 57 23t23 57v160H640v-91q-35 25-75.5 38T480-200q-43 0-84-13.5T320-252v92H40Zm440-160q-38 0-72-17.5T351-386q-17-25-42.5-39.5T253-440q22-37 93-58.5T480-520q63 0 134 21.5t93 58.5q-29 0-55 14.5T609-386q-22 32-56 49t-73 17ZM160-440q-50 0-85-35t-35-85q0-51 35-85.5t85-34.5q51 0 85.5 34.5T280-560q0 50-34.5 85T160-440Zm640 0q-50 0-85-35t-35-85q0-51 35-85.5t85-34.5q51 0 85.5 34.5T920-560q0 50-34.5 85T800-440ZM480-560q-50 0-85-35t-35-85q0-51 35-85.5t85-34.5q51 0 85.5 34.5T600-680q0 50-34.5 85T480-560Z"/>
+            </svg>
+            <p style="margin: 0 0 8px 0; font-size: 1rem; color: #00186d; font-weight: 600;">
+                ✨ Ready to enroll in your classes?
+            </p>
+            <p style="margin-bottom: 1rem; font-size: 0.9rem; color: #64748b;">
+                Look up your classes for this semester or join one via a class code. If a class isn't open yet, feel free to create it and kick things off!
+            </p>
+        </div>
+    </div>
+{% elif results %}
+
+    <ul style="list-style: none; margin: 0; padding: 0;">
+        {% for c in results %}
+        <li style="padding: 15px 20px; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f8f9fa';" onmouseout="this.style.backgroundColor='transparent';">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h4 style="margin: 0 0 5px 0; color: #333; font-size: 16px;">{{ c.course_code }} - {{ c.course_name }}</h4>
+                    <p style="margin: 0; color: #666; font-size: 13px;">{{ c.section }}, {{ c.trimester }}</p>
+                </div>
+                <button class="join-btn" hx-get="/classes/join_modal/" hx-target="#modal-container" hx-swap="innerHTML" style="padding: 6px 15px; font-size: 13px; height: auto;">Join</button>
+            </div>
+        </li>
+        {% endfor %}
+        
+        {% if query %}
+        <li style="padding: 15px 20px; border-bottom: 1px solid #f0f0f0; background-color: #f8f9fa;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="color: #666; font-size: 14px;">Didn't find your class?</div>
+                <button class="create_class_btn" hx-get="/classes/create_modal/?code={{ query }}" hx-target="#modal-container" hx-swap="innerHTML" style="border-radius: 20px; padding: 6px 15px; font-size: 13px; height: auto; width: auto; font-weight: bold; background-color: #001983; color: white; border: none; cursor: pointer;">+ Create class "{{ query }}"</button>
+            </div>
+        </li>
+        {% endif %}
+    </ul>
+{% else %}
+    <div style="padding: 20px; text-align: center;">
+        <p style="color: #666; margin: 0 0 15px 0;">No classes found matching "{{ query }}".</p>
+        <button class="create_class_btn" hx-get="/classes/create_modal/?code={{ query }}" hx-target="#modal-container" hx-swap="innerHTML" style="border-radius: 20px; padding: 8px 20px; font-size: 14px; height: auto; width: auto; font-weight: bold; background-color: #001983; color: white; border: none; cursor: pointer;">+ Create class "{{ query }}"</button>
+    </div>
+{% endif %}

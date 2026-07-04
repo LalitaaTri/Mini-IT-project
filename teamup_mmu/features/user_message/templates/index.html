@@ -1,14 +1,59 @@
-<div class="user-card">
-    <p>Chat with {{ context.another_user_email }}:</p>
-    {% for message in context.messages %}
-        <p>{{ message.sender_id }}: {{ message.content }} ({{ message.created_at }})</p>
-    {% endfor %}
-    <br>
-    <form id="message-form" hx-post="{% url 'user_message' %}" hx-target="#message-status" hx-swap="innerHTML">
+<div class="chat-thread-container" style="display: flex; flex-direction: column; height: 100%; font-family: 'Inter', sans-serif;">
+    
+    <!-- Chat Header -->
+    <div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+        <div>
+            <h3 style="margin: 0; font-size: 1.25rem; color: #00186d; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="width: 10px; height: 10px; background: #10b981; border-radius: 50%;"></span>
+                {{ context.another_user_email }}
+            </h3>
+            <span style="font-size: 0.8rem; color: #94a3b8;">Direct Message</span>
+        </div>
+    </div>
+
+    <!-- Message Bubble Area -->
+    <div id="chat-messages-box" style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; padding-right: 0.5rem; margin-bottom: 1.5rem;">
+        {% for message in context.messages %}
+            <div style="display: flex; flex-direction: column; align-items: {% if message.sender_id == 'You' %}flex-end{% else %}flex-start{% endif %}; max-width: 80%; align-self: {% if message.sender_id == 'You' %}flex-end{% else %}flex-start{% endif %};">
+                <div style="font-size: 0.72rem; color: #94a3b8; margin-bottom: 0.2rem; margin-left: 0.4rem; margin-right: 0.4rem;">
+                    {{ message.sender_id }} • {{ message.created_at|date:"H:i" }}
+                </div>
+                <div style="padding: 0.75rem 1rem; border-radius: 16px; border-bottom-{% if message.sender_id == 'You' %}right{% else %}left{% endif %}-radius: 4px; background: {% if message.sender_id == 'You' %}#00186d{% else %}#f1f5f9{% endif %}; color: {% if message.sender_id == 'You' %}white{% else %}#1e293b{% endif %}; font-size: 0.9rem; line-height: 1.4; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);">
+                    {{ message.content }}
+                </div>
+            </div>
+        {% empty %}
+            <div style="text-align: center; padding: 4rem 1rem; color: #94a3b8;">
+                <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">👋</div>
+                <div style="font-weight: 600; color: #64748b;">Say hello!</div>
+                <div style="font-size: 0.82rem; margin-top: 0.25rem;">Start the conversation with {{ context.another_user_email }}.</div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Message Form -->
+    <form id="message-form" 
+          hx-post="{% url 'user_message' %}" 
+          hx-target="#message-status" 
+          hx-swap="innerHTML"
+          onsubmit="setTimeout(() => { document.getElementById('message-content').value = ''; htmx.ajax('GET', '/chat/{{ context.another_user_id }}/', '#inbox-detail-pane'); }, 100);"
+          style="display: flex; gap: 0.75rem; align-items: flex-end; border-top: 1px solid #f1f5f9; padding-top: 1.25rem;">
         {% csrf_token %}
         <input type="hidden" name="another_user_id" value="{{ context.another_user_id }}">
-        <textarea name="content" placeholder="Type your message here..." required></textarea>
-        <button type="submit">Send Message</button>
+        <textarea id="message-content" name="content" placeholder="Write a message..." required style="flex-grow: 1; height: 44px; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 0.9rem; outline: none; resize: none; font-family: inherit; transition: border-color 0.2s;" onfocus="this.style.borderColor='#00186d'" onblur="this.style.borderColor='#cbd5e1'"></textarea>
+        <button type="submit" style="height: 44px; padding: 0 1.25rem; background: #00186d; border: none; color: white; font-weight: 600; border-radius: 12px; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem; transition: background 0.2s; box-shadow: 0 4px 10px rgba(0, 24, 109, 0.15);" onmouseover="this.style.background='#00104a'" onmouseout="this.style.background='#00186d'">
+            Send
+        </button>
     </form>
-    <div id="message-status"></div>
+    <div id="message-status" style="display: none;"></div>
 </div>
+
+<script>
+    // Auto scroll chat to bottom
+    (function() {
+        const msgBox = document.getElementById('chat-messages-box');
+        if (msgBox) {
+            msgBox.scrollTop = msgBox.scrollHeight;
+        }
+    })();
+</script>

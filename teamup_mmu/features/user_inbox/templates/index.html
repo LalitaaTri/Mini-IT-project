@@ -14,10 +14,13 @@
         <!-- Chats Scrollable Area -->
         <div style="flex-grow: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
             {% for chat in context.chats_l %}
-                <div class="chat-item" 
+                <div class="chat-item {% if context.open_chat_id and chat.another_user_id == context.open_chat_id %}active-chat{% endif %}" 
                      hx-get="{% url 'user_message_index_view' chat.another_user_id %}" 
                      hx-target="#inbox-detail-pane" 
                      hx-swap="innerHTML"
+                     {% if context.open_chat_id and chat.another_user_id == context.open_chat_id %}
+                         hx-trigger="load, click"
+                     {% endif %}
                      style="display: flex; align-items: center; gap: 1rem; padding: 0.85rem 1rem; border-radius: 12px; cursor: pointer; transition: all 0.2s; border: 1px solid transparent;"
                      onclick="setActiveChat(this)">
                     
@@ -60,15 +63,15 @@
         
         <div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 1.5rem; margin-bottom: 2rem;">
             <h2 style="margin: 0; font-size: 1.5rem; color: #00186d; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
-                Pending Invites
-                {% if context.invites_l %}
-                    <span style="font-size: 0.75rem; background: #ef4444; color: white; padding: 2px 8px; border-radius: 12px;">{{ context.invites_l|length }} new</span>
+                Pending Invites & Requests
+                {% if context.invites_l or context.requests_l %}
+                    <span style="font-size: 0.75rem; background: #ef4444; color: white; padding: 2px 8px; border-radius: 12px;">{{ context.invites_l|length|add:context.requests_l|length }} new</span>
                 {% endif %}
             </h2>
-            <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #64748b;">Respond to team invitations here</p>
+            <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #64748b;">Manage incoming and outgoing team invitations and join requests</p>
         </div>
 
-        <!-- Invites List -->
+        <!-- Invites & Requests List -->
         <div style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; padding-right: 0.5rem;">
             {% for invite in context.invites_l %}
                 <div id="invite-card-{{ invite.invite_id }}" style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 12px; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.03);">
@@ -81,7 +84,12 @@
                             <p style="margin: 0; font-size: 0.88rem; color: #475569;">
                                 <strong style="color: #1e293b;">{{ invite.sender_name|default:invite.sender_email }}</strong> invited you to join:
                             </p>
-                            <h4 style="margin: 0.2rem 0 0 0; font-size: 1.1rem; color: #00186d; font-weight: 700;">{{ invite.group_name }}</h4>
+                            <h4 style="margin: 0.6rem 0rem 0.6rem 0rem; font-size: 1.1rem; color: #00186d; font-weight: 700;">
+                                {{ invite.group_name }}
+                                {% if invite.course_code %}
+                                    <span style="font-size: 0.78rem; font-weight: 600; color: #475569; background: #f1f5f9; padding: 2px 8px; border-radius: 6px; margin-left: 0.5rem;">📚 {{ invite.course_code }} • {{ invite.course_name }}</span>
+                                {% endif %}
+                            </h4>
                             <span style="font-size: 0.75rem; color: #94a3b8; display: block; margin-top: 0.25rem;">Sent on {{ invite.created_at|date:"M d, Y" }}</span>
                         </div>
                     </div>
@@ -105,14 +113,124 @@
                         </button>
                     </div>
                 </div>
-            {% empty %}
-                <!-- Empty state for invites -->
+            {% endfor %}
+
+            {% for req in context.requests_l %}
+                <div id="request-card-{{ req.request_id }}" style="background: #eff6ff; border: 1px solid #dbeafe; border-radius: 12px; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.03);">
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <!-- Icon wrapper -->
+                        <div style="width: 42px; height: 42px; border-radius: 50%; background: #dbeafe; color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                            🙋
+                        </div>
+                        <div>
+                            <p style="margin: 0; font-size: 0.88rem; color: #475569;">
+                                <strong style="color: #1e293b;">{{ req.student_name|default:req.student_email }}</strong> requested to join your team:
+                            </p>
+                            <h4 style="margin: 0.6rem 0rem 0.6rem 0rem; font-size: 1.1rem; color: #00186d; font-weight: 700;">
+                                {{ req.group_name }}
+                                {% if req.course_code %}
+                                    <span style="font-size: 0.78rem; font-weight: 600; color: #2563eb; background: #dbeafe; padding: 2px 8px; border-radius: 6px; margin-left: 0.5rem;">📚 {{ req.course_code }} • {{ req.course_name }}</span>
+                                {% endif %}
+                            </h4>
+                            <span style="font-size: 0.75rem; color: #94a3b8; display: block; margin-top: 0.25rem;">Requested on {{ req.created_at|date:"M d, Y" }}</span>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button hx-post="/inbox/approve_request/{{ req.request_id }}/" 
+                                hx-target="#request-card-{{ req.request_id }}" 
+                                hx-swap="outerHTML" 
+                                style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.88rem; cursor: pointer; transition: background 0.2s;"
+                                onmouseover="this.style.background='#059669'"
+                                onmouseout="this.style.background='#10b981'">
+                            Approve
+                        </button>
+                        <button hx-post="/inbox/decline_request/{{ req.request_id }}/" 
+                                hx-target="#request-card-{{ req.request_id }}" 
+                                hx-swap="outerHTML" 
+                                style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.88rem; cursor: pointer; transition: background 0.2s;"
+                                onmouseover="this.style.background='#dc2626'"
+                                onmouseout="this.style.background='#ef4444'">
+                            Decline
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+
+            {% for invite in context.outgoing_invites_l %}
+                <div id="out-invite-card-{{ invite.invite_id }}" style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s;">
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <div style="width: 42px; height: 42px; border-radius: 50%; background: #e2e8f0; color: #475569; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                            📤
+                        </div>
+                        <div>
+                            <p style="margin: 0; font-size: 0.88rem; color: #64748b;">
+                                You invited <strong style="color: #334155;">{{ invite.receiver_name|default:invite.receiver_email }}</strong> to join:
+                            </p>
+                            <h4 style="margin: 0.6rem 0rem 0.6rem 0rem; font-size: 1.1rem; color: #334155; font-weight: 700;">
+                                {{ invite.group_name }}
+                                {% if invite.course_code %}
+                                    <span style="font-size: 0.78rem; font-weight: 600; color: #475569; background: #e2e8f0; padding: 2px 8px; border-radius: 6px; margin-left: 0.5rem;">📚 {{ invite.course_code }} • {{ invite.course_name }}</span>
+                                {% endif %}
+                            </h4>
+                            <span style="font-size: 0.75rem; color: #94a3b8; display: block; margin-top: 0.25rem;">Sent on {{ invite.created_at|date:"M d, Y" }} • <span style="color: #d97706; font-weight: 600;">Pending response</span></span>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <button hx-post="/inbox/cancel_invite/{{ invite.invite_id }}/" 
+                                hx-target="#out-invite-card-{{ invite.invite_id }}" 
+                                hx-swap="outerHTML" 
+                                style="background: #94a3b8; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.88rem; cursor: pointer; transition: background 0.2s;"
+                                onmouseover="this.style.background='#64748b'"
+                                onmouseout="this.style.background='#94a3b8'">
+                            Cancel Invite
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+
+            {% for req in context.outgoing_requests_l %}
+                <div id="out-request-card-{{ req.request_id }}" style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s;">
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <div style="width: 42px; height: 42px; border-radius: 50%; background: #e2e8f0; color: #475569; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                            ⏳
+                        </div>
+                        <div>
+                            <p style="margin: 0; font-size: 0.88rem; color: #64748b;">
+                                You requested to join <strong style="color: #334155;">{{ req.leader_name|default:req.leader_email }}</strong>'s team:
+                            </p>
+                            <h4 style="margin: 0.6rem 0rem 0.6rem 0rem; font-size: 1.1rem; color: #334155; font-weight: 700;">
+                                {{ req.group_name }}
+                                {% if req.course_code %}
+                                    <span style="font-size: 0.78rem; font-weight: 600; color: #475569; background: #e2e8f0; padding: 2px 8px; border-radius: 6px; margin-left: 0.5rem;">📚 {{ req.course_code }} • {{ req.course_name }}</span>
+                                {% endif %}
+                            </h4>
+                            <span style="font-size: 0.75rem; color: #94a3b8; display: block; margin-top: 0.25rem;">Requested on {{ req.created_at|date:"M d, Y" }} • <span style="color: #2563eb; font-weight: 600;">Pending approval</span></span>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <button hx-post="/inbox/cancel_request/{{ req.request_id }}/" 
+                                hx-target="#out-request-card-{{ req.request_id }}" 
+                                hx-swap="outerHTML" 
+                                style="background: #94a3b8; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.88rem; cursor: pointer; transition: background 0.2s;"
+                                onmouseover="this.style.background='#64748b'"
+                                onmouseout="this.style.background='#94a3b8'">
+                            Cancel Request
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+
+            {% if not context.invites_l and not context.requests_l and not context.outgoing_invites_l and not context.outgoing_requests_l %}
+                <!-- Empty state for invites and requests -->
                 <div style="text-align: center; padding: 4rem 2rem; border: 2px dashed #e2e8f0; border-radius: 12px; background: #fafcff; color: #94a3b8; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 1rem;">
                     <div style="font-size: 3rem; margin-bottom: 1rem; filter: grayscale(0.2);">📬</div>
                     <div style="font-weight: 700; color: #475569; font-size: 1.05rem;">Inbox is empty</div>
-                    <div style="font-size: 0.88rem; color: #64748b; max-width: 320px; margin-top: 0.5rem; line-height: 1.5;">You don't have any pending team invitations. When someone invites you to join their group, it will appear here.</div>
+                    <div style="font-size: 0.88rem; color: #64748b; max-width: 320px; margin-top: 0.5rem; line-height: 1.5;">You don't have any pending team invitations or join requests. When someone invites you or requests to join your team, it will appear here.</div>
                 </div>
-            {% endfor %}
+            {% endif %}
         </div>
     </div>
 </div>

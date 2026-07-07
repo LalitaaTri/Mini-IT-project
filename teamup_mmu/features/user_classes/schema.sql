@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS class_announcements (
 );
 
 
+DROP TABLE IF EXISTS group_requests CASCADE;
 CREATE TABLE IF NOT EXISTS group_requests (
     id SERIAL PRIMARY KEY,
     group_id INTEGER REFERENCES groups(id) ON DELETE CASCADE,

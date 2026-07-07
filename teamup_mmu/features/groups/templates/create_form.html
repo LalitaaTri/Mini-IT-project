@@ -7,19 +7,13 @@
         margin-bottom: 25px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
-    .create-form-box input[type="text"], .create-form-box input[type="number"], .create-form-box textarea {
+    .create-form-box input[type="text"], .create-form-box input[type="number"], .create-form-box input[type="url"], .create-form-box textarea {
         width: 100%;
         padding: 10px;
         margin: 8px 0 15px 0;
         border: 1px solid #ccc;
         border-radius: 8px;
-    }
-    .form-row {
-        display: flex;
-        gap: 15px;
-    }
-    .form-row > div {
-        flex: 1;
+        box-sizing: border-box;
     }
     .cancel-btn {
         background-color: white;
@@ -43,45 +37,25 @@
 <div class="create-form-box">
     <h3 style="margin-top: 0; color: #001561;">Create a New Group</h3>
     
-    <!-- Changed target to #form-message -->
     <form hx-post="/groups/create/receive/" hx-target="#form-message" hx-swap="innerHTML">
         {% csrf_token %}
         
         <label>Group Name</label>
-        <!-- Added maxlength -->
         <input type="text" name="name" placeholder="e.g., Database Assignment Team" maxlength="100" required>
         
         <label>Description</label>
-        <!-- Added maxlength -->
         <textarea name="description" placeholder="What is this group for?" maxlength="500"></textarea>
         
-        <div class="form-row">
-            <div>
-                <label>Class Tag (Optional)</label>
-                <input type="text" name="class_name" placeholder="e.g., 2610 - TT3L - Comp Networks" maxlength="100">
-            </div>
-            <div>
-                <label>Max Members</label>
-                <input type="number" name="max_members" value="20" min="2" max="50" required>
-            </div>
-        </div>
+        <label>Max Members</label>
+        <input type="number" name="max_members" value="20" min="2" max="50" required>
 
         <label>WhatsApp Group Link (Optional)</label>
-        <!-- Changed to type="url" to force valid links -->
         <input type="url" name="whatsapp_link" placeholder="https://chat.whatsapp.com/..." maxlength="255">
         
-        <div style="margin: 10px 0 20px 0;">
-            <label style="cursor: pointer; font-weight: bold;">
-                <input type="checkbox" name="is_general"> 
-                Make this a General Group (Not tied to a specific class)
-            </label>
-        </div>
-        
-        <!-- This is where backend errors will appear -->
         <div id="form-message" style="margin-bottom: 15px; font-weight: bold; text-align: right;"></div>
         
         <div style="display: flex; gap: 10px; justify-content: flex-end;">
-            <button type="button" class="cancel-btn" hx-get="data:text/html," hx-target="#create-form-area" hx-swap="innerHTML">Cancel</button>
+            <button type="button" class="cancel-btn" hx-get="/groups/clear/" hx-target="#create-form-area" hx-swap="innerHTML">Cancel</button>
             <button type="submit" class="save-btn">Create Group</button>
         </div>
     </form>

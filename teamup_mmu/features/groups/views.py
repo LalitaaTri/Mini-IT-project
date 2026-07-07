@@ -51,10 +51,10 @@ async def group_create_receive(request):
         name = request.POST.get('name', '').strip()
         description = request.POST.get('description', '').strip()
         wa_link = request.POST.get('whatsapp_link', '').strip()
-        class_name = request.POST.get('class_name', '').strip()
-        is_general = request.POST.get('is_general') == 'on' 
         
-        # --- 1. BACKEND VALIDATION ---
+        # Hardcode these since they are now defaults
+        is_general = True
+        class_name = None 
         
         if not name:
             return HttpResponse("<span style='color: red;'>Group name is required.</span>")
@@ -71,40 +71,25 @@ async def group_create_receive(request):
                 return HttpResponse("<span style='color: red;'>Max members must be between 2 and 50.</span>")
         except (ValueError, TypeError):
             return HttpResponse("<span style='color: red;'>Max members must be a valid number.</span>")
-
-        # --- 2. DATABASE INSERTION ---
         
-        pool = await Database.get_pool()
-        async with pool.acquire() as conn:
-            # Check if user already created a group with this exact name
-            existing_group = await conn.fetchval("SELECT id FROM groups WHERE name=$1 AND created_by=$2", name, id)
-            if existing_group:
-                return HttpResponse("<span style='color: red;'>You already have a group with this name.</span>")
-
-# --- 2. DATABASE INSERTION ---
-        
-        # Generate a random 6-character code (e.g., "X9K2PA")
         join_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
         
         pool = await Database.get_pool()
         async with pool.acquire() as conn:
-            # ... existing unique name check ...
+            existing_group = await conn.fetchval("SELECT id FROM groups WHERE name=$1 AND created_by=$2", name, id)
+            if existing_group:
+                return HttpResponse("<span style='color: red;'>You already have a group with this name.</span>")
 
-            # Insert new group WITH the join code
             group_id = await conn.fetchval("""
                 INSERT INTO groups (name, description, whatsapp_link, is_general, class_name, leader_id, created_by, max_members, join_code)
                 VALUES ($1, $2, $3, $4, $5, $6, $6, $7, $8)
                 RETURNING id
             """, name, description, wa_link, is_general, class_name, id, max_members, join_code)
             
-            # ... existing group_members insert ...
-
-            # Add creator to group_members
             await conn.execute("""
                 INSERT INTO group_members (group_id, user_id) VALUES ($1, $2)
             """, group_id, id)
 
-        # 3. SUCCESS REDIRECT
         response = HttpResponse("Success")
         response['HX-Redirect'] = '/groups/'
         return response
@@ -349,20 +334,18 @@ async def group_edit_receive(request, group_id):
         name = request.POST.get('name', '').strip()
         description = request.POST.get('description', '').strip()
         wa_link = request.POST.get('whatsapp_link', '').strip()
-        class_name = request.POST.get('class_name', '').strip()
-        is_general = request.POST.get('is_general') == 'on'
             
         pool = await Database.get_pool()
         async with pool.acquire() as conn:
             is_admin = await conn.fetchval("SELECT 1 FROM groups WHERE id=$1 AND leader_id=$2", group_id, id)
             if not is_admin: return HttpResponse("Unauthorized")
                 
+            # Removed is_general and class_name from the UPDATE statement
             await conn.execute("""
-                UPDATE groups SET name=$1, description=$2, whatsapp_link=$3, is_general=$4, class_name=$5
-                WHERE id=$6
-            """, name, description, wa_link, is_general, class_name, group_id)
+                UPDATE groups SET name=$1, description=$2, whatsapp_link=$3
+                WHERE id=$4
+            """, name, description, wa_link, group_id)
                 
-        # Refresh the page to show new data
         response = HttpResponse("Updated")
         response['HX-Refresh'] = "true"
         return response

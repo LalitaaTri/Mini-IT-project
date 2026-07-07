@@ -41,7 +41,7 @@ async def index(request):
             """, id)
             invites_l = [dict(record) for record in invites_records]
 
-            # 2. FETCH JOIN REQUESTS
+            # 2. FETCH JOIN REQUESTS (Using old schema: admin_id and sender_id)
             requests_records = await conn.fetch("""
                 SELECT 
                     gr.id as request_id,
@@ -52,13 +52,12 @@ async def index(request):
                     gr.created_at
                 FROM group_requests gr
                 JOIN groups g ON gr.group_id = g.id
-                JOIN users u ON gr.student_id = u.id
+                JOIN users u ON gr.sender_id = u.id
                 LEFT JOIN profiles p ON u.id = p.id
-                WHERE g.leader_id = $1 AND gr.status = 'pending'
+                WHERE gr.admin_id = $1 AND gr.status = 'pending'
                 ORDER BY gr.created_at DESC
             """, id)
             requests_l = [dict(record) for record in requests_records]
-
 
             # 3. FETCH OUTGOING INVITES
             outgoing_invites_records = await conn.fetch("""
@@ -78,7 +77,7 @@ async def index(request):
             """, id)
             outgoing_invites_l = [dict(record) for record in outgoing_invites_records]
 
-            # 4. FETCH OUTGOING REQUESTS
+            # 4. FETCH OUTGOING REQUESTS (Using old schema: admin_id and sender_id)
             outgoing_requests_records = await conn.fetch("""
                 SELECT 
                     gr.id as request_id,
@@ -89,9 +88,9 @@ async def index(request):
                     gr.created_at
                 FROM group_requests gr
                 JOIN groups g ON gr.group_id = g.id
-                JOIN users u ON g.leader_id = u.id
+                JOIN users u ON gr.admin_id = u.id
                 LEFT JOIN profiles p ON u.id = p.id
-                WHERE gr.student_id = $1 AND gr.status = 'pending'
+                WHERE gr.sender_id = $1 AND gr.status = 'pending'
                 ORDER BY gr.created_at DESC
             """, id)
             outgoing_requests_l = [dict(record) for record in outgoing_requests_records]
@@ -138,8 +137,7 @@ async def index(request):
                     'last_message': last_message
                 })
 
-            # Sort chats by most recent message, putting new un-messaged users (like injected matches) at the top
-            chats_l.sort(key=lambda x: (1, 0) if not x['last_message'] else (0, x['last_message']['created_at'].timestamp() if hasattr(x['last_message']['created_at'], 'timestamp') else 0), reverse=True)
+            chats_l.sort(key=lambda x: x['last_message']['created_at'] if x['last_message'] else '9999', reverse=True)
 
             context = {
                 'invites_l': invites_l,
@@ -177,7 +175,7 @@ async def inbox_approve_request(request, request_id):
             return HttpResponse("")
 
         team_id = req['group_id']
-        student_id = req['student_id']
+        student_id = req['sender_id']  # Old column
 
         team = await conn.fetchrow("SELECT * FROM groups WHERE id = $1", team_id)
         if not team:
@@ -249,5 +247,5 @@ async def cancel_outgoing_request(request, request_id):
             return HttpResponse("Unauthorized", status=401)
         
         # Using old column sender_id instead of student_id
-        await conn.execute("DELETE FROM group_requests WHERE id = $1 AND student_id = $2", request_id, session['user_id'])
+        await conn.execute("DELETE FROM group_requests WHERE id = $1 AND sender_id = $2", request_id, session['user_id'])
         return HttpResponse("")
